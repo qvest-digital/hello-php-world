@@ -1,0 +1,12 @@
+CREATE TABLE z_schema_version (
+	version TEXT
+);
+
+INSERT INTO z_schema_version VALUES ('1');
+
+CREATE TABLE content (
+	id SERIAL,
+	blabla TEXT
+);
+
+INSERT INTO content (blabla) VALUES ('Hello World!');

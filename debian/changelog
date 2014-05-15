@@ -1,3 +1,11 @@
+hello-php-world (2) tarent; urgency=low
+
+  * Fix include_path
+  * Do actual DB magic
+  * Add syntax tests at “compile” time
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 15 May 2014 16:37:24 +0200
+
 hello-php-world (1) tarent; urgency=low
 
   * Initial release. (Closes: #999999)

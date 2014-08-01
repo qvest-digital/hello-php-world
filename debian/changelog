@@ -1,3 +1,10 @@
+hello-php-world (3) tarent; urgency=medium
+
+  * Change postrm to match dbconfig-common documentation
+  * XXX TODO: move apache code to prerm, like in SimKolab
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 01 Aug 2014 15:38:36 +0200
+
 hello-php-world (2) tarent; urgency=low
 
   * Fix include_path

@@ -65,8 +65,10 @@ remove)
 
 purge)
 	do_webserver_config
-	if test -x "$(which ucf 2>/dev/null)"; then
+	rm -f /var/lib/hello-php-world/dbconfig.inc
+	if which ucf >/dev/null 2>&1; then
 		ucf --purge /var/lib/hello-php-world/dbconfig.inc
+		ucfr --purge hello-php-world /var/lib/hello-php-world/dbconfig.inc
 	fi
 	rm -rf /var/lib/hello-php-world
 	;;

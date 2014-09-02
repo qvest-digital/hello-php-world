@@ -64,11 +64,11 @@ function db_query_params($sql, $params) {
 }
 
 function db_numrows($h) {
-	return @pg_numrows($h);
+	return @pg_num_rows($h);
 }
 
 function db_free_result($h) {
-	return @pg_freeresult($h);
+	return @pg_free_result($h);
 }
 
 function db_result($h,$row,$field) {
@@ -76,7 +76,7 @@ function db_result($h,$row,$field) {
 }
 
 function db_affected_rows($h) {
-	return @pg_cmdtuples($h);
+	return @pg_affected_rows($h);
 }
 
 function db_fetch_array($h) {

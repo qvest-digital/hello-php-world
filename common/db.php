@@ -72,7 +72,7 @@ function db_free_result($h) {
 }
 
 function db_result($h,$row,$field) {
-	return @pg_result($h, $row, $field);
+	return @pg_fetch_result($h, $row, $field);
 }
 
 function db_affected_rows($h) {

@@ -1,3 +1,9 @@
+hello-php-world (4) tarent; urgency=medium
+
+  * Policy §7.2, dbconfig-common §3.1.2: conditionals in maintainer scripts
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 13:49:54 +0200
+
 hello-php-world (3) tarent; urgency=medium
 
   * Change postrm to match dbconfig-common documentation

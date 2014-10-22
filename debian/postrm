@@ -54,8 +54,10 @@ dbc_generate_include_perms=0640
 dbc_generate_include=php:/var/lib/hello-php-world/dbconfig.inc
 dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
-. /usr/share/dbconfig-common/dpkg/postrm.pgsql
-dbc_go hello-php-world "$@"
+if test -f /usr/share/dbconfig-common/dpkg/postrm.pgsql; then
+	. /usr/share/dbconfig-common/dpkg/postrm.pgsql
+	dbc_go hello-php-world "$@"
+fi
 
 # custom actions
 case $1 in

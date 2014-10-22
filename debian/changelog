@@ -10,8 +10,11 @@ hello-php-world (4) tarent; urgency=medium
     - prerm also restarts Apache 2 (after disabling our config)
       to stop all database connections (so we can remove the DB)
   * Policy §7.2, dbconfig-common §3.1.2: conditionals in maintainer scripts
+  * Merge Makefile improvements from SimKolab
+  * Install a Makefile for in-situ syntax checks on the installed system
+  * Ship the Debian package version in a file; display it on the page
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 15:29:54 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 15:42:04 +0200
 
 hello-php-world (3) tarent; urgency=medium
 

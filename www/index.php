@@ -3,7 +3,7 @@
 require_once('util.php');
 require_once('db.php');
 
-html_header(array('title' => 'Hello PHP World'));
+html_header(array('title' => 'Hello PHP World v' . HPW_VERSION));
 
 echo '<table border="1">';
 echo '<tr><th>ID</th><th>Blabla</th></tr>' . "\n";

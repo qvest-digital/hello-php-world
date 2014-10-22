@@ -1,5 +1,7 @@
 <?php
 
+require_once('/var/lib/hello-php-world/version.php');
+
 function util_ifsetor(&$value, $default=false) {
 	return (isset($value) ? $value : $default);
 }

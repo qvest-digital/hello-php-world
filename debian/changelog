@@ -1,8 +1,17 @@
 hello-php-world (4) tarent; urgency=medium
 
+  * Merge all maintainer script improvements from SimKolab:
+    - (commented out) settings for forcing the C locale collation
+      and UTF-8 or ASCII encoding (with the latter being fastest)
+    - postinst restarts Apache 2 to flush the cache and get rid
+      of running scripts of the pre-updated code (you may want to
+      not use this)
+    - Apache 2 deconfiguration is now in prerm instead of postrm
+    - prerm also restarts Apache 2 (after disabling our config)
+      to stop all database connections (so we can remove the DB)
   * Policy §7.2, dbconfig-common §3.1.2: conditionals in maintainer scripts
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 13:49:54 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 15:29:54 +0200
 
 hello-php-world (3) tarent; urgency=medium
 

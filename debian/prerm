@@ -18,17 +18,87 @@ set -e
 # Called when 'old-prerm "upgrade"' fails; new package not unpacked, all
 # other constraints the same as above.
 
+HPW_PRERM_LEVEL=$(expr "${HPW_PRERM_LEVEL:-0}" + 1)
+export HPW_PRERM_LEVEL
+#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) hello-php-world.prerm starting up for $*"
+
+test -n "$HPW_PRERM_DIDWEB" || \
+    if test -e /usr/share/apache2/apache2-maintscript-helper; then
+	. /usr/share/apache2/apache2-maintscript-helper
+fi
+do_webserver_config() {
+	# set up Apache configuration
+	local apache22common_state x rv
+
+	apache22common_state=$(dpkg-query -f '${Status}' -W 'apache2.2-common' \
+	    2>/dev/null | awk '{print $3}' || :)
+
+	if test -e /usr/share/apache2/apache2-maintscript-helper; then
+		# Apache 2.4
+		apache2_invoke disconf hello-php-world || exit $?
+	elif test x"$apache22common_state" = x"installed" || \
+	    test x"$apache22common_state" = x"unpacked"; then
+		# Apache 2.2
+		test '!' -L /etc/apache2/conf.d/hello-php-world.conf || \
+		    rm /etc/apache2/conf.d/hello-php-world.conf
+	else
+		# neither Apache 2.2 nor Apache 2.4
+		echo >&2 "I: no web server configured for hello-php-world"
+		return 0
+	fi
+	if invoke-rc.d apache2 status >/dev/null; then
+		echo >&2 "I: restarting Apache to get rid of hanging connections"
+		(invoke-rc.d apache2 stop || :)
+		set +e # ignore Debian Policy here, I’m a shell author FFS!
+		x=$(apache2ctl configtest 2>&1)
+		rv=$?
+		case $rv:$x in
+		0:Syntax\ OK)
+			invoke-rc.d apache2 start
+			;;
+		*)
+			echo >&2 "W: Your apache2 configuration is broken, not restarting the webserver!"
+			echo >&2 "N: 'apache2ctl configtest' returned with errorlevel $rv and:"
+			sed 's/^/N: /' >&2 <<EOF
+$x
+EOF
+			;;
+		esac
+		set -e # back to Debian Policy land
+	fi
+}
+
+# Handle webserver part first, to ensure it’s gone before
+# dbconfig-common attempts to purge the database; this is
+# tricky due to bad interaction with debconf
+test -n "$HPW_PRERM_DIDWEB" || case $1 in
+remove)
+	#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) disabling webserver config"
+	do_webserver_config >&2
+	HPW_PRERM_DIDWEB=1
+	export HPW_PRERM_DIDWEB
+	;;
+esac
+
+#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) initialising debconf"
 # Initialise debconf
 . /usr/share/debconf/confmodule
 # Initialise dbconfig-common
 dbc_generate_include_owner=root:www-data
 dbc_generate_include_perms=0640
 dbc_generate_include=php:/var/lib/hello-php-world/dbconfig.inc
+# hack to force 'C' locale and ASCII encoding (for speed)
+#dbc_pgsql_createdb_encoding="SQL_ASCII' lc_collate='C"
+# hack to force 'C' locale and UTF-8 encoding
+#dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
+# use UTF-8 encoding and server locale, in the hope that works
 dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
 . /usr/share/dbconfig-common/dpkg/prerm.pgsql
+#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) calling dbc_go"
 dbc_go hello-php-world "$@"
 
+#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) switching on $1"
 # custom actions
 case $1 in
 remove|deconfigure)
@@ -48,4 +118,5 @@ esac
 
 #DEBHELPER#
 
+#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) hello-php-world.prerm success for $*"
 exit 0

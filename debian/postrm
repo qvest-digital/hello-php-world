@@ -22,36 +22,17 @@ set -e
 # Called when preinst fails; package is not unpacked. Essential packages
 # and (unpacked or Half-Configured) Pre-Depends are available.
 
-if test -e /usr/share/apache2/apache2-maintscript-helper; then
-	. /usr/share/apache2/apache2-maintscript-helper
-fi
-do_webserver_config() {
-	# set up Apache configuration
-	local apache22common_state
-
-	apache22common_state=$(dpkg-query -f '${Status}' -W 'apache2.2-common' \
-	    2>/dev/null | awk '{print $3}' || :)
-
-	if test -e /usr/share/apache2/apache2-maintscript-helper; then
-		# Apache 2.4
-		apache2_invoke disconf hello-php-world || exit $?
-	elif test x"$apache22common_state" = x"installed" || \
-	    test x"$apache22common_state" = x"unpacked"; then
-		# Apache 2.2
-		test '!' -L /etc/apache2/conf.d/hello-php-world.conf || \
-		    rm /etc/apache2/conf.d/hello-php-world.conf
-	else
-		# neither Apache 2.2 nor Apache 2.4
-		echo >&2 "I: no web server configured for hello-php-world"
-	fi
-}
-
 # Initialise debconf
 . /usr/share/debconf/confmodule
 # Initialise dbconfig-common
 dbc_generate_include_owner=root:www-data
 dbc_generate_include_perms=0640
 dbc_generate_include=php:/var/lib/hello-php-world/dbconfig.inc
+# hack to force 'C' locale and ASCII encoding (for speed)
+#dbc_pgsql_createdb_encoding="SQL_ASCII' lc_collate='C"
+# hack to force 'C' locale and UTF-8 encoding
+#dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
+# use UTF-8 encoding and server locale, in the hope that works
 dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
 if test -f /usr/share/dbconfig-common/dpkg/postrm.pgsql; then
@@ -62,11 +43,9 @@ fi
 # custom actions
 case $1 in
 remove)
-	do_webserver_config
 	;;
 
 purge)
-	do_webserver_config
 	rm -f /var/lib/hello-php-world/dbconfig.inc
 	if which ucf >/dev/null 2>&1; then
 		ucf --purge /var/lib/hello-php-world/dbconfig.inc

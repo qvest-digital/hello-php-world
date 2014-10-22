@@ -13,8 +13,11 @@ hello-php-world (4) tarent; urgency=medium
   * Merge Makefile improvements from SimKolab
   * Install a Makefile for in-situ syntax checks on the installed system
   * Ship the Debian package version in a file; display it on the page
+  * Use per-binary-package names for debian/ files
+  * Bump to Policy 3.9.6 (no changes)
+  * Add lintian overrides
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 15:42:04 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 22 Oct 2014 15:51:46 +0200
 
 hello-php-world (3) tarent; urgency=medium
 

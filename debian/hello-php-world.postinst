@@ -28,7 +28,8 @@ if test -e /usr/share/apache2/apache2-maintscript-helper; then
 fi
 do_webserver_config() {
 	# set up Apache configuration
-	local apache22common_state
+	local apache22common_state nl='
+'
 
 	apache22common_state=$(dpkg-query -f '${Status}' -W 'apache2.2-common' \
 	    2>/dev/null | awk '{print $3}' || :)
@@ -56,7 +57,7 @@ do_webserver_config() {
 		x=$(apache2ctl configtest 2>&1)
 		rv=$?
 		case $rv:$x in
-		0:Syntax\ OK)
+		0:Syntax\ OK|0:*${nl}Syntax\ OK)
 			invoke-rc.d apache2 start
 			;;
 		*)

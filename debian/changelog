@@ -1,3 +1,11 @@
+hello-php-world (6) tarent; urgency=medium
+
+  * Fix Apache 2 restart with chatty modules like mod_tile installed
+  * Build the *.deb files with gzip compression as well
+  * Use DH_VERBOSE since this is a learning tool
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 12 Feb 2015 11:45:16 +0100
+
 hello-php-world (5) tarent; urgency=low
 
   * Fix bad whitespace

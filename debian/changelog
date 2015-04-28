@@ -1,3 +1,9 @@
+hello-php-world (7) tarent; urgency=low
+
+  * Do not use invoke-rc.d for the “status” operation
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Tue, 28 Apr 2015 15:26:21 +0200
+
 hello-php-world (6) tarent; urgency=medium
 
   * Fix Apache 2 restart with chatty modules like mod_tile installed

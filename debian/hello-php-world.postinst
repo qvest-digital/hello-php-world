@@ -50,7 +50,7 @@ do_webserver_config() {
 		echo >&2 "I: no web server configured for hello-php-world"
 		return 0
 	fi
-	if invoke-rc.d apache2 status >/dev/null; then
+	if /etc/init.d/apache2 status >/dev/null 2>&1; then
 		echo >&2 "I: restarting Apache to flush the code cache"
 		(invoke-rc.d apache2 stop || :)
 		set +e # ignore Debian Policy here, I’m a shell author FFS!

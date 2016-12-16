@@ -1,3 +1,9 @@
+hello-php-world (8) tarent; urgency=low
+
+  * Update utility functions
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 16 Dec 2016 15:58:31 +0100
+
 hello-php-world (7) tarent; urgency=low
 
   * Do not use invoke-rc.d for the “status” operation

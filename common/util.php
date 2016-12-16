@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2014, 2015
+ * Copyright © 2014, 2015, 2016
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices

@@ -1,8 +1,9 @@
 hello-php-world (8) tarent; urgency=low
 
   * Update utility functions
+  * Honour the tarent Artefaktversionsschema
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 16 Dec 2016 15:58:31 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 16 Dec 2016 17:01:54 +0100
 
 hello-php-world (7) tarent; urgency=low
 

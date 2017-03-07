@@ -6,7 +6,7 @@ Priority: optional
 Maintainer: Thorsten Glaser <t.glaser@tarent.de>
 Standards-Version: 3.9.6
 Build-Depends: debhelper (>= 9), mksh, moreutils, pcregrep,
- php5-cli | php-cli, phpab, phpunit
+ php5-cli | php-cli, php-mbstring | php5-cli, phpab, phpunit
 Homepage: https://www.tarent.de/
 VCS-Browser: https://evolvis.org/plugins/scmgit/cgi-bin/gitweb.cgi?p=shellsnippets/hello-php-world.git
 VCS-git: https://evolvis.org/anonscm/git/shellsnippets/hello-php-world.git

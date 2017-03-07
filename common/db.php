@@ -29,10 +29,10 @@ function db_error() {
 }
 
 function db_die($reason, $dberr=true) {
-	echo 'E: ' . $reason;
 	if ($dberr)
-		echo ': ' . db_error();
-	echo "\n";
+		util_debugJ('ERR', NULL, $reason, db_error());
+	else
+		util_debugJ('ERR', NULL, $reason);
 	exit(1);
 }
 

@@ -22,7 +22,7 @@ metacheck:
 	    hpw-metacheck-helper-eol
 	@echo Checking for empty lines or missing newline at EOF
 	rv=0; find * -type f -print0 | grep -zEv ${BINFILES} |& \
-	    while IFS= read -d '' -pr name; do \
+	    while IFS= read -p -d '' -r name; do \
 		if [[ -n "$$(tail -c -1 "$$name")" ]]; then \
 			rv=1; \
 			print -r -- "$$name: no newline at EOF"; \
@@ -36,7 +36,7 @@ metacheck:
 
 syntaxcheck:
 	@echo Running syntax checks, please verify output manually.
-	rv=0; find . -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
 		php -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
 		(( PIPESTATUS[0] )) && rv=1; \
 	done; exit $$rv
@@ -44,7 +44,7 @@ syntaxcheck:
 
 syntaxcheck5:
 	@echo Running syntax checks, please verify output manually.
-	rv=0; find . -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
 		php5 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
 		(( PIPESTATUS[0] )) && rv=1; \
 	done; exit $$rv
@@ -52,7 +52,7 @@ syntaxcheck5:
 
 syntaxcheck7:
 	@echo Running syntax checks, please verify output manually.
-	rv=0; find . -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
 		php7.0 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
 		(( PIPESTATUS[0] )) && rv=1; \
 	done; exit $$rv

@@ -314,6 +314,37 @@ function util_nat0(&$s) {
 	return false;
 }
 
+/* better random numbers, yay! */
+function util_randbytes($num=6) {
+	$f = fopen('/dev/urandom', 'rb');
+	$b = fread($f, $num);
+	fclose($f);
+
+	/*XXX check if the result is truly random (how?) */
+	if ($b === false || strlen(''.$b) != $num) {
+		debugJ('Could not read from random device',
+		    array('b' => $b, 'num' => $num));
+		exit(1);
+	}
+
+	return (''.$b);
+}
+
+function util_randnum($mask=0xFFFFFF, $lim=false) {
+	if ($lim === false)
+		$lim = $mask;
+	/* due to PHP limitations, four octets can’t be used */
+	if ($mask > 0xFFFFFF || $lim > $mask) {
+		debugJ(NULL, "randnum($mask, $lim) abuse");
+		exit(1);
+	}
+	while (true) {
+		$rnum = hexdec(bin2hex(util_randbytes(3))) & $mask;
+		if ($rnum <= $lim)
+			return $rnum;
+	}
+}
+
 /* JSON stuff which lives separate for hysterical raisins */
 require_once('minijson.php');
 

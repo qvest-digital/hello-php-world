@@ -602,6 +602,19 @@ function minijson_encdbg($x, $ri='') {
 	    constant('JSONDEBUG_TRUNCATE_SIZE') : 0, true));
 }
 
+/* autoloader */
+spl_autoload_register(function ($cls) {
+	static $classlist = NULL;
+	if ($classlist === NULL) {
+		require_once('/var/lib/hello-php-world/autoldr.php');
+	}
+	if (isset($classlist[$cls])) {
+		require_once('/usr/share/hello-php-world/' . $classlist[$cls]);
+	} else {
+		debugJ('ERR', 'cannot autoload class', $cls);
+	}
+    });
+
 /* HTML stuff */
 function html_header($p=array()) {
 	//global $html_footer_p;

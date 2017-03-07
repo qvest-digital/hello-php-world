@@ -1,7 +1,6 @@
 <?php
 
 require_once('util.php');
-require_once('hpw.php');
 
 $db = new HpwDb();
 

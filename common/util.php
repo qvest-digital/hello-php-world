@@ -96,6 +96,39 @@ function util_debugJ() {
 	echo $loglevel . ': ' . trim(str_replace("\n", "\nN: ", $cm)) . "\n";
 }
 
+/* get a backtrace as string */
+function debug_string_backtrace() {
+	ob_start();
+	debug_print_backtrace();
+	$trace = ob_get_contents();
+	ob_end_clean();
+
+	/* remove first item (this function, i.e. redundant) from backtrace */
+	$trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '',
+	    $trace, 1);
+
+	/* renumber backtrace items */
+	$trace = preg_replace_callback('/^#(\d+)/m', function ($match) {
+		return sprintf('#%d', $match[1] - 1);
+	    }, $trace);
+
+	return $trace;
+}
+
+/* define if not yet defined */
+function define_dfl($k, $v) {
+	if (!defined($k))
+		define($k, $v);
+}
+
+/* set global variable if not yet set */
+function set_dfl($k, $v) {
+	global $$k;
+
+	if (!isset($$k))
+		$$k = $v;
+}
+
 /**
  * return $1 if $1 is set, ${2:-false} otherwise
  *
@@ -123,47 +156,6 @@ function util_mkarray($v) {
 	return is_array($v) ? $v : array($v);
 }
 
-/* define if not yet defined */
-function define_dfl($k, $v) {
-	if (!defined($k))
-		define($k, $v);
-}
-
-function set_dfl($k, $v) {
-	global $$k;
-
-	if (!isset($$k))
-		$$k = $v;
-}
-
-/* HTML stuff */
-function html_header($p=array()) {
-	//global $html_footer_p;
-
-	//$html_footer_p = $p;
-	$lines = array(
-		'<' . '?xml version="1.0"?>',
-		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"',
-		' "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
-		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>',
-		' <meta http-equiv="content-type" content="text/html; charset=utf-8" />',
-		' <title>' . util_html_encode(util_ifsetor($p['title'], 'untitled page')) . '</title>',
-	    );
-	foreach (util_ifsetor($p['head'], array()) as $line)
-		$lines[] = $line;
-	$lines[] = '</head><body>';
-
-	foreach ($lines as $line)
-		echo $line . "\n";
-}
-
-function html_footer($p=array()) {
-	//global $html_footer_p;
-
-	//$p = array_merge($html_footer_p, $p);
-	echo "</body></html>\n";
-}
-
 /* escape a string into HTML for safe output */
 function util_html_encode($s) {
 	return htmlspecialchars(''.$s, ENT_QUOTES, 'UTF-8');
@@ -187,23 +179,6 @@ function util_sanitise_multiline_submission($text) {
 	$text = preg_replace("/[\012\015]/m", "\015\012", $text);
 
 	return $text;
-}
-
-/* prefix every line of a string */
-function util_linequote($s, $pfx, $firstline=false) {
-	if ($s instanceof \IteratorAggregate) {
-		$a = array();
-		foreach ($s as $v)
-			$a[] = $v;
-		$s = $a;
-	}
-	if (is_array($s))
-		$s = implode("\n", $s);
-	$s = util_sanitise_multiline_submission($s);
-	if ($firstline && (strpos($s, "\015\012") === false))
-		return ' ' . $s;
-	$s = $pfx . str_replace("\015\012", "\n" . $pfx, $s);
-	return ($firstline ? "\n" : '') . $s;
 }
 
 /* convert text to UTF-8 (from UTF-8 or cp1252 or question marks); nil⇒nil */
@@ -285,23 +260,21 @@ function util_fixutf8($s) {
 	return $n;
 }
 
-/* get a backtrace as string */
-function debug_string_backtrace() {
-	ob_start();
-	debug_print_backtrace();
-	$trace = ob_get_contents();
-	ob_end_clean();
-
-	/* remove first item (this function, i.e. redundant) from backtrace */
-	$trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '',
-	    $trace, 1);
-
-	/* renumber backtrace items */
-	$trace = preg_replace_callback('/^#(\d+)/m', function ($match) {
-		return sprintf('#%d', $match[1] - 1);
-	    }, $trace);
-
-	return $trace;
+/* prefix every line of a string */
+function util_linequote($s, $pfx, $firstline=false) {
+	if ($s instanceof \IteratorAggregate) {
+		$a = array();
+		foreach ($s as $v)
+			$a[] = $v;
+		$s = $a;
+	}
+	if (is_array($s))
+		$s = implode("\n", $s);
+	$s = util_sanitise_multiline_submission($s);
+	if ($firstline && (strpos($s, "\015\012") === false))
+		return ' ' . $s;
+	$s = $pfx . str_replace("\015\012", "\n" . $pfx, $s);
+	return ($firstline ? "\n" : '') . $s;
 }
 
 /* return integral value (ℕ₀) of passed string if it matches, or false */
@@ -627,4 +600,32 @@ function minijson_encdbg($x, $ri='') {
 	return (minijson_encode_internal($x, $ri, 32,
 	    defined('JSONDEBUG_TRUNCATE_SIZE') ?
 	    constant('JSONDEBUG_TRUNCATE_SIZE') : 0, true));
+}
+
+/* HTML stuff */
+function html_header($p=array()) {
+	//global $html_footer_p;
+
+	//$html_footer_p = $p;
+	$lines = array(
+		'<' . '?xml version="1.0"?>',
+		'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"',
+		' "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">',
+		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>',
+		' <meta http-equiv="content-type" content="text/html; charset=utf-8" />',
+		' <title>' . util_html_encode(util_ifsetor($p['title'], 'untitled page')) . '</title>',
+	    );
+	foreach (util_ifsetor($p['head'], array()) as $line)
+		$lines[] = $line;
+	$lines[] = '</head><body>';
+
+	foreach ($lines as $line)
+		echo $line . "\n";
+}
+
+function html_footer($p=array()) {
+	//global $html_footer_p;
+
+	//$p = array_merge($html_footer_p, $p);
+	echo "</body></html>\n";
 }

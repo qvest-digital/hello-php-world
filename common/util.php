@@ -21,6 +21,81 @@
 
 require_once('/var/lib/hello-php-world/version.php');
 
+/* replace this with your own custom proper error handling */
+function util_debugJ() {
+	$argc = func_num_args();
+	$argv = func_get_args();
+	$skip = 0;
+
+	/* should not happen except extremely early */
+	if (!function_exists('minijson_encdbg')) {
+		print_r($argv);
+		debug_print_backtrace();
+		return;
+	}
+
+	$loglevel = 'D';
+	if ($argc && $argv[0] === 'ERR') {
+		$loglevel = 'E';
+		/* skip loglevel */
+		$argc--;
+		array_shift($argv);
+	}
+
+	while ($argc && $argv[0] === NULL) {
+		/* skip backtrace levels, one for each leading NULL */
+		$skip++;
+		$argc--;
+		array_shift($argv);
+	}
+
+	$bt = debug_backtrace();
+	$cm = '<no backtrace>';
+	if (isset($bt[$skip]) && isset($bt[$skip]['file'])) {
+		/* calculate backtrace info: file and line */
+		$cm = sprintf('%s[%d]',
+		    $bt[$skip]['file'],
+		    util_ifsetor($bt[$skip]['line'], -1));
+
+		if (isset($bt[$skip + 1])) {
+			$cm .= ': ';
+			/* calling method: if set, begin with class */
+			$cm .= util_ifsetor($bt[$skip + 1]['class'], '');
+			/* calling type; / if not set but we have class */
+			$cm .= util_ifsetor($bt[$skip + 1]['type']) ?
+			    $bt[$skip + 1]['type'] :
+			    (util_ifsetor($bt[$skip + 1]['class']) ? '/' : '');
+			/* called function */
+			$cm .= util_ifsetor($bt[$skip + 1]['function'],
+			    '<unknown>');
+			/* func arguments, JSON encoded but with () ipv [] */
+			$cm .= preg_replace('/^.(.*).$/', '(\1)',
+			    minijson_encdbg(util_ifsetor($bt[$skip + 1]['args'],
+			    array()), false));
+		}
+	}
+
+	if ($argc > 0) {
+		/* is first argument 7bit ASCII string, no C0 ctrl chars? */
+		if (is_string($argv[0]) && !preg_match('/[^ -~]/', $argv[0])) {
+			/* shift it to front */
+			$cm .= ': ' . array_shift($argv);
+			$argc--;
+		}
+	}
+
+	if ($argc == 1) {
+		/* omit the [] for only one argument */
+		$argv = $argv[0];
+	}
+
+	if ($argc != 0) {
+		/* append any arguments left */
+		$cm .= ': ' . minijson_encdbg($argv);
+	}
+	echo $loglevel . ': ' . trim(str_replace("\n", "\nN: ", $cm)) . "\n";
+}
+
 /**
  * return $1 if $1 is set, ${2:-false} otherwise
  *
@@ -241,3 +316,10 @@ function util_nat0(&$s) {
 
 /* JSON stuff which lives separate for hysterical raisins */
 require_once('minijson.php');
+
+/* used by structured debugging, see above */
+function minijson_encdbg($x, $ri='') {
+	return (minijson_encode_internal($x, $ri, 32,
+	    defined('JSONDEBUG_TRUNCATE_SIZE') ?
+	    constant('JSONDEBUG_TRUNCATE_SIZE') : 0, true));
+}

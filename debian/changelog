@@ -4,8 +4,9 @@ hello-php-world (9) tarent; urgency=medium
   * Show a skeleton testsuite
   * Provide an exemplary autoloader
   * Make tentatively compatible with PHP 7
+  * Add meta tests (source files QA conformance)
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 08 Mar 2017 00:09:38 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 08 Mar 2017 00:38:37 +0100
 
 hello-php-world (8) tarent; urgency=low
 

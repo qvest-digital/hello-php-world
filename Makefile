@@ -3,10 +3,36 @@ SHELL:=/bin/mksh
 AUTOLDR_DIRS+=	common
 AUTOLDR_DIRS+=	www
 
-all: syntaxcheck var/autoldr.php var/version.php
+all: metacheck syntaxcheck var/autoldr.php var/version.php
 
 clean:
 	rm -f var/autoldr.php var/version.php var/*~ www/artifact-version
+
+BINFILES:='\.(png|jpe?g|gif|deb|rpm|vpp|rtf)$$'
+metacheck:
+	@echo Checking that all files are in UTF-8
+	find * -type f -print0 | grep -zEv ${BINFILES} | xargs -0 -- isutf8
+	@echo Checking for CVS/git conflict markers
+	find * -type f -print0 | grep -zEv ${BINFILES} | xargs -0r mksh -c \
+	    'grep -El "^[<>=]{7}( |\$$)" "$$@"; test $$? -eq 1' \
+	    hpw-metacheck-helper-cvs
+	@echo Ensuring there is no whitespace or CR at end of lines
+	find * -type f -print0 | grep -zEv ${BINFILES} | xargs -0r mksh -c \
+	    'pcregrep -l $$'\''[\t\x0B-\x0D ]$$'\'' "$$@"; test $$? -eq 1' \
+	    hpw-metacheck-helper-eol
+	@echo Checking for empty lines or missing newline at EOF
+	rv=0; find * -type f -print0 | grep -zEv ${BINFILES} |& \
+	    while IFS= read -d '' -pr name; do \
+		if [[ -n "$$(tail -c -1 "$$name")" ]]; then \
+			rv=1; \
+			print -r -- "$$name: no newline at EOF"; \
+		fi; \
+		if [[ -s $$name && -z "$$(tail -n 1 "$$name")" ]]; then \
+			rv=1; \
+			print -r -- "$$name: empty line at EOF"; \
+		fi; \
+	done; exit $$rv
+	@echo All done.
 
 syntaxcheck:
 	@echo Running syntax checks, please verify output manually.
@@ -54,4 +80,4 @@ var/autoldr.php:
 	php -l $@~
 	mv -f $@~ $@
 
-.PHONY: all clean syntaxcheck syntaxcheck5 syntaxcheck7
+.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck7

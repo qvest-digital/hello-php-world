@@ -118,6 +118,11 @@ function util_ifscalaror(&$val, $default=false, $ifarray=false) {
 	return (isset($val) ? (is_array($val) ? $ifarray : $val) : $default);
 }
 
+/* convert !is_array into sole array */
+function util_mkarray($v) {
+	return is_array($v) ? $v : array($v);
+}
+
 /* define if not yet defined */
 function define_dfl($k, $v) {
 	if (!defined($k))
@@ -182,6 +187,23 @@ function util_sanitise_multiline_submission($text) {
 	$text = preg_replace("/[\012\015]/m", "\015\012", $text);
 
 	return $text;
+}
+
+/* prefix every line of a string */
+function util_linequote($s, $pfx, $firstline=false) {
+	if ($s instanceof \IteratorAggregate) {
+		$a = array();
+		foreach ($s as $v)
+			$a[] = $v;
+		$s = $a;
+	}
+	if (is_array($s))
+		$s = implode("\n", $s);
+	$s = util_sanitise_multiline_submission($s);
+	if ($firstline && (strpos($s, "\015\012") === false))
+		return ' ' . $s;
+	$s = $pfx . str_replace("\015\012", "\n" . $pfx, $s);
+	return ($firstline ? "\n" : '') . $s;
 }
 
 /* convert text to UTF-8 (from UTF-8 or cp1252 or question marks); nil⇒nil */
@@ -343,6 +365,14 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 		if ($rnum <= $lim)
 			return $rnum;
 	}
+}
+
+/* convert case-insensitive part of eMail address to lowercase */
+function util_emailcase($s) {
+	$matches = array();
+	if (preg_match('/^([^@]*@)(.*)$/', $s, $matches))
+		$s = $matches[1] . strtolower($matches[2]);
+	return $s;
 }
 
 /* JSON stuff which lives separate for hysterical raisins */

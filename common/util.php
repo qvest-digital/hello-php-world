@@ -506,9 +506,7 @@ function util_sendmail($sender, $recip, $hdrs, $body) {
 	/* check eMail addresses and shellescape them */
 
 	$adrs = array();
-	if (!is_array($recip)) {
-		$recip = array($recip);
-	}
+	$recip = util_mkarray($recip);
 	/* the first address only */
 	$what = 'Sender';
 	array_unshift($recip, $sender);
@@ -577,18 +575,8 @@ function util_sendmail($sender, $recip, $hdrs, $body) {
 	/* take care of the body */
 
 	if (!is_array($body)) {
-		/*
-		 * First, convert all CR-LF pairs into LF, so we
-		 * then have either Unix or Macintosh line endings
-		 */
-		$body = str_replace("\015\012", "\012", strval($body));
-		/*
-		 * Now, detect which of these two, and convert them
-		 * to array lines. Preference on Unix (or converted
-		 * ASCII) over Macintosh: if an LF is found, use it.
-		 */
-		$body = explode(strpos($body, "\012") === false ?
-		    "\015" : "\012", $body);
+		$body = explode("\015\012",
+		    util_sanitise_multiline_submission($body));
 	}
 
 	foreach ($body as $v) {

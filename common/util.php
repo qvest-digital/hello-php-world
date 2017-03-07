@@ -86,12 +86,12 @@ function html_footer($p=array()) {
 
 /* escape a string into HTML for safe output */
 function util_html_encode($s) {
-	return htmlspecialchars(''.$s, ENT_QUOTES, "UTF-8");
+	return htmlspecialchars(''.$s, ENT_QUOTES, 'UTF-8');
 }
 
 /* unconvert a string converted with util_html_encode() or htmlspecialchars() */
 function util_unconvert_htmlspecialchars($s) {
-	return html_entity_decode(''.$s, ENT_QUOTES | ENT_XHTML, "UTF-8");
+	return html_entity_decode(''.$s, ENT_QUOTES | ENT_XHTML, 'UTF-8');
 }
 
 /* secure a (possibly already HTML encoded) string */
@@ -123,10 +123,10 @@ function util_fixutf8($s) {
 	/* save state */
 	$mb_encoding = mb_internal_encoding();
 	/* we use Unicode */
-	mb_internal_encoding("UTF-8");
+	mb_internal_encoding('UTF-8');
 	/* check encoding */
-	$w = mb_convert_encoding($s, "UTF-16LE", "UTF-8");
-	$n = mb_convert_encoding($w, "UTF-8", "UTF-16LE");
+	$w = mb_convert_encoding($s, 'UTF-16LE', 'UTF-8');
+	$n = mb_convert_encoding($w, 'UTF-8', 'UTF-16LE');
 	if ($n === $s) {
 		/* correct UTF-8, restore state and return */
 		if ($mb_encoding !== false)
@@ -175,8 +175,8 @@ function util_fixutf8($s) {
 		$w .= chr($wc & 0xFF) . chr($wc >> 8);
 	}
 	/* convert to UTF-8, then double-check */
-	$n = mb_convert_encoding($w, "UTF-8", "UTF-16LE");
-	$x = mb_convert_encoding($n, "UTF-16LE", "UTF-8");
+	$n = mb_convert_encoding($w, 'UTF-8', 'UTF-16LE');
+	$x = mb_convert_encoding($n, 'UTF-16LE', 'UTF-8');
 	/* restore caller state saved */
 	if ($mb_encoding !== false)
 		mb_internal_encoding($mb_encoding);
@@ -233,7 +233,7 @@ function util_nat0(&$s) {
 			/* number matches its textual representation */
 			return ($num);
 		}
-		/* doesn't match, like 0123 or 1.2 or " 1" */
+		/* doesn’t match, like 0123 or 1.2 or " 1" */
 	}
 	/* or negative */
 	return false;

@@ -22,6 +22,9 @@
 require_once('/var/lib/hello-php-world/version.php');
 
 /* replace this with your own custom proper error handling */
+function util_logerr($loglevel, $s) {
+	echo $loglevel . ': ' . trim(str_replace("\n", "\nN: ", $s)) . "\n";
+}
 function util_debugJ() {
 	$argc = func_num_args();
 	$argv = func_get_args();
@@ -93,7 +96,7 @@ function util_debugJ() {
 		/* append any arguments left */
 		$cm .= ': ' . minijson_encdbg($argv);
 	}
-	echo $loglevel . ': ' . trim(str_replace("\n", "\nN: ", $cm)) . "\n";
+	util_logerr($loglevel, $cm);
 }
 
 /* get a backtrace as string */

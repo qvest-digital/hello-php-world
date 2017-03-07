@@ -238,3 +238,6 @@ function util_nat0(&$s) {
 	/* or negative */
 	return false;
 }
+
+/* JSON stuff which lives separate for hysterical raisins */
+require_once('minijson.php');

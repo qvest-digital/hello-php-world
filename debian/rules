@@ -5,5 +5,12 @@ export DH_VERBOSE=1
 %:
 	dh $@
 
+override_dh_auto_test:
+ifeq (,$(findstring nocheck,${DEB_BUILD_OPTIONS}))
+	cd tests && exec phpunit .
+else
+	@echo 'I: tests disabled'
+endif
+
 override_dh_builddeb:
 	dh_builddeb -- -Zgzip

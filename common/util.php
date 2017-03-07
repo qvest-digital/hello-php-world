@@ -317,7 +317,7 @@ function util_randbytes($num=6) {
 
 	/*XXX check if the result is truly random (how?) */
 	if ($b === false || strlen(''.$b) != $num) {
-		debugJ('Could not read from random device',
+		util_debugJ('Could not read from random device',
 		    array('b' => $b, 'num' => $num));
 		exit(1);
 	}
@@ -330,7 +330,7 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 		$lim = $mask;
 	/* due to PHP limitations, four octets can’t be used */
 	if ($mask > 0xFFFFFF || $lim > $mask) {
-		debugJ(NULL, "randnum($mask, $lim) abuse");
+		util_debugJ(NULL, "randnum($mask, $lim) abuse");
 		exit(1);
 	}
 	while (true) {
@@ -611,7 +611,7 @@ spl_autoload_register(function ($cls) {
 	if (isset($classlist[$cls])) {
 		require_once('/usr/share/hello-php-world/' . $classlist[$cls]);
 	} else {
-		debugJ('ERR', 'cannot autoload class', $cls);
+		util_debugJ('ERR', 'cannot autoload class', $cls);
 	}
     });
 

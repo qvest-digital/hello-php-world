@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2014, 2015, 2016
+ * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -43,6 +43,20 @@ function util_ifscalaror(&$val, $default=false, $ifarray=false) {
 	return (isset($val) ? (is_array($val) ? $ifarray : $val) : $default);
 }
 
+/* define if not yet defined */
+function define_dfl($k, $v) {
+	if (!defined($k))
+		define($k, $v);
+}
+
+function set_dfl($k, $v) {
+	global $$k;
+
+	if (!isset($$k))
+		$$k = $v;
+}
+
+/* HTML stuff */
 function html_header($p=array()) {
 	//global $html_footer_p;
 
@@ -72,15 +86,155 @@ function html_footer($p=array()) {
 
 /* escape a string into HTML for safe output */
 function util_html_encode($s) {
-	return htmlspecialchars($s, ENT_QUOTES, "UTF-8");
+	return htmlspecialchars(''.$s, ENT_QUOTES, "UTF-8");
 }
 
 /* unconvert a string converted with util_html_encode() or htmlspecialchars() */
 function util_unconvert_htmlspecialchars($s) {
-	return html_entity_decode($s, ENT_QUOTES | ENT_XHTML, "UTF-8");
+	return html_entity_decode(''.$s, ENT_QUOTES | ENT_XHTML, "UTF-8");
 }
 
 /* secure a (possibly already HTML encoded) string */
 function util_html_secure($s) {
 	return util_html_encode(util_unconvert_htmlspecialchars($s));
+}
+
+/* convert text to ASCII CR-LF by (\r*\n|\r(?!\n)) */
+function util_sanitise_multiline_submission($text) {
+	/* convert all CR-LF into LF */
+	$text = preg_replace("/\015+\012+/m", "\012", ''.$text);
+	/* convert all CR or LF into CR-LF */
+	$text = preg_replace("/[\012\015]/m", "\015\012", $text);
+
+	return $text;
+}
+
+/* convert text to UTF-8 (from UTF-8 or cp1252 or question marks); nil⇒nil */
+function util_fixutf8($s) {
+	if ($s === NULL)
+		return NULL;
+	$s = ''.$s;
+
+	if (!function_exists('mb_internal_encoding') ||
+	    !function_exists('mb_convert_encoding')) {
+		/* we cannot deal with this without the mb functions */
+		return preg_replace('/[^\x01-\x7E]/', '?', $s);
+	}
+	/* save state */
+	$mb_encoding = mb_internal_encoding();
+	/* we use Unicode */
+	mb_internal_encoding("UTF-8");
+	/* check encoding */
+	$w = mb_convert_encoding($s, "UTF-16LE", "UTF-8");
+	$n = mb_convert_encoding($w, "UTF-8", "UTF-16LE");
+	if ($n === $s) {
+		/* correct UTF-8, restore state and return */
+		if ($mb_encoding !== false)
+			mb_internal_encoding($mb_encoding);
+		return ($n);
+	}
+	/* parse as cp1252 loosely */
+	$n = str_split($s);
+	$w = '';
+	foreach ($n as $v) {
+		switch (($c = ord($v[0]))) {
+		case 0x80: $wc = 0x20AC; break;
+		case 0x81: $wc = 0x003F; break;	/* not in cp1252 */
+		case 0x82: $wc = 0x201A; break;
+		case 0x83: $wc = 0x0192; break;
+		case 0x84: $wc = 0x201E; break;
+		case 0x85: $wc = 0x2026; break;
+		case 0x86: $wc = 0x2020; break;
+		case 0x87: $wc = 0x2021; break;
+		case 0x88: $wc = 0x02C6; break;
+		case 0x89: $wc = 0x2030; break;
+		case 0x8A: $wc = 0x0160; break;
+		case 0x8B: $wc = 0x2039; break;
+		case 0x8C: $wc = 0x0152; break;
+		case 0x8D: $wc = 0x003F; break;	/* not in cp1252 */
+		case 0x8E: $wc = 0x017D; break;
+		case 0x8F: $wc = 0x003F; break;	/* not in cp1252 */
+		case 0x90: $wc = 0x003F; break;	/* not in cp1252 */
+		case 0x91: $wc = 0x2018; break;
+		case 0x92: $wc = 0x2019; break;
+		case 0x93: $wc = 0x201C; break;
+		case 0x94: $wc = 0x201D; break;
+		case 0x95: $wc = 0x2022; break;
+		case 0x96: $wc = 0x2013; break;
+		case 0x97: $wc = 0x2014; break;
+		case 0x98: $wc = 0x02DC; break;
+		case 0x99: $wc = 0x2122; break;
+		case 0x9A: $wc = 0x0161; break;
+		case 0x9B: $wc = 0x203A; break;
+		case 0x9C: $wc = 0x0153; break;
+		case 0x9D: $wc = 0x003F; break;	/* not in cp1252 */
+		case 0x9E: $wc = 0x017E; break;
+		case 0x9F: $wc = 0x0178; break;
+		default: $wc = $c; break;
+		}
+		$w .= chr($wc & 0xFF) . chr($wc >> 8);
+	}
+	/* convert to UTF-8, then double-check */
+	$n = mb_convert_encoding($w, "UTF-8", "UTF-16LE");
+	$x = mb_convert_encoding($n, "UTF-16LE", "UTF-8");
+	/* restore caller state saved */
+	if ($mb_encoding !== false)
+		mb_internal_encoding($mb_encoding);
+	if ($w !== $x) {
+		/* something went wrong in Unicode land */
+		return preg_replace('/[^\x01-\x7E]/', '?', $s);
+	}
+	/* return UTF-8 result string */
+	return $n;
+}
+
+/* get a backtrace as string */
+function debug_string_backtrace() {
+	ob_start();
+	debug_print_backtrace();
+	$trace = ob_get_contents();
+	ob_end_clean();
+
+	/* remove first item (this function, i.e. redundant) from backtrace */
+	$trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '',
+	    $trace, 1);
+
+	/* renumber backtrace items */
+	$trace = preg_replace_callback('/^#(\d+)/m', function ($match) {
+		return sprintf('#%d', $match[1] - 1);
+	    }, $trace);
+
+	return $trace;
+}
+
+/* return integral value (ℕ₀) of passed string if it matches, or false */
+function util_nat0(&$s) {
+	if (!isset($s)) {
+		/* unset variable */
+		return false;
+	}
+	if (is_array($s)) {
+		if (count($s) == 1) {
+			/* one-element array */
+			return util_nat0($s[0]);
+		}
+		/* not one element, or element not at [0] */
+		return false;
+	}
+	if (!is_numeric($s)) {
+		/* not numeric */
+		return false;
+	}
+	$num = (int)$s;
+	if ($num >= 0) {
+		/* number element of ℕ₀ */
+		$text = (string)$num;
+		if ($text == $s) {
+			/* number matches its textual representation */
+			return ($num);
+		}
+		/* doesn't match, like 0123 or 1.2 or " 1" */
+	}
+	/* or negative */
+	return false;
 }

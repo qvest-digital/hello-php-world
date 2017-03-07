@@ -1,21 +1,22 @@
 <?php
 
 require_once('util.php');
-require_once('db.php');
+require_once('hpw.php');
+
+$db = new HpwDb();
 
 html_header(array('title' => 'Hello PHP World v' . HPW_VERSION));
 
 echo '<table border="1">';
 echo '<tr><th>ID</th><th>Blabla</th></tr>' . "\n";
-$res = db_query_params('SELECT * FROM content', array());
-while (($row = db_fetch_array($res))) {
+$db->Query('SELECT * FROM content');
+while (($row = $db->NextRow())) {
 	echo '<tr><th>' . $row['id'] . '</th><td>' .
 	    util_html_encode($row['blabla']) . '</td></tr>' . "\n";
 }
 echo '</table>' . "\n";
 
-$res = db_query_params('SELECT version FROM z_schema_version', array());
-printf('<p>DB-Schema Version %d</p>', db_result($res, 0, 'version')) . "\n";
+printf("<p>DB-Schema Version %d</p>\n", HpwDb::GetSchemaVersion());
 
 echo '<hr /><p><a href="pi.php">PHPinfo();</a></p>' . "\n";
 

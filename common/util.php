@@ -19,11 +19,24 @@
  * of said person’s immediate fault when using the work as intended.
  */
 
+error_reporting(-1);
+
 require_once('/var/lib/hello-php-world/version.php');
 
 /* replace this with your own custom proper error handling */
 function util_logerr($loglevel, $s) {
-	echo $loglevel . ': ' . str_replace("\n", "\nN: ", trim($s)) . "\n";
+	$s = $loglevel . ': ' . str_replace("\n", "\nN: ", trim($s)) . "\n";
+	echo $s;
+	if (in_array(php_sapi_name(), array(
+		/* all with separate log, NOT stdout/stderr */
+		'apache',
+		'apache2filter',
+		'apache2handler',
+		'litespeed',
+		/* possibly more */
+	    )))
+		foreach (explode("\n", trim($s)) as $msg)
+			error_log($msg, 4);
 }
 function util_debugJ() {
 	$argc = func_num_args();
@@ -100,13 +113,14 @@ function util_debugJ() {
 }
 
 /* get a backtrace as string */
-function debug_string_backtrace() {
+function debug_string_backtrace($skip=0) {
 	ob_start();
 	debug_print_backtrace();
 	$trace = ob_get_contents();
 	ob_end_clean();
 
 	/* remove first item (this function, i.e. redundant) from backtrace */
+	/*XXX remove the next $skip items, too… */
 	$trace = preg_replace('/^#0\s+' . __FUNCTION__ . "[^\n]*\n/", '',
 	    $trace, 1);
 

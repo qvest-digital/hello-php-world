@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2014, 2015
+ * Copyright © 2014, 2015, 2017
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -33,6 +33,7 @@ function db_die($reason, $dberr=true) {
 		util_debugJ('ERR', NULL, $reason, db_error());
 	else
 		util_debugJ('ERR', NULL, $reason);
+	util_logerr('T', debug_string_backtrace(1));
 	exit(1);
 }
 

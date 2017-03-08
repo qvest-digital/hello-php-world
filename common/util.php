@@ -23,7 +23,7 @@ require_once('/var/lib/hello-php-world/version.php');
 
 /* replace this with your own custom proper error handling */
 function util_logerr($loglevel, $s) {
-	echo $loglevel . ': ' . trim(str_replace("\n", "\nN: ", $s)) . "\n";
+	echo $loglevel . ': ' . str_replace("\n", "\nN: ", trim($s)) . "\n";
 }
 function util_debugJ() {
 	$argc = func_num_args();
@@ -322,6 +322,7 @@ function util_randbytes($num=6) {
 	if ($b === false || strlen(''.$b) != $num) {
 		util_debugJ('Could not read from random device',
 		    array('b' => $b, 'num' => $num));
+		util_logerr('T', debug_string_backtrace());
 		exit(1);
 	}
 
@@ -614,7 +615,8 @@ spl_autoload_register(function ($cls) {
 	if (isset($classlist[$cls])) {
 		require_once('/usr/share/hello-php-world/' . $classlist[$cls]);
 	} else {
-		util_debugJ('ERR', 'cannot autoload class', $cls);
+		util_debugJ('ERR', NULL, NULL, 'cannot autoload class', $cls);
+		util_logerr('T', debug_string_backtrace());
 	}
     });
 

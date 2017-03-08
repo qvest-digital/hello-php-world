@@ -348,7 +348,8 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 		$lim = $mask;
 	/* due to PHP limitations, four octets can’t be used */
 	if ($mask > 0xFFFFFF || $lim > $mask) {
-		util_debugJ(NULL, "randnum($mask, $lim) abuse");
+		util_debugJ(NULL, "util_randnum($mask, $lim): " .
+		    'arguments out of bounds');
 		exit(1);
 	}
 	while (true) {

@@ -22,7 +22,7 @@
 function db_error() {
 	global $dbconn;
 
-	if (!isset($dbconn))
+	if (!isset($dbconn) || !$dbconn)
 		return '(database not set up)';
 
 	return pg_last_error($dbconn);

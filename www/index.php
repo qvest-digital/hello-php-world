@@ -1,6 +1,8 @@
 <?php
 
+/* this must come first */
 require_once('util.php');
+/* include db.php here or, indirectly, via autoloader (see below) */
 
 $db = new HpwDb();
 

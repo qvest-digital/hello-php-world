@@ -103,7 +103,9 @@ function db_fetch_array($h) {
 	return @pg_fetch_array($h);
 }
 
+/* deprecated, use db_insert_one() or db_insert_max() instead */
 function db_insertid($table_name, $table_pkey) {
+	/* this can potentially be wrong */
 	$res = db_query_params('SELECT currval(pg_get_serial_sequence($1, $2)) AS id',
 	    array($table_name, $table_pkey));
 	return ($res && db_numrows($res) > 0) ? db_result($res, 0, 'id') : false;

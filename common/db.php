@@ -103,7 +103,8 @@ function db_fetch_array($h) {
 	return @pg_fetch_array($h);
 }
 
-function db_insertid($h, $table_name, $table_pkey) {
-	$res = db_query_params('SELECT MAX(' . $table_pkey . ') AS id FROM ' . $table_name);
+function db_insertid($table_name, $table_pkey) {
+	$res = db_query_params('SELECT currval(pg_get_serial_sequence($1, $2)) AS id',
+	    array($table_name, $table_pkey));
 	return (db_numrows($res) > 0) ? db_result($res, 0, 'id') : 0;
 }

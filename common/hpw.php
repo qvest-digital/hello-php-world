@@ -13,6 +13,13 @@ static public function GetSchemaVersion() {
 
 public function __construct() {
 	$this->res = NULL;
+	db_query_params('INSERT INTO log (ts, ip) VALUES (now(), $1)',
+	    array($_SERVER["REMOTE_ADDR"]));
+	$this->logId = db_insertid('log', 'id');
+}
+
+public function getLogId() {
+	return $this->logId;
 }
 
 public function Query($sql, $params=array()) {

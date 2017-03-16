@@ -1,3 +1,10 @@
+hello-php-world (10) tarent; urgency=low
+
+  * Add an example for db_insertid
+  * Make db_insertid not suck so much
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 16 Mar 2017 17:24:47 +0100
+
 hello-php-world (9) tarent; urgency=medium
 
   * Add tons more utility functions

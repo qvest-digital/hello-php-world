@@ -1,0 +1,7 @@
+CREATE TABLE log (
+	id BIGSERIAL,
+	ts TIMESTAMP WITH TIME ZONE,
+	ip TEXT
+);
+
+UPDATE z_schema_version SET version='10';

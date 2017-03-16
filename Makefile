@@ -1,9 +1,35 @@
 SHELL:=/bin/mksh
+DBC:=$(basename $(notdir $(wildcard dbconfig/install/*.in)))
 
 AUTOLDR_DIRS+=	common
 AUTOLDR_DIRS+=	www
 
-all: metacheck syntaxcheck var/autoldr.php var/version.php
+all: metacheck syntaxcheck ${DBC_OUT} var/autoldr.php var/version.php
+
+ifneq (*,${DBC})
+d: $(foreach db,${DBC},d-${db})
+
+define dbsystem =
+D$1_IN:=dbconfig/install/$1.in
+D$1_OUT:=dbconfig/install/$1
+D$1_UP:=$$(wildcard dbconfig/upgrade/$1/*)
+d-$1: $${D$1_IN}
+	@mkdir -p data
+	@for rev in $$$$(dbc_share=$$$$PWD; dbc_basepackage=../dbconfig; \
+	    dbc_dbtype=$1; dbc_oldversion='0~~~~'; \
+	    . /usr/share/dbconfig-common/dpkg/postinst; \
+	    _dbc_find_upgrades); do \
+		echo apply $1 revision $$$$rev; \
+	done
+	@rmdir data 2>/dev/null
+	@echo 'dbc <$1> in <$${D$1_IN}> up <$${D$1_UP}> out <$${D$1_OUT}>'
+endef
+
+$(foreach db,${DBC},$(eval $(call dbsystem,${db})))
+else
+d:
+	@echo nee
+endif
 
 clean:
 	rm -f var/autoldr.php var/version.php var/*~ www/artifact-version

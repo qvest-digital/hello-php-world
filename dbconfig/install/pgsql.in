@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE z_schema_version (
 	version TEXT
 );
@@ -10,3 +12,5 @@ CREATE TABLE content (
 );
 
 INSERT INTO content (blabla) VALUES ('Hello World!');
+
+COMMIT;

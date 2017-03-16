@@ -1,2 +1,6 @@
+BEGIN;
+
 UPDATE content SET blabla='Hello, World!' WHERE id=1;
 UPDATE z_schema_version SET version='2';
+
+COMMIT;

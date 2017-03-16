@@ -1,3 +1,5 @@
+BEGIN;
+
 CREATE TABLE log (
 	id BIGSERIAL,
 	ts TIMESTAMP WITH TIME ZONE,
@@ -5,3 +7,5 @@ CREATE TABLE log (
 );
 
 UPDATE z_schema_version SET version='10';
+
+COMMIT;

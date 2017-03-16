@@ -106,5 +106,12 @@ function db_fetch_array($h) {
 function db_insertid($table_name, $table_pkey) {
 	$res = db_query_params('SELECT currval(pg_get_serial_sequence($1, $2)) AS id',
 	    array($table_name, $table_pkey));
-	return (db_numrows($res) > 0) ? db_result($res, 0, 'id') : 0;
+	return ($res && db_numrows($res) > 0) ? db_result($res, 0, 'id') : false;
+}
+
+function db_insert_max($pk, $sql, $params) {
+	$res = db_query_params('WITH insrt_from_php AS (' .
+	    $sql . ' RETURNING ' . $pk . ') SELECT MAX(' .
+	    $pk . ') AS id FROM insrt_from_php', $params);
+	return ($res && db_numrows($res) > 0) ? db_result($res, 0, 'id') : false;
 }

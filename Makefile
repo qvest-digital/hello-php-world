@@ -19,7 +19,10 @@ $${D$1_OUT}: dbc-init $${D$1_IN}
 	    _dbc_find_upgrades); do \
 		printf '%s\n' '' "-- revision $$$$rev" ''; \
 		cat dbconfig/upgrade/$1/$$$$rev; \
-	done | cat $${D$1_IN} - >$$@
+	done | cat $${D$1_IN} - | \
+	    sed -e '/^BEGIN;$$$$/d' -e '/^COMMIT;$$$$/d' | \
+	    { echo 'BEGIN;'; cat; echo 'COMMIT;'; } >$$@; \
+	    echo created $$@
 endef
 
 $(foreach db,${DBC},$(eval $(call dbsystem,${db})))

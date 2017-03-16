@@ -17,9 +17,9 @@ $${D$1_OUT}: dbc-init $${D$1_IN}
 	    dbc_dbtype=$1; dbc_oldversion='0~~~~'; \
 	    . /usr/share/dbconfig-common/dpkg/postinst; \
 	    _dbc_find_upgrades); do \
-		echo apply $1 revision $$$$rev; \
-	done
-	@echo 'dbc <$1> in <$${D$1_IN}> up <$${D$1_UP}> out <$${D$1_OUT}>'
+		printf '%s\n' '' "-- revision $$$$rev" ''; \
+		cat dbconfig/upgrade/$1/$$$$rev; \
+	done | cat $${D$1_IN} - >$$@
 endef
 
 $(foreach db,${DBC},$(eval $(call dbsystem,${db})))

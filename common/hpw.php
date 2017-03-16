@@ -13,7 +13,7 @@ static public function GetSchemaVersion() {
 
 public function __construct() {
 	$this->res = NULL;
-	$this->logId = db_insert_max('id',
+	$this->logId = db_insert_one('id',
 	    'INSERT INTO log (ts, ip) VALUES (now(), $1)',
 	    array($_SERVER["REMOTE_ADDR"]));
 }

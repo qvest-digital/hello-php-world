@@ -109,6 +109,11 @@ function db_insertid($table_name, $table_pkey) {
 	return ($res && db_numrows($res) > 0) ? db_result($res, 0, 'id') : false;
 }
 
+function db_insert_one($pk, $sql, $params) {
+	$res = db_query_params($sql . ' RETURNING ' . $pk, $params);
+	return ($res && db_numrows($res) == 1) ? db_result($res, 0, $pk) : false;
+}
+
 function db_insert_max($pk, $sql, $params) {
 	$res = db_query_params('WITH insrt_from_php AS (' .
 	    $sql . ' RETURNING ' . $pk . ') SELECT MAX(' .

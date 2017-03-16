@@ -12,7 +12,8 @@ define dbsystem =
 D$1_IN:=dbconfig/install/$1.in
 D$1_OUT:=dbconfig/install/$1
 D$1_UP:=$$(wildcard dbconfig/upgrade/$1/*)
-$${D$1_OUT}: dbc-init $${D$1_IN}
+$${D$1_OUT}: $${D$1_IN} $${D$1_UP}
+	@mkdir -p data
 	@for rev in $$$$(dbc_share=$$$$PWD; dbc_basepackage=../dbconfig; \
 	    dbc_dbtype=$1; dbc_oldversion='0~~~~'; \
 	    . /usr/share/dbconfig-common/dpkg/postinst; \
@@ -29,13 +30,10 @@ $(foreach db,${DBC},$(eval $(call dbsystem,${db})))
 DBC_OUT=$(foreach db,${DBC},${D${db}_OUT})
 CLEANFILES+=${DBC_OUT}
 
-dbc-init:
-	@mkdir -p data
-
-dbc-done: ${DBC_OUT}
-	@rmdir data 2>/dev/null
+dbc-generated: ${DBC_OUT}
+	@(rmdir data || :) 2>/dev/null
 else
-dbc-done:
+dbc-generated:
 	# no dbconfig-common files to frobnicate
 endif
 
@@ -112,10 +110,9 @@ var/autoldr.php:
 	php -l $@~
 	mv -f $@~ $@
 
-all: metacheck syntaxcheck dbc-done var/autoldr.php var/version.php
+all: metacheck syntaxcheck dbc-generated var/autoldr.php var/version.php
 
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck7
-.PHONY: dbc-init dbc-done
+.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck7 dbc-generated

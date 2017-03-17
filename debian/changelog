@@ -3,8 +3,9 @@ hello-php-world (11) UNRELEASED; urgency=high
   * Apply transactions to merged install SQL only for PostgreSQL
     (although this should be extended to encompass all that support it)
   * Add dbconfig-common to Build-Depends, oops…
+  * Don’t clobber a top-level data directory / break with it as a file
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 17 Mar 2017 20:14:07 +0000
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 17 Mar 2017 21:30:54 +0100
 
 hello-php-world (10) tarent; urgency=high
 

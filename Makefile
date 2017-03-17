@@ -13,8 +13,8 @@ D$1_IN:=dbconfig/install/$1.in
 D$1_OUT:=dbconfig/install/$1
 D$1_UP:=$$(wildcard dbconfig/upgrade/$1/*)
 $${D$1_OUT}: $${D$1_IN} $${D$1_UP}
-	@mkdir -p data
-	@for rev in $$$$(dbc_share=$$$$PWD; dbc_basepackage=../dbconfig; \
+	@ln -sfT . dbconfig/data
+	@for rev in $$$$(dbc_share=$$$$PWD/dbconfig; dbc_basepackage=.; \
 	    dbc_dbtype=$1; dbc_oldversion='0~~~~'; \
 	    . /usr/share/dbconfig-common/dpkg/postinst; \
 	    _dbc_find_upgrades); do \
@@ -35,10 +35,10 @@ endef
 
 $(foreach db,${DBC},$(eval $(call dbsystem,${db})))
 DBC_OUT=$(foreach db,${DBC},${D${db}_OUT})
-CLEANFILES+=${DBC_OUT}
+CLEANFILES+=${DBC_OUT} dbconfig/data
 
 dbc-generated: ${DBC_OUT}
-	@(rmdir data || :) 2>/dev/null
+	@rm -f dbconfig/data
 else
 dbc-generated:
 	# no dbconfig-common files to frobnicate

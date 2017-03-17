@@ -22,7 +22,13 @@ $${D$1_OUT}: $${D$1_IN} $${D$1_UP}
 		cat dbconfig/upgrade/$1/$$$$rev; \
 	done | cat $${D$1_IN} - | \
 	    sed -e '/^BEGIN;$$$$/d' -e '/^COMMIT;$$$$/d' | \
-	    { echo 'BEGIN;'; cat; echo 'COMMIT;'; } >$$@~
+	    if [[ $1 = pgsql ]]; then \
+		echo 'BEGIN;'; \
+		cat; \
+		echo 'COMMIT;'; \
+	    else \
+		cat; \
+	    fi >$$@~
 	mv -f $$@~ $$@
 	echo created $$@
 endef

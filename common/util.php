@@ -107,11 +107,11 @@ function util_debugJ() {
 /* format a backtrace array member */
 function util_debug_backtrace_fmt($bt, $ofs) {
 	if (!isset($bt[$ofs]))
-		return '<no backtrace>';
+		return '(no backtrace)';
 
 	/* calculate backtrace info: file and line */
 	$rv = sprintf('%s[%d]: ',
-	    util_ifsetor($bt[$ofs]['file'], '<no file>'),
+	    util_ifsetor($bt[$ofs]['file'], '(no file)'),
 	    util_ifsetor($bt[$ofs]['line'], -1));
 
 	/* calculate backtrace info: surrounding function and args */
@@ -129,7 +129,7 @@ function util_debug_backtrace_fmt($bt, $ofs) {
 		    util_ifsetor($bt[$ofs + 1]['args'], array()), false),
 		    1, -1) . ')';
 	} else {
-		$rv .= '<top-level>';
+		$rv .= '(top-level)';
 	}
 	return $rv;
 }

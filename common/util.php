@@ -92,10 +92,10 @@ function util_debugJ() {
 /* format a backtrace array member */
 function util_debug_backtrace_fmt($bt, $ofs) {
 	$rv = '<no backtrace>';
-	if (isset($bt[$ofs]) && isset($bt[$ofs]['file'])) {
+	if (isset($bt[$ofs])) {
 		/* calculate backtrace info: file and line */
 		$rv = sprintf('%s[%d]: ',
-		    $bt[$ofs]['file'],
+		    util_ifsetor($bt[$ofs]['file'], '<no file>'),
 		    util_ifsetor($bt[$ofs]['line'], -1));
 
 		if (isset($bt[$ofs + 1])) {

@@ -1,3 +1,9 @@
+hello-php-world (12) tarent; urgency=medium
+
+  * Improve DB error handling
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 24 Mar 2017 17:01:25 +0100
+
 hello-php-world (11) tarent; urgency=high
 
   * Apply transactions to merged install SQL only for PostgreSQL

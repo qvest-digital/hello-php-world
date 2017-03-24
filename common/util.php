@@ -58,6 +58,14 @@ function util_debugJ() {
 		array_shift($argv);
 	}
 
+	$moretrace = false;
+	if ($argc && $argv[0] === true) {
+		$moretrace = true;
+		/* skip that… */
+		$argc--;
+		array_shift($argv);
+	}
+
 	while ($argc && $argv[0] === NULL) {
 		/* skip backtrace levels, one for each leading NULL */
 		$skip++;
@@ -87,6 +95,13 @@ function util_debugJ() {
 		$cm .= ': ' . minijson_encdbg($argv);
 	}
 	util_logerr($loglevel, $cm);
+	if ($moretrace) {
+		$loglevel = 'T';
+		while (isset($bt[++$skip])) {
+			$cm = util_debug_backtrace_fmt($bt, $skip);
+			util_logerr($loglevel, $cm);
+		}
+	}
 }
 
 /* format a backtrace array member */

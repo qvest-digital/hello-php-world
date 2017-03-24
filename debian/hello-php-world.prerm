@@ -1,5 +1,4 @@
 #!/bin/sh
-# From MirOS: contrib/hosted/tg/deb/jupp/debian/jupp.prerm,v 1.4 2011/09/06 20:07:39 tg Exp $
 
 set -e
 
@@ -15,12 +14,9 @@ set -e
 # have previously been configured and not removed.
 #
 # * new-prerm "failed-upgrade" $old_version
+# * new-prerm "failed-upgrade" $old_version $new_version # 1.18.5, stretch
 # Called when 'old-prerm "upgrade"' fails; new package not unpacked, all
 # other constraints the same as above.
-
-HPW_PRERM_LEVEL=$(expr "${HPW_PRERM_LEVEL:-0}" + 1)
-export HPW_PRERM_LEVEL
-#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) hello-php-world.prerm starting up for $*"
 
 test -n "$HPW_PRERM_DIDWEB" || \
     if test -e /usr/share/apache2/apache2-maintscript-helper; then
@@ -74,14 +70,12 @@ EOF
 # tricky due to bad interaction with debconf
 test -n "$HPW_PRERM_DIDWEB" || case $1 in
 remove)
-	#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) disabling webserver config"
 	do_webserver_config >&2
 	HPW_PRERM_DIDWEB=1
 	export HPW_PRERM_DIDWEB
 	;;
 esac
 
-#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) initialising debconf"
 # Initialise debconf
 . /usr/share/debconf/confmodule
 # Initialise dbconfig-common
@@ -96,10 +90,8 @@ dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
 #dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
 . /usr/share/dbconfig-common/dpkg/prerm.pgsql
-#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) calling dbc_go"
 dbc_go hello-php-world "$@"
 
-#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) switching on $1"
 # custom actions
 case $1 in
 remove|deconfigure)
@@ -119,5 +111,4 @@ esac
 
 #DEBHELPER#
 
-#echo >&2 "D: ($$,$HPW_PRERM_LEVEL) hello-php-world.prerm success for $*"
 exit 0

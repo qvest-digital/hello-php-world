@@ -1,5 +1,4 @@
 #!/bin/sh
-# From MirOS: contrib/hosted/tg/deb/jupp/debian/jupp.postinst,v 1.11 2011/10/06 08:59:57 tg Exp $
 
 set -e
 
@@ -93,6 +92,7 @@ case $1 in
 configure)
 	# end debconf connection so we can start services
 	db_stop
+	# set up webserver
 	do_webserver_config
 	;;
 

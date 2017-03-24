@@ -5,8 +5,9 @@ hello-php-world (11) UNRELEASED; urgency=high
   * Add dbconfig-common to Build-Depends, oops…
   * Don’t clobber a top-level data directory / break with it as a file
   * When selecting gzip compression, adjust level accordingly
+  * Update maintainer scripts from jupp package
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 24 Mar 2017 15:23:40 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 24 Mar 2017 15:30:04 +0100
 
 hello-php-world (10) tarent; urgency=high
 

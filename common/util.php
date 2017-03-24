@@ -91,30 +91,30 @@ function util_debugJ() {
 
 /* format a backtrace array member */
 function util_debug_backtrace_fmt($bt, $ofs) {
-	$rv = '<no backtrace>';
-	if (isset($bt[$ofs])) {
-		/* calculate backtrace info: file and line */
-		$rv = sprintf('%s[%d]: ',
-		    util_ifsetor($bt[$ofs]['file'], '<no file>'),
-		    util_ifsetor($bt[$ofs]['line'], -1));
+	if (!isset($bt[$ofs]))
+		return '<no backtrace>';
 
-		if (isset($bt[$ofs + 1])) {
-			/* calling method: if set, begin with class */
-			$rv .= util_ifsetor($bt[$ofs + 1]['class'], '');
-			/* calling type; / if not set but we have class */
-			$rv .= util_ifsetor($bt[$ofs + 1]['type']) ?
-			    $bt[$ofs + 1]['type'] :
-			    (util_ifsetor($bt[$ofs + 1]['class']) ? '/' : '');
-			/* called function */
-			$rv .= util_ifsetor($bt[$ofs + 1]['function'],
-			    '<unknown>');
-			/* func arguments, JSON encoded but with () ipv [] */
-			$rv .= preg_replace('/^.(.*).$/', '(\1)',
-			    minijson_encdbg(util_ifsetor($bt[$ofs + 1]['args'],
-			    array()), false));
-		} else {
-			$rv .= '<top-level>';
-		}
+	/* calculate backtrace info: file and line */
+	$rv = sprintf('%s[%d]: ',
+	    util_ifsetor($bt[$ofs]['file'], '<no file>'),
+	    util_ifsetor($bt[$ofs]['line'], -1));
+
+	/* calculate backtrace info: surrounding function and args */
+	if (isset($bt[$ofs + 1])) {
+		/* calling method: if set, begin with class */
+		$rv .= util_ifsetor($bt[$ofs + 1]['class'], '');
+		/* calling type; / if not set but we have a class */
+		$rv .= util_ifsetor($bt[$ofs + 1]['type']) ?
+		    $bt[$ofs + 1]['type'] :
+		    (util_ifsetor($bt[$ofs + 1]['class']) ? '/' : '');
+		/* called function */
+		$rv .= util_ifsetor($bt[$ofs + 1]['function'], '<unknown>');
+		/* function arguments, JSON encoded but with () around */
+		$rv .= '(' . substr(minijson_encdbg(
+		    util_ifsetor($bt[$ofs + 1]['args'], array()), false),
+		    1, -1) . ')';
+	} else {
+		$rv .= '<top-level>';
 	}
 	return $rv;
 }

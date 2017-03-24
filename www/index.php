@@ -17,12 +17,17 @@ while (($row = $db->NextRow())) {
 }
 echo '</table>' . "\n";
 
-printf("<p>DB-Schema Version %d</p>\n", HpwDb::GetSchemaVersion());
+if (($schemavsn = HpwDb::GetSchemaVersion()) === NULL) {
+	echo '<p>Could not access the database.</p>' . "\n";
+} else {
+	printf("<p>DB-Schema Version %d</p>\n", HpwDb::GetSchemaVersion());
 
-printf("<p>I logged your visit as ID #%d</p>\n", $db->getLogId());
-$db->Query('SELECT * FROM log WHERE id=$1', array($db->getLogId()));
-$row = $db->NextRow();
-printf("<p>#%d - %s - %s</p>\n", $row['id'], $row['ts'], util_html_encode($row['ip']));
+	printf("<p>I logged your visit as ID #%d</p>\n", $db->getLogId());
+	$db->Query('SELECT * FROM log WHERE id=$1', array($db->getLogId()));
+	$row = $db->NextRow();
+	printf("<p>#%d - %s - %s</p>\n", $row['id'], $row['ts'],
+	    util_html_encode($row['ip']));
+}
 
 echo '<hr /><p><a href="pi.php">PHPinfo();</a></p>' . "\n";
 

@@ -8,6 +8,13 @@ private $res;
 
 static public function GetSchemaVersion() {
 	$res = db_query_params('SELECT version FROM z_schema_version', array());
+	if (!$res)
+		return NULL;
+	if (db_numrows($res) !== 1) {
+		util_debugJ(true, 'Could not retrieve DB schema version: ' .
+		    db_numrows($res) . ' entries found');
+		return NULL;
+	}
 	return db_result($res, 0, 'version');
 }
 

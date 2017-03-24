@@ -66,30 +66,7 @@ function util_debugJ() {
 	}
 
 	$bt = debug_backtrace();
-	$cm = '<no backtrace>';
-	if (isset($bt[$skip]) && isset($bt[$skip]['file'])) {
-		/* calculate backtrace info: file and line */
-		$cm = sprintf('%s[%d]',
-		    $bt[$skip]['file'],
-		    util_ifsetor($bt[$skip]['line'], -1));
-
-		if (isset($bt[$skip + 1])) {
-			$cm .= ': ';
-			/* calling method: if set, begin with class */
-			$cm .= util_ifsetor($bt[$skip + 1]['class'], '');
-			/* calling type; / if not set but we have class */
-			$cm .= util_ifsetor($bt[$skip + 1]['type']) ?
-			    $bt[$skip + 1]['type'] :
-			    (util_ifsetor($bt[$skip + 1]['class']) ? '/' : '');
-			/* called function */
-			$cm .= util_ifsetor($bt[$skip + 1]['function'],
-			    '<unknown>');
-			/* func arguments, JSON encoded but with () ipv [] */
-			$cm .= preg_replace('/^.(.*).$/', '(\1)',
-			    minijson_encdbg(util_ifsetor($bt[$skip + 1]['args'],
-			    array()), false));
-		}
-	}
+	$cm = util_debug_backtrace_fmt($bt, $skip);
 
 	if ($argc > 0) {
 		/* is first argument 7bit ASCII string, no C0 ctrl chars? */
@@ -110,6 +87,35 @@ function util_debugJ() {
 		$cm .= ': ' . minijson_encdbg($argv);
 	}
 	util_logerr($loglevel, $cm);
+}
+
+/* format a backtrace array member */
+function util_debug_backtrace_fmt($bt, $ofs) {
+	$rv = '<no backtrace>';
+	if (isset($bt[$ofs]) && isset($bt[$ofs]['file'])) {
+		/* calculate backtrace info: file and line */
+		$rv = sprintf('%s[%d]',
+		    $bt[$ofs]['file'],
+		    util_ifsetor($bt[$ofs]['line'], -1));
+
+		if (isset($bt[$ofs + 1])) {
+			$rv .= ': ';
+			/* calling method: if set, begin with class */
+			$rv .= util_ifsetor($bt[$ofs + 1]['class'], '');
+			/* calling type; / if not set but we have class */
+			$rv .= util_ifsetor($bt[$ofs + 1]['type']) ?
+			    $bt[$ofs + 1]['type'] :
+			    (util_ifsetor($bt[$ofs + 1]['class']) ? '/' : '');
+			/* called function */
+			$rv .= util_ifsetor($bt[$ofs + 1]['function'],
+			    '<unknown>');
+			/* func arguments, JSON encoded but with () ipv [] */
+			$rv .= preg_replace('/^.(.*).$/', '(\1)',
+			    minijson_encdbg(util_ifsetor($bt[$ofs + 1]['args'],
+			    array()), false));
+		}
+	}
+	return $rv;
 }
 
 /* get a backtrace as string */

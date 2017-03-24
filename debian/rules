@@ -13,4 +13,4 @@ else
 endif
 
 override_dh_builddeb:
-	dh_builddeb -- -Zgzip
+	dh_builddeb -- -Zgzip -z9

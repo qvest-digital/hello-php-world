@@ -64,7 +64,6 @@ function db_connect() {
 		$s .= ' host=' . $dbserver;
 	if ($dbport)
 		$s .= ' port=' . $dbport;
-	//D: error_log('pg_pconnect("' . $s . '")');
 	if (!($dbconn = pg_pconnect($s)))
 		db_die('could not connect to database');
 
@@ -92,7 +91,7 @@ function db_free_result($h) {
 	return @pg_free_result($h);
 }
 
-function db_result($h,$row,$field) {
+function db_result($h, $row, $field) {
 	return @pg_fetch_result($h, $row, $field);
 }
 

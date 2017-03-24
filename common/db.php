@@ -76,8 +76,10 @@ function db_query_params($sql, $params) {
 
 	db_connect_if_needed();
 	if (!($res = @pg_query_params($dbconn, $sql, $params))) {
-		error_log('SQL: ' . preg_replace('/\n\s+/', ' ', $sql));
-		error_log('SQL> ' . db_error());
+		util_debugJ('ERR', true, NULL, array(
+			'database error' => db_error(),
+			'failed SQL' => preg_replace('/\n\s+/', ' ', $sql),
+		    ));
 	}
 	return $res;
 }

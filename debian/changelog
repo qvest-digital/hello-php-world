@@ -1,4 +1,4 @@
-hello-php-world (11) UNRELEASED; urgency=high
+hello-php-world (11) tarent; urgency=high
 
   * Apply transactions to merged install SQL only for PostgreSQL
     (although this should be extended to encompass all that support it)
@@ -6,8 +6,10 @@ hello-php-world (11) UNRELEASED; urgency=high
   * Don’t clobber a top-level data directory / break with it as a file
   * When selecting gzip compression, adjust level accordingly
   * Update maintainer scripts from jupp package
+  * Improve logging backtraces on errors again
+  * Update lintian overrides
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 24 Mar 2017 15:30:04 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 24 Mar 2017 16:07:28 +0100
 
 hello-php-world (10) tarent; urgency=high
 

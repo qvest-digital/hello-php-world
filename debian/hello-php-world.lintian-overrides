@@ -3,3 +3,6 @@ hello-php-world: apache2-reverse-dependency-calls-invoke-rc.d postinst
 
 # we cannot use reload, we must ensure that all children are gone
 hello-php-world: apache2-reverse-dependency-calls-invoke-rc.d prerm
+
+# this is correct, debconf is used only indirectly via dbconfig-common
+hello-php-world: no-debconf-templates

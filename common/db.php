@@ -49,7 +49,7 @@ function db_connect() {
 	if (!function_exists('pg_pconnect'))
 		db_die('missing PostgreSQL interface for PHP: function pg_pconnect does not exist!', false);
 
-	require_once('/var/lib/hello-php-world/dbconfig.inc');
+	include('/var/lib/hello-php-world/dbconfig.inc');
 	if ($dbpass && !$dbserver) {
 		/* by default, peer auth for IPC, password auth for localhost */
 		$dbserver = 'localhost';

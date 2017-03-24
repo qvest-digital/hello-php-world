@@ -356,9 +356,8 @@ function util_randbytes($num=6) {
 
 	/*XXX check if the result is truly random (how?) */
 	if ($b === false || strlen(''.$b) != $num) {
-		util_debugJ('Could not read from random device',
+		util_debugJ(true, 'Could not read from random device',
 		    array('b' => $b, 'num' => $num));
-		util_logerr('T', debug_string_backtrace());
 		exit(1);
 	}
 
@@ -370,7 +369,7 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 		$lim = $mask;
 	/* due to PHP limitations, four octets can’t be used */
 	if ($mask > 0xFFFFFF || $lim > $mask) {
-		util_debugJ(NULL, "util_randnum($mask, $lim): " .
+		util_debugJ(true, NULL, "util_randnum($mask, $lim): " .
 		    'arguments out of bounds');
 		exit(1);
 	}

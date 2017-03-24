@@ -30,10 +30,9 @@ function db_error() {
 
 function db_die($reason, $dberr=true) {
 	if ($dberr)
-		util_debugJ('ERR', NULL, $reason, db_error());
+		util_debugJ('ERR', true, NULL, $reason, db_error());
 	else
-		util_debugJ('ERR', NULL, $reason);
-	util_logerr('T', debug_string_backtrace(1));
+		util_debugJ('ERR', true, NULL, $reason);
 	exit(1);
 }
 

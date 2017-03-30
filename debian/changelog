@@ -1,3 +1,9 @@
+hello-php-world (13) tarent; urgency=medium
+
+  * Add a German test string, to check for encoding issues
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 30 Mar 2017 19:11:36 +0200
+
 hello-php-world (12) tarent; urgency=medium
 
   * Improve DB error handling

@@ -1,0 +1,7 @@
+BEGIN;
+
+INSERT INTO content (blabla) VALUES ('Hällo World!');
+
+UPDATE z_schema_version SET version='13';
+
+COMMIT;

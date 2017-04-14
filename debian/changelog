@@ -1,3 +1,9 @@
+hello-php-world (14) tarent; urgency=low
+
+  * Update minijson.php adding a CLI pretty-printer mode
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 14 Apr 2017 22:06:14 +0200
+
 hello-php-world (13) tarent; urgency=medium
 
   * Add a German test string, to check for encoding issues

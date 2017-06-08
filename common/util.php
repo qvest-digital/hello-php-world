@@ -613,8 +613,7 @@ function util_sendmail($sender, $recip, $hdrs, $body) {
 	/* take care of the body */
 
 	if (!is_array($body)) {
-		$body = explode("\015\012",
-		    util_sanitise_multiline_submission($body));
+		$body = util_split_newlines($body);
 	}
 
 	foreach ($body as $v) {

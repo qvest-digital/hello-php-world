@@ -697,6 +697,13 @@ spl_autoload_register(function ($cls) {
     });
 
 /* HTML stuff */
+
+/*
+ * Note: just like eMail stuff, this is simpleton and we could do better
+ * by generating code from the spec instead. It i̲s̲ just an example, just
+ * enough to barely get going in a hello-world type application.
+ */
+
 function html_header($p=array()) {
 	//global $html_footer_p;
 

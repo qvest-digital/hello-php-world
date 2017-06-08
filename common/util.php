@@ -532,6 +532,7 @@ function util_sendmail_valid($adr) {
  * header and does not guarantee retaining ordering. This suffices
  * for (simple) creation of new messages but is not enough to process
  * existing eMails due to e.g. the Received header trace requirement.
+ * Note further that, in PHP, the order is retained in an array.
  *
  * @param	string	$sender
  *		The eMail address to use as envelope sender

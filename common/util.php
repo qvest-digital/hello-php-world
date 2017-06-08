@@ -332,12 +332,12 @@ function util_linequote($s, $pfx, $firstline=false) {
 			$a[] = $v;
 		$s = $a;
 	}
-	if (is_array($s))
-		$s = implode("\n", $s);
-	$s = util_sanitise_multiline_submission($s);
-	if ($firstline && (strpos($s, "\015\012") === false))
-		return ' ' . $s;
-	$s = $pfx . str_replace("\015\012", "\n" . $pfx, $s);
+	$s = util_split_newlines($s);
+	if (!$s)
+		return '';
+	if ($firstline && count($s) == 1)
+		return ' ' . $s[0];
+	$s = $pfx . implode("\n" . $pfx, $s);
 	return ($firstline ? "\n" : '') . $s;
 }
 

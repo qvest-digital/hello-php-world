@@ -210,6 +210,29 @@ function util_html_secure($s) {
 	return util_html_encode(util_unconvert_htmlspecialchars($s));
 }
 
+/* split text by newlines: ASCII CR-LF / Unix LF; if not found, Macintosh CR */
+function util_split_newlines($text, $mop=true) {
+	/*
+	 * First, convert all ASCII CR-LF pairs into ASCII LF, so we
+	 * then have either Unix (one LF) or Macintosh (one CR) line
+	 * endings; any extra CR characters are retained (payload).
+	 */
+	$text = str_replace("\015\012", "\012", strval($text));
+	/*
+	 * Now, detect which of the two line ending conventions are
+	 * actually used after the above, with preference on Unix (or
+	 * converted ASCII) over Macintosh: split by ASCII LF if one
+	 * exists, otherwise split by CR; in either case, ignore the
+	 * other completely (i.e. either CR or LF may be contained in
+	 * the result array’s string members except if $mop is set
+	 * (default) which removes them for consistency and security).
+	 */
+	$macintosh = strpos($text, "\012") === false;
+	if ($mop && !$macintosh)
+		$text = str_replace("\015", "", $text);
+	return explode($macintosh ? "\015" : "\012", $text);
+}
+
 /* convert text to ASCII CR-LF by (\r*\n|\r(?!\n)) */
 function util_sanitise_multiline_submission($text) {
 	/* convert all CR-LF into LF */

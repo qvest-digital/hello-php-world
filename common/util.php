@@ -240,7 +240,7 @@ function util_split_newlines($text, &$trailing=false, $mop=true) {
 }
 
 /* convert text to ASCII CR-LF by logical newlines, cf. above */
-function util_sanitise_multiline_submission($text) {
+function util_sanitise_multiline_submission($text, &$lastnl=false) {
 	$rv = implode("\015\012", util_split_newlines($text, $lastnl));
 	if ($lastnl)
 		$rv .= "\015\012";

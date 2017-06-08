@@ -213,7 +213,7 @@ function util_html_secure($s) {
 /* split text by newlines: ASCII CR-LF / Unix LF; if not found, Macintosh CR */
 function util_split_newlines($text, $mop=true) {
 	/* coerce to string */
-	$text = strval($text);
+	$text = is_array($text) ? implode("\n", $text) : strval($text);
 	/*
 	 * First, convert all ASCII CR-LF pairs into ASCII LF, so we
 	 * then have either Unix (one LF) or Macintosh (one CR) line

@@ -302,12 +302,8 @@ class Minijson_Tests extends PHPUnit_Framework_TestCase {
       "array with 1 element"
     ]
   },
-  [
-
-  ],
-  [
-
-  ],
+  [],
+  [],
   -42,
   true,
   false,
@@ -330,9 +326,7 @@ class Minijson_Tests extends PHPUnit_Framework_TestCase {
     "E": 1.23456789E+34,
     "address": "50 St. James Street",
     "alpha": "abcdefghijklmnopqrstuvwyz",
-    "array": [
-
-    ],
+    "array": [],
     "backslash": "\\\\",
     "comment": "// /* <!-- --",
     "compact": [
@@ -352,9 +346,7 @@ class Minijson_Tests extends PHPUnit_Framework_TestCase {
     "integer": 1234567890,
     "jsontext": "{\\"object with 1 member\\":[\\"array with 1 element\\"]}",
     "null": null,
-    "object": [
-
-    ],
+    "object": [],
     "one": 1,
     "quote": "\\"",
     "quotes": "&#34; \\" %22 0x22 034 &#x22;",

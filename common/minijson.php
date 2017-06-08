@@ -157,6 +157,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 	if (is_array($x)) {
 		$k = array_keys($x);
+		if (!$k) {
+			return '[]';
+		}
 
 		$isnum = true;
 		foreach ($k as $v) {
@@ -248,6 +251,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			/* protected and private members have NULs there */
 			$k[$v] = preg_replace('/^\0([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*|\*)\0(.)/',
 			    '\\\\$1\\\\$2', $v);
+		}
+		if (!$k) {
+			return '{}';
 		}
 		$si = $ri === false ? false : $ri . '  ';
 		$first = true;

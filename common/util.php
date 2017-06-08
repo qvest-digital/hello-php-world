@@ -235,14 +235,9 @@ function util_split_newlines($text, $mop=true) {
 	return explode($macintosh ? "\015" : "\012", $text);
 }
 
-/* convert text to ASCII CR-LF by (\r*\n|\r(?!\n)) */
+/* convert text to ASCII CR-LF by logical newlines, cf. above */
 function util_sanitise_multiline_submission($text) {
-	/* convert all CR-LF into LF */
-	$text = preg_replace("/\015+\012+/m", "\012", ''.$text);
-	/* convert all CR or LF into CR-LF */
-	$text = preg_replace("/[\012\015]/m", "\015\012", $text);
-
-	return $text;
+	return implode("\015\012", util_split_newlines($text));
 }
 
 /* convert text to UTF-8 (from UTF-8 or cp1252 or question marks); nil⇒nil */

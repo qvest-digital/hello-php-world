@@ -197,12 +197,12 @@ function util_mkarray($v) {
 
 /* escape a string into HTML for safe output */
 function util_html_encode($s) {
-	return htmlspecialchars(''.$s, ENT_QUOTES, 'UTF-8');
+	return htmlspecialchars(strval($s), ENT_QUOTES, 'UTF-8');
 }
 
 /* unconvert a string converted with util_html_encode() or htmlspecialchars() */
 function util_unconvert_htmlspecialchars($s) {
-	return html_entity_decode(''.$s, ENT_QUOTES | ENT_XHTML, 'UTF-8');
+	return html_entity_decode(strval($s), ENT_QUOTES | ENT_XHTML, 'UTF-8');
 }
 
 /* secure a (possibly already HTML encoded) string */
@@ -251,7 +251,7 @@ function util_sanitise_multiline_submission($text, &$lastnl=false) {
 function util_fixutf8($s) {
 	if ($s === NULL)
 		return NULL;
-	$s = ''.$s;
+	$s = strval($s);
 
 	if (!function_exists('mb_internal_encoding') ||
 	    !function_exists('mb_convert_encoding')) {
@@ -364,7 +364,7 @@ function util_nat0(&$s) {
 	$num = (int)$s;
 	if ($num >= 0) {
 		/* number element of ℕ₀ */
-		$text = (string)$num;
+		$text = strval($num);
 		if ($text == $s) {
 			/* number matches its textual representation */
 			return ($num);
@@ -382,13 +382,13 @@ function util_randbytes($num=6) {
 	fclose($f);
 
 	/*XXX check if the result is truly random (how?) */
-	if ($b === false || strlen(''.$b) != $num) {
+	if ($b === false || strlen(strval($b)) != $num) {
 		util_debugJ(true, 'Could not read from random device',
 		    array('b' => $b, 'num' => $num));
 		exit(1);
 	}
 
-	return (''.$b);
+	return strval($b);
 }
 
 function util_randnum($mask=0xFFFFFF, $lim=false) {

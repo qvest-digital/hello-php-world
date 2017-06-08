@@ -69,10 +69,10 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return 'false';
 	if (is_int($x)) {
 		$y = (int)$x;
-		$z = (string)$y;
+		$z = strval($y);
 		if ($x == $z)
 			return $z;
-		$x = (string)$x;
+		$x = strval($x);
 	}
 	if (is_float($x)) {
 		$rs = sprintf('%.14e', $x);
@@ -162,7 +162,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		foreach ($k as $v) {
 			if (is_int($v)) {
 				$y = (int)$v;
-				$z = (string)$y;
+				$z = strval($y);
 				if ($v != $z) {
 					$isnum = false;
 					break;
@@ -226,7 +226,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 				$rs .= ",\n";
 			if ($si !== false)
 				$rs .= $si;
-			$rs .= minijson_encode_internal((string)$v, false,
+			$rs .= minijson_encode_internal(strval($v), false,
 			    $depth, $truncsz, $dumprsrc);
 			if ($ri === false)
 				$rs .= ':';
@@ -281,7 +281,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
 	if ($dumprsrc && !is_null($rsrctype = @get_resource_type($x))) {
-		$k = ''.$rsrctype;
+		$k = strval($rsrctype);
 		$rs = '{';
 		if ($ri !== false)
 			$rs .= "\n" . $ri . '  ';
@@ -297,7 +297,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 
 	/* treat everything else as array or string */
-	return minijson_encode_internal(is_scalar($x) ? (string)$x : (array)$x,
+	return minijson_encode_internal(is_scalar($x) ? strval($x) : (array)$x,
 	    $ri, $depth, $truncsz, $dumprsrc);
 }
 
@@ -703,7 +703,7 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 		/* no fractional part, no exponent */
 
 		$v = (int)$s;
-		if ((string)$v == $s) {
+		if (strval($v) == $s) {
 			$ov = $v;
 			return true;
 		}
@@ -747,7 +747,7 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 				$depth = array_shift($argv);
 				if (!preg_match('/^[1-9][0-9]*$/', $depth))
 					usage();
-				if ((string)(int)$depth !== $depth)
+				if (strval((int)$depth) !== $depth)
 					usage();
 				$depth = (int)$depth;
 				break;
@@ -763,7 +763,7 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 				$truncsz = array_shift($argv);
 				if (!preg_match('/^[1-9][0-9]*$/', $truncsz))
 					usage();
-				if ((string)(int)$truncsz !== $truncsz)
+				if (strval((int)$truncsz) !== $truncsz)
 					usage();
 				$truncsz = (int)$truncsz;
 				break;

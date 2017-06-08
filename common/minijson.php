@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 if (count(get_included_files()) === 1) define('__main__', __FILE__);
 /**

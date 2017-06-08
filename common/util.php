@@ -211,7 +211,7 @@ function util_html_secure($s) {
 }
 
 /* split text by newlines: ASCII CR-LF / Unix LF; if not found, Macintosh CR */
-function util_split_newlines($text, $mop=true) {
+function util_split_newlines($text, &$trailing=false, $mop=true) {
 	/* coerce to string */
 	$text = is_array($text) ? implode("\n", $text) : strval($text);
 	/*
@@ -232,7 +232,11 @@ function util_split_newlines($text, $mop=true) {
 	$macintosh = strpos($text, "\012") === false;
 	if ($mop && !$macintosh)
 		$text = str_replace("\015", "", $text);
-	return explode($macintosh ? "\015" : "\012", $text);
+	$nlstr = $macintosh ? "\015" : "\012";
+	/* remove trailing newline indicating in $trailing if one existed */
+	if (($trailing = $text[strlen($text) - 1] === $nlstr))
+		$text = substr($text, 0, -1);
+	return explode($nlstr, $text);
 }
 
 /* convert text to ASCII CR-LF by logical newlines, cf. above */

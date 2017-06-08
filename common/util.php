@@ -528,6 +528,11 @@ function util_sendmail_valid($adr) {
  *
  * This function should be used in place of the PHP mail() function.
  *
+ * Note: the header handling here permits only one instance of each
+ * header and does not guarantee retaining ordering. This suffices
+ * for (simple) creation of new messages but is not enough to process
+ * existing eMails due to e.g. the Received header trace requirement.
+ *
  * @param	string	$sender
  *		The eMail address to use as envelope sender
  * @param	string|array(string+)	$recip

@@ -460,6 +460,11 @@ function util_emailcase($s) {
  * pass through unencoded (because if Content-Type is encoded
  * at least Postfix does not handle the eMail correctly).
  *
+ * This is still not correct; see RFC2047 §5 for where these
+ * are actually allowed, but it suffices for now, especially
+ * as we currently have no way to line-fold non-MIME headers.
+ * This should eventually be improved.
+ *
  * @param	string	$fname
  *		The name of the eMail header to use, which
  *		must not preg_match /[^!-9;-~]/ (not checked)
@@ -497,6 +502,10 @@ function util_sendmail_encode_hdr_int($fname, $ftext) {
  * or A RR — the caller can verify that itself once
  * validity is established by a truthy return value
  * from this function.
+ *
+ * Eventually, we likely will want for a full RFC-compliant
+ * address parser. Actually, a full header and message parser
+ * and generator will be necessary to implement all details.
  *
  * @param	string	$adr
  *		The eMail address to check for validity

@@ -1,3 +1,14 @@
+hello-php-world (15) tarent; urgency=low
+
+  * Expand wording about database creation parameters in maintainer
+    scripts: In the default case setting the DB-wide collation to ‘C’
+    is almost always the best thing to do. Alternatives are ‘SQL_ASCII’
+    (for speed and if the application doesn’t make use of certain SQL
+    features) or the correct UTF-8 variant, but you can always apply
+    those to a column, index, or at the query level, when needed.
+
+ -- Thorsten Glaser <tg@mirbsd.de>  Mon, 24 Apr 2017 13:54:37 +0200
+
 hello-php-world (14) tarent; urgency=low
 
   * Update minijson.php adding a CLI pretty-printer mode

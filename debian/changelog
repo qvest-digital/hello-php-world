@@ -2,8 +2,9 @@ hello-php-world (16) tarent; urgency=low
 
   * Render empty JSONArray and JSONObject without space in between
   * Make minijson.php executable (as pretty-printer)
+  * Override a Lintian false-positive
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 08 Jun 2017 17:49:44 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 08 Jun 2017 17:52:19 +0200
 
 hello-php-world (15) tarent; urgency=low
 

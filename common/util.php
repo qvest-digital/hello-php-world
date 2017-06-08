@@ -172,7 +172,7 @@ function set_dfl($k, $v) {
  * return $1 if $1 is set, ${2:-false} otherwise
  *
  * Shortcomings: may create $$val = NULL in the
- * current namespace; see the (rejected – but
+ * current namespace; see the (rejected — but
  * then, with PHP, you know where you stand…)
  * https://wiki.php.net/rfc/ifsetor#userland_2
  * proposal for details and a (rejected) fix.
@@ -494,7 +494,7 @@ function util_sendmail_encode_hdr_int($fname, $ftext) {
  * but otherwise per DNS/DARPA. Domain literals and
  * whitespace are not permitted. The domain part is
  * expected to be an FQDN resolving to an MX, AAAA,
- * or A RR – the caller can verify that itself once
+ * or A RR — the caller can verify that itself once
  * validity is established by a truthy return value
  * from this function.
  *

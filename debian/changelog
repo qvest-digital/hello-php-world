@@ -1,3 +1,9 @@
+hello-php-world (18) tarent; urgency=low
+
+  * Add util_xmlutf8()
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Tue, 13 Jun 2017 15:02:56 +0200
+
 hello-php-world (17) tarent; urgency=high
 
   * No longer make minijson.php executable (shebang is output…)

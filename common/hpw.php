@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Note: this is only an example demonstrating the class autoloader.
+ * In a real-world application you would just use the db_query_params()
+ * and other functions directly from within your own code.
+ */
+
 require_once('db.php');
 
 class HpwDb {

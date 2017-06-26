@@ -2,7 +2,7 @@ Tests: src-dev
 Depends: @, mksh, moreutils, pcregrep
 Restrictions: allow-stderr
 
-Tests: src-pu
+Tests: phpunit
 Depends: @, phpunit
 Restrictions: allow-stderr
 

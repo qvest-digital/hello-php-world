@@ -1,0 +1,23 @@
+Depends: @, mksh, moreutils, pcregrep
+Restrictions: allow-stderr
+Test-Command: make metacheck syntaxcheck
+
+Depends: @, phpunit
+Restrictions: allow-stderr
+Test-Command: cd tests && phpunit .
+
+Depends: @
+Restrictions: allow-stderr
+Test-Command: make -f /usr/share/hello-php-world/Makefile
+
+Depends: @, mksh, php5-cli
+Restrictions: allow-stderr
+Test-Command: make syntaxcheck5
+
+Depends: @, mksh, php7.0-cli, php7.0-mbstring
+Restrictions: allow-stderr
+Test-Command: make syntaxcheck70
+
+Depends: @, mksh, php7.1-cli, php7.1-mbstring
+Restrictions: allow-stderr
+Test-Command: make syntaxcheck71

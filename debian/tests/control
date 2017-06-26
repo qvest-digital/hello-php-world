@@ -10,9 +10,9 @@ Tests: syntax
 Depends: @
 Restrictions: allow-stderr
 
-Tests: syntax5
-Depends: @, mksh, php5-cli
-Restrictions: allow-stderr
+#Tests: syntax5
+#Depends: @, mksh, php5-cli
+#Restrictions: allow-stderr
 
 Tests: syntax70
 Depends: @, mksh, php7.0-cli, php7.0-mbstring

@@ -1,3 +1,4 @@
 #!/bin/sh
 set -e
+# source checks, *not* as-installed, from development
 exec make metacheck syntaxcheck

@@ -1,12 +1,20 @@
 #!/bin/sh
+
+# work around sadt not honouring the latest DEP8
 test -n "$AUTOPKGTEST_TMP" || AUTOPKGTEST_TMP=${ADTTMP:-$TMPDIR}
+
 set -e
+# just to be safe
 test -n "$AUTOPKGTEST_TMP"
+
+# copy tests and link code to test as-installed
 cp -r tests "$AUTOPKGTEST_TMP/"
 cd "$AUTOPKGTEST_TMP"
 ln -s /usr/share/hello-php-world/common common
 ln -s /usr/share/hello-php-world/www www
 ln -s /usr/share/dbconfig-common/data/hello-php-world dbconfig
 ln -s /var/lib/hello-php-world var
+
+# actually do run the tests
 cd tests
 exec phpunit .

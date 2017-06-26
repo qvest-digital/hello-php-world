@@ -5,9 +5,9 @@ hello-php-world (19) tarent; urgency=medium
   * Policy 4.0.0.4
     - use invoke-rc.d with --disclose-deny to determine if Apache 2
       needs to be restarted after upgrading
-  * Add autopkgtests (mostly source tree checks, not as-installed)
+  * Add autopkgtests
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 26 Jun 2017 15:00:33 +0000
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 26 Jun 2017 15:33:54 +0000
 
 hello-php-world (18) tarent; urgency=low
 

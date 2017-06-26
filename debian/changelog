@@ -1,3 +1,13 @@
+hello-php-world (19) tarent; urgency=medium
+
+  * Note common/hpw.php is only a classloader example and to directly
+    use the db_query_params() et al. functions in a real-world program
+  * Policy 4.0.0.4
+    - use invoke-rc.d with --disclose-deny to determine if Apache 2
+      needs to be restarted after upgrading
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 26 Jun 2017 14:32:10 +0000
+
 hello-php-world (18) tarent; urgency=low
 
   * Add util_xmlutf8()

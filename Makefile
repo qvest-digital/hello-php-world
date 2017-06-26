@@ -85,10 +85,18 @@ syntaxcheck5:
 	done; exit $$rv
 	@echo done.
 
-syntaxcheck7:
+syntaxcheck70:
 	@echo Running syntax checks, please verify output manually.
 	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
 		php7.0 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
+		(( PIPESTATUS[0] )) && rv=1; \
+	done; exit $$rv
+	@echo done.
+
+syntaxcheck71:
+	@echo Running syntax checks, please verify output manually.
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+		php7.1 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
 		(( PIPESTATUS[0] )) && rv=1; \
 	done; exit $$rv
 	@echo done.
@@ -123,4 +131,4 @@ all: metacheck syntaxcheck dbc-generated var/autoldr.php var/version.php
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck7 dbc-generated
+.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 dbc-generated

@@ -1,3 +1,9 @@
+hello-php-world (20) tarent; urgency=low
+
+  * Fix trailing newline detection for empty strings underrun
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 05 Jul 2017 17:09:32 +0200
+
 hello-php-world (19) tarent; urgency=medium
 
   * Note common/hpw.php is only a classloader example and to directly

@@ -234,7 +234,8 @@ function util_split_newlines($text, &$trailing=false, $mop=true) {
 		$text = str_replace("\015", '', $text);
 	$nlstr = $macintosh ? "\015" : "\012";
 	/* remove trailing newline indicating in $trailing if one existed */
-	if (($trailing = $text[strlen($text) - 1] === $nlstr))
+	if (($trailing = strlen($text) < 1 ? false :
+	    ($text[strlen($text) - 1] === $nlstr)))
 		$text = substr($text, 0, -1);
 	return explode($nlstr, $text);
 }

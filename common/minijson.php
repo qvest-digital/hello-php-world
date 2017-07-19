@@ -70,9 +70,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (is_int($x)) {
 		$y = (int)$x;
 		$z = strval($y);
-		if ($x == $z)
-			return $z;
 		$x = strval($x);
+		if ($x === $z)
+			return $z;
 	}
 	if (is_float($x)) {
 		$rs = sprintf('%.14e', $x);

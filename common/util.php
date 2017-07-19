@@ -242,10 +242,10 @@ function util_split_newlines($text, &$trailing=false, $mop=true) {
 
 /* convert text to ASCII CR-LF by logical newlines, cf. above */
 function util_sanitise_multiline_submission($text, &$lastnl=false) {
-	$rv = implode("\015\012", util_split_newlines($text, $lastnl));
+	$text = implode("\015\012", util_split_newlines($text, $lastnl));
 	if ($lastnl)
-		$rv .= "\015\012";
-	return $rv;
+		$text .= "\015\012";
+	return $text;
 }
 
 /* convert text to UTF-8 (from UTF-8 or cp1252 or question marks); nil⇒nil */
@@ -266,12 +266,14 @@ function util_fixutf8($s) {
 	/* check encoding */
 	$w = mb_convert_encoding($s, 'UTF-16LE', 'UTF-8');
 	$n = mb_convert_encoding($w, 'UTF-8', 'UTF-16LE');
+	unset($w);
 	if ($n === $s) {
 		/* correct UTF-8, restore state and return */
 		if ($mb_encoding !== false)
 			mb_internal_encoding($mb_encoding);
 		return ($n);
 	}
+	unset($n);
 	/* parse as cp1252 loosely */
 	$n = str_split($s);
 	$w = '';
@@ -316,11 +318,15 @@ function util_fixutf8($s) {
 	/* convert to UTF-8, then double-check */
 	$n = mb_convert_encoding($w, 'UTF-8', 'UTF-16LE');
 	$x = mb_convert_encoding($n, 'UTF-16LE', 'UTF-8');
+	$ok = $w === $x;
+	unset($w);
+	unset($x);
 	/* restore caller state saved */
 	if ($mb_encoding !== false)
 		mb_internal_encoding($mb_encoding);
-	if ($w !== $x) {
+	if (!$ok) {
 		/* something went wrong in Unicode land */
+		unset($n);
 		return preg_replace('/[^\x01-\x7E]/', '?', $s);
 	}
 	/* return UTF-8 result string */
@@ -340,7 +346,9 @@ function util_linequote($s, $pfx, $firstline=false) {
 		$a = array();
 		foreach ($s as $v)
 			$a[] = $v;
+		unset($v);
 		$s = $a;
+		unset($a);
 	}
 	$s = util_split_newlines($s);
 	if (!$s)
@@ -633,6 +641,7 @@ function util_sendmail($sender, $recip, $hdrs, $body) {
 		$msg[] = util_sendmail_encode_hdr_int('From', $recip[0]);
 	}
 
+	unset($hdr_seen);
 	$msg[] = '';
 
 	/* take care of the body */
@@ -650,14 +659,17 @@ function util_sendmail($sender, $recip, $hdrs, $body) {
 		}
 		$msg[] = $v;
 	}
+	unset($body);
 
 	/* generate a mail message from that */
 
 	$body = implode("\015\012", $msg) . "\015\012";
+	unset($msg);
 
 	/* this is only safe because $adrs is shell-escaped */
 	$adrs[0] = '/usr/sbin/sendmail -f' . $adrs[0] . ' -i --';
 	$cmd = implode(' ', $adrs);
+	unset($adrs);
 
 	if (($p = popen($cmd, 'wb')) === false) {
 		mb_internal_encoding($old_encoding);

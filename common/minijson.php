@@ -111,11 +111,15 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$z = mb_convert_encoding($x, 'UTF-16LE', 'UTF-8');
 			$y = mb_convert_encoding($z, 'UTF-8', 'UTF-16LE');
 			$isunicode = ($y == $x);
+			unset($y);
 		}
 		if ($isunicode) {
+			unset($x);
 			$z = str_split($z, 2);
 		} else {
+			unset($z);
 			$z = str_split($x);
+			unset($x);
 		}
 
 		foreach ($z as $v) {
@@ -344,8 +348,10 @@ function minijson_decode($sj, &$ov, $depth=32) {
 
 		/* skip Byte Order Mark if present */
 		$p = 0;
-		if ($j[$p] == 0xFEFF)
+		if ($j[$p] == 0xFEFF) {
+			unset($j[$p]);
 			$p++;
+		}
 
 		/* parse recursively */
 		$rv = minijson_decode_value($j, $p, $ov, $depth);
@@ -372,13 +378,18 @@ function minijson_decode($sj, &$ov, $depth=32) {
 function minijson_skip_wsp(&$j, &$p) {
 	/* skip all wide characters that are JSON whitespace */
 	do {
-		$wc = $j[$p++];
+		$wc = $j[$p];
+		unset($j[$p]);
+		++$p;
 	} while ($wc == 0x09 || $wc == 0x0A || $wc == 0x0D || $wc == 0x20);
 	$p--;
+	$j[$p] = $wc;
 }
 
 function minijson_get_hexdigit(&$j, &$p, &$v, $i) {
-	$wc = $j[$p++];
+	$wc = $j[$p];
+	unset($j[$p]);
+	++$p;
 	if ($wc >= 0x30 && $wc <= 0x39) {
 		$v += $wc - 0x30;
 	} elseif ($wc >= 0x41 && $wc <= 0x46) {
@@ -406,12 +417,14 @@ function minijson_decode_array(&$j, &$p, &$ov, $depth) {
 		if ($j[$p] == 0x5D) {
 			/* regular exit point for the loop */
 
+			unset($j[$p]);
 			$p++;
 			return true;
 		}
 
 		/* member separator? */
 		if ($j[$p] == 0x2C) {
+			unset($j[$p]);
 			$p++;
 			if ($first) {
 				/* no comma before the first member */
@@ -452,12 +465,14 @@ function minijson_decode_object(&$j, &$p, &$ov, $depth) {
 		if ($j[$p] == 0x7D) {
 			/* regular exit point for the loop */
 
+			unset($j[$p]);
 			$p++;
 			return true;
 		}
 
 		/* member separator? */
 		if ($j[$p] == 0x2C) {
+			unset($j[$p]);
 			$p++;
 			if ($first) {
 				/* no comma before the first member */
@@ -574,7 +589,9 @@ function minijson_decode_string(&$j, &$p, &$ov) {
 	$s = '';
 
 	while (true) {
-		$wc = $j[$p++];
+		$wc = $j[$p];
+		unset($j[$p]);
+		++$p;
 		if ($wc < 0x20) {
 			$ov = 'unescaped control character $wc at wchar #' . $p;
 			return false;
@@ -584,13 +601,15 @@ function minijson_decode_string(&$j, &$p, &$ov) {
 			/* convert to UTF-8, then re-check against UTF-16 */
 			$ov = mb_convert_encoding($s, 'UTF-8', 'UTF-16LE');
 			$tmp = mb_convert_encoding($ov, 'UTF-16LE', 'UTF-8');
-			if ($tmp != $s) {
+			if ($tmp !== $s) {
 				$ov = 'no Unicode string before wchar #' . $p;
 				return false;
 			}
 			return true;
 		} elseif ($wc == 0x5C) {
-			$wc = $j[$p++];
+			$wc = $j[$p];
+			unset($j[$p]);
+			++$p;
 			if ($wc == 0x22 ||
 			    $wc == 0x2F ||
 			    $wc == 0x5C) {
@@ -641,16 +660,22 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 	$isint = true;
 
 	/* check for an optional minus sign */
-	$wc = $j[$p++];
+	$wc = $j[$p];
+	unset($j[$p]);
+	++$p;
 	if ($wc == 0x2D) {
 		$s = '-';
-		$wc = $j[$p++];
+		$wc = $j[$p];
+		unset($j[$p]);
+		++$p;
 	}
 
 	if ($wc == 0x30) {
 		/* begins with zero (0 or 0.x) */
 		$s .= '0';
-		$wc = $j[$p++];
+		$wc = $j[$p];
+		unset($j[$p]);
+		++$p;
 		if ($wc >= 0x30 && $wc <= 0x39) {
 			$ov = 'no leading zeroes please at wchar #' . $p;
 			return false;
@@ -659,7 +684,9 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 		/* begins with 1‥9 */
 		while ($wc >= 0x30 && $wc <= 0x39) {
 			$s .= chr($wc);
-			$wc = $j[$p++];
+			$wc = $j[$p];
+			unset($j[$p]);
+			++$p;
 		}
 	} else {
 		$ov = 'decimal digit expected at wchar #' . $p;
@@ -674,14 +701,18 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 	if ($wc == 0x2E) {
 		$s .= '.';
 		$isint = false;
-		$wc = $j[$p++];
+		$wc = $j[$p];
+		unset($j[$p]);
+		++$p;
 		if ($wc < 0x30 || $wc > 0x39) {
 			$ov = 'fractional digit expected at wchar #' . $p;
 			return false;
 		}
 		while ($wc >= 0x30 && $wc <= 0x39) {
 			$s .= chr($wc);
-			$wc = $j[$p++];
+			$wc = $j[$p];
+			unset($j[$p]);
+			++$p;
 		}
 	}
 
@@ -689,10 +720,14 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 	if ($wc == 0x45 || $wc == 0x65) {
 		$s .= 'E';
 		$isint = false;
-		$wc = $j[$p++];
+		$wc = $j[$p];
+		unset($j[$p]);
+		++$p;
 		if ($wc == 0x2B || $wc == 0x2D) {
 			$s .= chr($wc);
-			$wc = $j[$p++];
+			$wc = $j[$p];
+			unset($j[$p]);
+			++$p;
 		}
 		if ($wc < 0x30 || $wc > 0x39) {
 			$ov = 'exponent digit expected at wchar #' . $p;
@@ -700,7 +735,9 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 		}
 		while ($wc >= 0x30 && $wc <= 0x39) {
 			$s .= chr($wc);
-			$wc = $j[$p++];
+			$wc = $j[$p];
+			unset($j[$p]);
+			++$p;
 		}
 	}
 	$p--;

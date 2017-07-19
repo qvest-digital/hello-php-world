@@ -530,7 +530,9 @@ function minijson_decode_value(&$j, &$p, &$ov, $depth) {
 	minijson_skip_wsp($j, $p);
 
 	/* parse begin of Value token */
-	$wc = $j[$p++];
+	$wc = $j[$p];
+	unset($j[$p]);
+	++$p;
 
 	/* style: falling through exits with false */
 	if ($wc == 0) {
@@ -577,6 +579,7 @@ function minijson_decode_value(&$j, &$p, &$ov, $depth) {
 		return minijson_decode_string($j, $p, $ov);
 	} elseif ($wc == 0x2D || ($wc >= 0x30 && $wc <= 0x39)) {
 		$p--;
+		$j[$p] = $wc;
 		return minijson_decode_number($j, $p, $ov);
 	} else {
 		$ov = sprintf('unexpected U+%04X at wchar #%u', $wc, $p);
@@ -741,6 +744,7 @@ function minijson_decode_number(&$j, &$p, &$ov) {
 		}
 	}
 	$p--;
+	$j[$p] = $wc;
 
 	if ($isint) {
 		/* no fractional part, no exponent */

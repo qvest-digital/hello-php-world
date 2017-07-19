@@ -1,3 +1,9 @@
+hello-php-world (21) tarent; urgency=low
+
+  * Reduce use of (temporary) memory in utility functions
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 19 Jul 2017 16:14:03 +0200
+
 hello-php-world (20) tarent; urgency=low
 
   * Fix trailing newline detection for empty strings underrun

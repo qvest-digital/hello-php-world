@@ -99,7 +99,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		/*
 		 * A bit unbelievable: not only does mb_check_encoding
 		 * not exist from the start, but also does it not check
-		 * reliably — so converting forth and back is the way
+		 * reliably — so converting forth and back is the way
 		 * they recommend… also, JSON is not binary-safe either…
 		 */
 		$isunicode = false;

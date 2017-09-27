@@ -236,7 +236,13 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs.'"';
 	}
 
-	$si = $ri === false ? false : $ri . '  ';
+	if ($ri === false) {
+		$si = false;
+		$xi = '';
+	} else {
+		$si = $ri . '  ';
+		$xi = $si;
+	}
 
 	if (is_array($x)) {
 		if (!($k = array_keys($x)))
@@ -281,7 +287,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 				$rs = "[\n";
 				$Si = ",\n" . $si;
 			}
-			$xi = '';
 			foreach ($s as $v) {
 				$rs .= $xi . minijson_encode_internal($x[$v],
 				    $si, $depth, $truncsz, $dumprsrc);
@@ -302,7 +307,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$Si = ",\n" . $si;
 			$Sd = ': ';
 		}
-		$xi = '';
 		foreach ($k as $v) {
 			$rs .= $xi . minijson_encode_internal(strval($v),
 			    false, $depth, $truncsz, $dumprsrc) .
@@ -337,7 +341,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$Si = ",\n" . $si;
 			$Sd = ': ';
 		}
-		$xi = '';
 		foreach ($k as $v => $s) {
 			$rs .= $xi . minijson_encode_internal($s,
 			    false, $depth, $truncsz, $dumprsrc) .

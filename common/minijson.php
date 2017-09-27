@@ -1,7 +1,8 @@
 <?php
 if (count(get_included_files()) === 1) define('__main__', __FILE__);
 /**
- * Minimal complete JSON generator and parser for FusionForge and SimKolab
+ * Minimal complete JSON generator and parser for FusionForge/Evolvis
+ * and SimKolab, including for debugging output serialisation
  *
  * Copyright © 2010, 2011, 2012, 2014, 2016, 2017
  *	mirabilos <t.glaser@tarent.de>
@@ -39,6 +40,8 @@ if (count(get_included_files()) === 1) define('__main__', __FILE__);
 
 /**
  * Encodes an array (indexed or associative) as JSON.
+ * Strings not comprised of only valid UTF-8 are interpreted as latin1;
+ * NUL terminates strings.
  *
  * in:	array x (Value to be encoded)
  * in:	string indent or bool false to skip beautification
@@ -63,10 +66,12 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (!$depth-- || !isset($x) || is_null($x) || (is_float($x) &&
 	    (is_nan($x) || is_infinite($x))))
 		return 'null';
+
 	if ($x === true)
 		return 'true';
 	if ($x === false)
 		return 'false';
+
 	if (is_int($x)) {
 		$y = (int)$x;
 		$z = strval($y);
@@ -74,96 +79,168 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if ($x === $z)
 			return $z;
 	}
+
 	if (is_float($x)) {
 		$rs = sprintf('%.14e', $x);
 		$v = explode('e', $rs);
 		$rs = rtrim($v[0], '0');
-		if (substr($rs, -1) == '.') {
+		if (substr($rs, -1) === '.')
 			$rs .= '0';
-		}
-		if ($v[1] != '-0' && $v[1] != '+0') {
+		if ($v[1] !== '-0' && $v[1] !== '+0')
 			$rs .= 'E' . $v[1];
-		}
 		return $rs;
 	}
-	if (is_string($x)) {
-		$rs = '"';
 
+	if (is_string($x)) {
 		if ($truncsz && (strlen($x) > $truncsz)) {
 			/* truncate very long texts */
 			$rs = 'TOO_LONG_STRING_TRUNCATED:"';
 			$x = substr($x, 0, $truncsz);
-		}
-
+		} else
+			$rs = '"';
+		/* NUL terminates */
 		$x .= "\0";
-		/*
-		 * A bit unbelievable: not only does mb_check_encoding
-		 * not exist from the start, but also does it not check
-		 * reliably — so converting forth and back is the way
-		 * they recommend… also, JSON is not binary-safe either…
-		 */
-		$isunicode = false;
-		$mb_encoding = false;
-		if (function_exists('mb_internal_encoding') &&
-		    function_exists('mb_convert_encoding')) {
-			$mb_encoding = mb_internal_encoding();
-			mb_internal_encoding('UTF-8');
-			$z = mb_convert_encoding($x, 'UTF-16LE', 'UTF-8');
-			$y = mb_convert_encoding($z, 'UTF-8', 'UTF-16LE');
-			$isunicode = ($y == $x);
-			unset($y);
+		/* assume UTF-8 first, for sanity */
+		$Ss = 0; /* state */
+		$Sp = 0; /* position */
+		$wc = 0; /* wide character */
+		$wnext = 0;
+ minijson_encode_string_utf8:
+		/* read next octet */
+		if (($c = ord($x[$Sp++])) === 0) {
+			/* NUL */
+			if ($Ss !== 0)
+				goto minijson_encode_string_latin1;
+			return $rs.'"';
 		}
-		if ($isunicode) {
-			unset($x);
-			$z = str_split($z, 2);
-		} else {
-			unset($z);
-			$z = str_split($x);
-			unset($x);
-		}
-
-		foreach ($z as $v) {
-			$y = ord($v[0]);
-			if ($isunicode) {
-				$y |= ord($v[1]) << 8;
-			}
-			if ($y == 0) {
-				break;
-			} elseif ($y == 8) {
-				$rs .= '\b';
-			} elseif ($y == 9) {
-				$rs .= '\t';
-			} elseif ($y == 10) {
-				$rs .= '\n';
-			} elseif ($y == 12) {
-				$rs .= '\f';
-			} elseif ($y == 13) {
-				$rs .= '\r';
-			} elseif ($y == 34) {
-				$rs .= '\"';
-			} elseif ($y == 92) {
-				$rs .= '\\\\';
-			} elseif ($y < 0x20 || $y > 0xFFFD ||
-			    ($y >= 0xD800 && $y <= 0xDFFF) ||
-			    ($y > 0x7E && (!$isunicode || $y < 0xA0))) {
-				$rs .= sprintf('\u%04X', $y);
-			} elseif ($isunicode && $y > 0x7E) {
-				$rs .= mb_convert_encoding($v, 'UTF-8',
-				    'UTF-16LE');
+		if ($Ss === 0) {
+			/* lead byte */
+			if ($c < 0x80) {
+				$wc = $c;
+				$wmin = 0;
+			} elseif ($c < 0xC2 || $c >= 0xF8) {
+				goto minijson_encode_string_latin1;
+			} elseif ($c < 0xE0) {
+				$wc = ($c & 0x1F) << 6;
+				$wmin = 0x80;
+				$Ss = 1;
+			} elseif ($c < 0xF0) {
+				$wc = ($c & 0x0F) << 12;
+				$wmin = 0x800;
+				$Ss = 2;
 			} else {
-				$rs .= $v[0];
+				$wc = ($c & 0x07) << 18;
+				$wmin = 0x10000;
+				$Ss = 3;
 			}
+		} else if (($c ^= 0x80) > 0x3F) {
+			goto minijson_encode_string_latin1;
+		} else {
+			/* trail byte */
+			--$Ss;
+			$wc |= $c << (6 * $Ss);
 		}
-		if ($mb_encoding !== false) {
-			mb_internal_encoding($mb_encoding);
+		if ($Ss !== 0)
+			goto minijson_encode_string_utf8;
+		/* complete wide character */
+		if ($wc < $wmin || $wc > 0x10FFFF)
+			goto minijson_encode_string_latin1;
+		/* UTF-16 */
+		if ($wc > 0xFFFF) {
+			$wc -= 0x10000;
+			$wnext = 0xDC00 | ($wc & 0x03FF);
+			$wc = 0xD800 | ($wc >> 10);
+		} else
+			$wnext = 0;
+ minijson_encode_string_utf16:
+		/* process UTF-16 char */
+		switch ($wc) {
+		case 8:
+			$rs .= '\b';
+			break;
+		case 9:
+			$rs .= '\t';
+			break;
+		case 10:
+			$rs .= '\n';
+			break;
+		case 12:
+			$rs .= '\f';
+			break;
+		case 13:
+			$rs .= '\r';
+			break;
+		case 34:
+			$rs .= '\"';
+			break;
+		case 92:
+			$rs .= '\\\\';
+			break;
+		default:
+			if ($wc < 0x20 || ($wc > 0x7E && $wc < 0xA0) ||
+			    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
+				$rs .= sprintf('\u%04X', $wc);
+			elseif ($wc < 0x0080)
+				$rs .= chr($wc);
+			elseif ($wc < 0x0800)
+				$rs .= chr(0xC0 | ($wc >> 6)) .
+				    chr(0x80 | ($wc & 0x3F));
+			else
+				$rs .= chr(0xE0 | ($wc >> 12)) .
+				    chr(0x80 | (($wc >> 6) & 0x3F)) .
+				    chr(0x80 | ($wc & 0x3F));
+			break;
+		}
+		/* process next UTF-16 char */
+		if ($wnext !== 0) {
+			$wc = $wnext;
+			$wnext = 0;
+			goto minijson_encode_string_utf16;
+		}
+		goto minijson_encode_string_utf8;
+
+ minijson_encode_string_latin1:
+		/* failed, interpret as sorta latin1 but binary */
+		/* note JSON is not binary-safe */
+		$rs = $rs[0] === 'T' ? 'TOO_LONG_STRING_TRUNCATED:"' : '"';
+		$Sp = 0;
+		while (($wc = ord($x[$Sp++])) !== 0) switch ($wc) {
+		case 8:
+			$rs .= '\b';
+			break;
+		case 9:
+			$rs .= '\t';
+			break;
+		case 10:
+			$rs .= '\n';
+			break;
+		case 12:
+			$rs .= '\f';
+			break;
+		case 13:
+			$rs .= '\r';
+			break;
+		case 34:
+			$rs .= '\"';
+			break;
+		case 92:
+			$rs .= '\\\\';
+			break;
+		default:
+			if ($wc < 0x20 || $wc > 0x7E)
+				$rs .= sprintf('\u%04X', $wc);
+			else
+				$rs .= chr($wc);
+			break;
 		}
 		return $rs.'"';
 	}
+
+	$si = $ri === false ? false : $ri . '  ';
+
 	if (is_array($x)) {
-		$k = array_keys($x);
-		if (!$k) {
+		if (!($k = array_keys($x)))
 			return '[]';
-		}
 
 		$isnum = true;
 		foreach ($k as $v) {
@@ -187,7 +264,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			/* test keys for order and delta */
 			$y = 0;
 			foreach ($s as $v) {
-				if ($v != $y) {
+				if ($v !== $y) {
 					$isnum = false;
 					break;
 				}
@@ -195,98 +272,82 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			}
 		}
 
-		$si = $ri === false ? false : $ri . '  ';
-		$first = true;
 		if ($isnum) {
 			/* all array keys are integers 0‥n */
-			$rs = '[';
-			if ($ri !== false)
-				$rs .= "\n";
+			if ($ri === false) {
+				$rs = '[';
+				$Si = ',';
+			} else {
+				$rs = "[\n";
+				$Si = ",\n" . $si;
+			}
+			$xi = '';
 			foreach ($s as $v) {
-				if ($first)
-					$first = false;
-				elseif ($ri === false)
-					$rs .= ',';
-				else
-					$rs .= ",\n";
-				if ($si !== false)
-					$rs .= $si;
-				$rs .= minijson_encode_internal($x[$v], $si,
-				    $depth, $truncsz, $dumprsrc);
+				$rs .= $xi . minijson_encode_internal($x[$v],
+				    $si, $depth, $truncsz, $dumprsrc);
+				$xi = $Si;
 			}
 			if ($ri !== false)
 				$rs .= "\n" . $ri;
-			$rs .= ']';
-			return $rs;
+			return $rs.']';
 		}
 
-		$rs = '{';
-		if ($ri !== false)
-			$rs .= "\n";
 		sort($k, SORT_STRING);
+		if ($ri === false) {
+			$rs = '{';
+			$Si = ',';
+			$Sd = ':';
+		} else {
+			$rs = "{\n";
+			$Si = ",\n" . $si;
+			$Sd = ': ';
+		}
+		$xi = '';
 		foreach ($k as $v) {
-			if ($first)
-				$first = false;
-			elseif ($ri === false)
-				$rs .= ',';
-			else
-				$rs .= ",\n";
-			if ($si !== false)
-				$rs .= $si;
-			$rs .= minijson_encode_internal(strval($v), false,
-			    $depth, $truncsz, $dumprsrc);
-			if ($ri === false)
-				$rs .= ':';
-			else
-				$rs .= ': ';
-			$rs .= minijson_encode_internal($x[$v], $si,
-			    $depth, $truncsz, $dumprsrc);
+			$rs .= $xi . minijson_encode_internal(strval($v),
+			    false, $depth, $truncsz, $dumprsrc) .
+			    $Sd . minijson_encode_internal($x[$v],
+			    $si, $depth, $truncsz, $dumprsrc);
+			$xi = $Si;
 		}
 		if ($ri !== false)
 			$rs .= "\n" . $ri;
-		$rs .= '}';
-		return $rs;
+		return $rs.'}';
 	}
+
 	if (is_object($x)) {
 		/* PHP objects are mostly like associative arrays */
 		$x = (array)$x;
 		$k = array();
 		foreach (array_keys($x) as $v) {
 			/* protected and private members have NULs there */
-			$k[$v] = preg_replace('/^\0([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*|\*)\0(.)/',
-			    '\\\\$1\\\\$2', $v);
+			$k[$v] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
+			    '\\\\$1\\\\$2', strval($v));
 		}
 		if (!$k) {
 			return '{}';
 		}
-		$si = $ri === false ? false : $ri . '  ';
-		$first = true;
-		$rs = '{';
-		if ($ri !== false)
-			$rs .= "\n";
 		asort($k, SORT_STRING);
+		if ($ri === false) {
+			$rs = '{';
+			$Si = ',';
+			$Sd = ':';
+		} else {
+			$rs = "{\n";
+			$Si = ",\n" . $si;
+			$Sd = ': ';
+		}
+		$xi = '';
 		foreach ($k as $v => $s) {
-			if ($first)
-				$first = false;
-			elseif ($ri === false)
-				$rs .= ',';
-			else
-				$rs .= ",\n";
-			if ($si !== false)
-				$rs .= $si;
-			$rs .= minijson_encode_internal($s, false,
-			    $depth, $truncsz, $dumprsrc);
-			if ($ri === false)
-				$rs .= ':';
-			else
-				$rs .= ': ';
-			$rs .= minijson_encode_internal($x[$v], $si,
-			    $depth, $truncsz, $dumprsrc);
+			$rs .= $xi . minijson_encode_internal($s,
+			    false, $depth, $truncsz, $dumprsrc) .
+			    $Sd . minijson_encode_internal($x[$v],
+			    $si, $depth, $truncsz, $dumprsrc);
+			$xi = $Si;
 		}
 		if ($ri !== false)
 			$rs .= "\n" . $ri;
-		$rs .= '}';
-		return $rs;
+		return $rs.'}';
 	}
 
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
@@ -298,12 +359,11 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$rs .= '"\u0000resource":';
 		if ($ri !== false)
 			$rs .= ' ';
-		$rs .= minijson_encode_internal($k, false,
-		    $depth, $truncsz, $dumprsrc);
+		$rs .= minijson_encode_internal($k,
+		    false, $depth, $truncsz, $dumprsrc);
 		if ($ri !== false)
 			$rs .= "\n" . $ri;
-		$rs .= '}';
-		return $rs;
+		return $rs.'}';
 	}
 
 	/* treat everything else as array or string */

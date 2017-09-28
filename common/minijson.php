@@ -286,11 +286,10 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs.'}';
 	}
 
-	if (is_array($x)) {
+	if (($isnum = is_array($x))) {
 		if (!($k = array_keys($x)))
 			return '[]';
 
-		$isnum = true;
 		foreach ($k as $v) {
 			if (is_int($v)) {
 				$y = (int)$v;

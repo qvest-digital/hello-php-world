@@ -250,12 +250,13 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 
 	$isStr = is_string($x);
-	$isAoO = is_array($x) || is_object($x);
-	$isRes = !$isStr && !$isAoO && $dumprsrc &&
+	$notAO = !is_array($x) && !is_object($x);
+	$isRes = !$isStr && $notAO && $dumprsrc &&
+	    /* http://de2.php.net/manual/en/function.is-resource.php#103942 */
 	    !is_null($rsrctype = @get_resource_type($x));
 
 	/* strings or unknown scalars */
-	if ($isStr || (!$isAoO && !$isRes && is_scalar($x)))
+	if ($isStr || ($notAO && !$isRes && is_scalar($x)))
 		return minijson_encode_string($x, $truncsz);
 
 	/* arrays, objects, potentially resources, or unknown non-scalars */
@@ -363,8 +364,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs.'}';
 	}
 
-	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	if ($dumprsrc && !is_null($rsrctype = @get_resource_type($x))) {
+	if ($isRes) {
 		$rs = '{';
 		if ($ri !== false)
 			$rs .= "\n" . $ri . '  ';

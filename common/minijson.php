@@ -264,10 +264,16 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		    substr(minijson_encode_string($x), 1) . $Sd .
 		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
 
-	/* arrays, potentially non-associative */
-	if (($isnum = is_array($x) && array_key_exists(0, $x))) {
-		if (!($k = array_keys($x)))
+	/* arrays, potentially empty or non-associative */
+	if (($isnum = is_array($x))) {
+		if (!$x)
 			return '[]';
+		if (!array_key_exists(0, $x))
+			$isnum = false;
+	}
+
+	if ($isnum) {
+		$k = array_keys($x);
 
 		foreach ($k as $v) {
 			if (is_int($v)) {

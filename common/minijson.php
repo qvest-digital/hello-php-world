@@ -276,7 +276,8 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* resources, if we dump them (otherwise they’re unknown scalars) */
 	if ($isRsrc && $dumprsrc)
-		return '{' . $xi . '"\u0000resource"' . $Sd .
+		return '{' . $xi . '"\u0000' .
+		    substr(minijson_encode_string($x), 1) . $Sd .
 		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
 
 	/* arrays, potentially non-associative */

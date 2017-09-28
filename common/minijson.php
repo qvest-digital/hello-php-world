@@ -76,6 +76,7 @@ function minijson_encode_string($x, $truncsz=0) {
 	/* assume UTF-8 first, for sanity */
 	$Ss = 0;	/* state */
 	$wc = 0;	/* wide character */
+	$wnext = 0;	/* other surrogate */
  minijson_encode_string_utf8:
 	/* read next octet */
 	if (($c = ord($x[$Sp++])) === 0) {
@@ -89,7 +90,7 @@ function minijson_encode_string($x, $truncsz=0) {
 		/* lead byte */
 		if ($c < 0x80) {
 			$wc = $c;
-			$wmin = 0;
+			goto minijson_encode_string_utf16;
 		} elseif ($c < 0xC2 || $c >= 0xF8) {
 			goto minijson_encode_string_latin1;
 		} elseif ($c < 0xE0) {

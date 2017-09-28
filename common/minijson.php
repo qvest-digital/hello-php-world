@@ -275,6 +275,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$Sd = ': ';
 	}
 
+	/* resources, if we dump them (otherwise they’re unknown scalars) */
 	if ($isRes) {
 		$rs = '{';
 		if ($ri !== false)
@@ -286,6 +287,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs.'}';
 	}
 
+	/* arrays, potentially non-associative */
 	if (($isnum = is_array($x))) {
 		if (!($k = array_keys($x)))
 			return '[]';
@@ -295,6 +297,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 				$y = (int)$v;
 				$z = strval($y);
 				if ($v != $z) {
+					/* non-numeric array key */
 					$isnum = false;
 					break;
 				}
@@ -303,36 +306,37 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 				break;
 			}
 		}
+	}
 
-		if ($isnum) {
-			/* all array keys are integers */
-			$s = $k;
-			sort($s, SORT_NUMERIC);
-			/* test keys for order and delta */
-			$y = 0;
-			foreach ($s as $v) {
-				if ($v !== $y) {
-					$isnum = false;
-					break;
-				}
-				$y++;
+	if ($isnum) {
+		/* all array keys are integers */
+		$s = $k;
+		sort($s, SORT_NUMERIC);
+		/* test keys for order and delta */
+		$y = 0;
+		foreach ($s as $v) {
+			if ($v !== $y) {
+				/* non-contiguous array key (sparse array) */
+				$isnum = false;
+				break;
 			}
+			$y++;
 		}
+	}
 
-		if ($isnum) {
-			/* all array keys are integers 0‥n */
-			$rs = '[';
-			if ($ri !== false)
-				$rs .= "\n";
-			foreach ($s as $v) {
-				$rs .= $xi . minijson_encode_internal($x[$v],
-				    $si, $depth, $truncsz, $dumprsrc);
-				$xi = $Si;
-			}
-			if ($ri !== false)
-				$rs .= "\n" . $ri;
-			return $rs.']';
+	if ($isnum) {
+		/* all array keys are integers 0‥n */
+		$rs = '[';
+		if ($ri !== false)
+			$rs .= "\n";
+		foreach ($s as $v) {
+			$rs .= $xi . minijson_encode_internal($x[$v],
+			    $si, $depth, $truncsz, $dumprsrc);
+			$xi = $Si;
 		}
+		if ($ri !== false)
+			$rs .= "\n" . $ri;
+		return $rs.']';
 	}
 
 	/* treat everything else as Object */

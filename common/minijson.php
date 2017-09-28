@@ -243,7 +243,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (is_float($x)) {
 		$rs = sprintf('%.14e', $x);
 		$v = explode('e', $rs);
-		$rs = rtrim($v[0], '.0');
+		$rs = rtrim($v[0], '0');
+		if (substr($rs, -1) === '.')
+			$rs .= '0';
 		if ($v[1] !== '-0' && $v[1] !== '+0')
 			$rs .= 'E' . $v[1];
 		return $rs;

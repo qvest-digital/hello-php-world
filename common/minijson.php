@@ -127,6 +127,8 @@ function minijson_encode_string($x, $truncsz=0) {
 		$Ss = 3;
 	}
 	/* trail bytes */
+	if ($Sp + $Ss >= $Sx)
+		goto minijson_encode_string_latin1;
 	while ($Ss--)
 		if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
 			$wc |= $c << (6 * $Ss);
@@ -168,29 +170,34 @@ function minijson_encode_string($x, $truncsz=0) {
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */
 
-	while (($c = ord($x[$Sp++])) !== 0) switch ($c) {
-	case 0x08:
-		$rs .= '\b';
-		break;
-	case 0x09:
-		$rs .= '\t';
-		break;
-	case 0x0A:
-		$rs .= '\n';
-		break;
-	case 0x0C:
-		$rs .= '\f';
-		break;
-	case 0x0D:
-		$rs .= '\r';
-		break;
-	case 0x22:
-	case 0x5C:
-		$rs .= "\\";
-		/* FALLTHROUGH */
-	default:
-		$rs .= $c < 0x20 || $c > 0x7E ? sprintf('\u%04X', $c) : chr($c);
-		break;
+	while ($Sp < $Sx) {
+		$c = ord($x[$Sp++]);
+		if ($c >= 0x20 && $c < 0x7F) {
+			if ($c === 0x22 || $c === 0x5C)
+				$rs .= "\\";
+			$rs .= chr($c);
+		} else switch ($c) {
+		case 0x08:
+			$rs .= '\b';
+			break;
+		case 0x09:
+			$rs .= '\t';
+			break;
+		case 0x0A:
+			$rs .= '\n';
+			break;
+		case 0x0C:
+			$rs .= '\f';
+			break;
+		case 0x0D:
+			$rs .= '\r';
+			break;
+		default:
+			$rs .= sprintf('\u%04X', $c);
+			break;
+		case 0x00:
+			goto minijson_encode_string_done;
+		}
 	}
  minijson_encode_string_done:
 	return ($dotrunc ? 'TOO_LONG_STRING_TRUNCATED:"' : '"') . $rs . '"';

@@ -167,7 +167,6 @@ function minijson_encode_string($x, $truncsz=0) {
 
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */
-	/* note JSON is not binary-safe */
 
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */

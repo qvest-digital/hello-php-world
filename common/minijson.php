@@ -275,6 +275,17 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$Sd = ': ';
 	}
 
+	if ($isRes) {
+		$rs = '{';
+		if ($ri !== false)
+			$rs .= "\n" . $ri . '  ';
+		$rs .= '"\u0000resource"' . $Sd;
+		$rs .= minijson_encode_string($rsrctype, $truncsz);
+		if ($ri !== false)
+			$rs .= "\n" . $ri;
+		return $rs.'}';
+	}
+
 	if (is_array($x)) {
 		if (!($k = array_keys($x)))
 			return '[]';
@@ -361,17 +372,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
 		}
-		if ($ri !== false)
-			$rs .= "\n" . $ri;
-		return $rs.'}';
-	}
-
-	if ($isRes) {
-		$rs = '{';
-		if ($ri !== false)
-			$rs .= "\n" . $ri . '  ';
-		$rs .= '"\u0000resource"' . $Sd;
-		$rs .= minijson_encode_string($rsrctype, $truncsz);
 		if ($ri !== false)
 			$rs .= "\n" . $ri;
 		return $rs.'}';

@@ -313,8 +313,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if ($ri !== false)
 			$rs .= "\n";
 		foreach ($k as $v) {
-			$rs .= $xi . minijson_encode_internal(strval($v),
-			    false, $depth, $truncsz, $dumprsrc) .
+			$rs .= $xi . minijson_encode_string($v, $truncsz) .
 			    $Sd . minijson_encode_internal($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
@@ -341,8 +340,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if ($ri !== false)
 			$rs .= "\n";
 		foreach ($k as $v => $s) {
-			$rs .= $xi . minijson_encode_internal($s,
-			    false, $depth, $truncsz, $dumprsrc) .
+			$rs .= $xi . minijson_encode_string($s, $truncsz) .
 			    $Sd . minijson_encode_internal($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
@@ -358,15 +356,16 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if ($ri !== false)
 			$rs .= "\n" . $ri . '  ';
 		$rs .= '"\u0000resource"' . $Sd;
-		$rs .= minijson_encode_internal(strval($rsrctype),
-		    false, $depth, $truncsz, $dumprsrc);
+		$rs .= minijson_encode_string($rsrctype, $truncsz);
 		if ($ri !== false)
 			$rs .= "\n" . $ri;
 		return $rs.'}';
 	}
 
 	/* treat everything else as array or string */
-	return minijson_encode_internal(is_scalar($x) ? strval($x) : (array)$x,
+	if (is_scalar($x))
+		return minijson_encode_string($x, $truncsz);
+	return minijson_encode_internal((array)$x,
 	    $ri, $depth, $truncsz, $dumprsrc);
 }
 

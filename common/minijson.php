@@ -259,6 +259,8 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (is_array($x)) {
 		if (!($ak = array_keys($x)))
 			return '[]';
+		if (!array_key_exists(0, $x))
+			goto minijson_encode_object;
 
 		$s = $ak;
 		sort($s, SORT_NUMERIC);

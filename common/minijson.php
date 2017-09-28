@@ -178,6 +178,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			break;
 		default:
 			if ($wc < 0x20 || ($wc > 0x7E && $wc < 0xA0) ||
+			    ($wc >= 0x2028 && $wc <= 0x2029) ||
 			    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
 				$rs .= sprintf('\u%04X', $wc);
 			elseif ($wc < 0x0080)

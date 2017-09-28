@@ -333,20 +333,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 				$rs .= "\n" . $ri;
 			return $rs.']';
 		}
-
-		sort($k, SORT_STRING);
-		$rs = '{';
-		if ($ri !== false)
-			$rs .= "\n";
-		foreach ($k as $v) {
-			$rs .= $xi . minijson_encode_string($v, $truncsz) .
-			    $Sd . minijson_encode_internal($x[$v],
-			    $si, $depth, $truncsz, $dumprsrc);
-			$xi = $Si;
-		}
-		if ($ri !== false)
-			$rs .= "\n" . $ri;
-		return $rs.'}';
 	}
 
 	/* treat everything else as Object */

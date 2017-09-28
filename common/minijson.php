@@ -255,17 +255,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 	$Si = ',' . $xi;
 
-	/* resources */
-	if (!is_array($x) && !is_object($x) &&
-	    /* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	    !is_null($rsrctype = @get_resource_type($x))) {
-		if (!$dumprsrc)
-			return minijson_encode_string($x, $truncsz);
-		return '{' . $xi . '"\u0000' .
-		    substr(minijson_encode_string($x), 1) . $Sd .
-		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
-	}
-
 	/* arrays, potentially empty or non-associative */
 	if (is_array($x)) {
 		if (!($ak = array_keys($x)))
@@ -300,6 +289,17 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$xi = $Si;
 		}
 		return $rs . $xr . ']';
+	}
+
+	/* resources */
+	if (!is_object($x) &&
+	    /* http://de2.php.net/manual/en/function.is-resource.php#103942 */
+	    !is_null($rsrctype = @get_resource_type($x))) {
+		if (!$dumprsrc)
+			return minijson_encode_string($x, $truncsz);
+		return '{' . $xi . '"\u0000' .
+		    substr(minijson_encode_string($x), 1) . $Sd .
+		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
 	}
 
 	/* treat everything else as Object */

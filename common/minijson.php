@@ -240,9 +240,13 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if ($ri === false) {
 		$si = false;
 		$xi = '';
+		$Si = ',';
+		$Sd = ':';
 	} else {
 		$si = $ri . '  ';
 		$xi = $si;
+		$Si = ",\n" . $si;
+		$Sd = ': ';
 	}
 
 	if (is_array($x)) {
@@ -281,13 +285,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 		if ($isnum) {
 			/* all array keys are integers 0‥n */
-			if ($ri === false) {
-				$rs = '[';
-				$Si = ',';
-			} else {
-				$rs = "[\n";
-				$Si = ",\n" . $si;
-			}
+			$rs = '[';
+			if ($ri !== false)
+				$rs .= "\n";
 			foreach ($s as $v) {
 				$rs .= $xi . minijson_encode_internal($x[$v],
 				    $si, $depth, $truncsz, $dumprsrc);
@@ -299,15 +299,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		}
 
 		sort($k, SORT_STRING);
-		if ($ri === false) {
-			$rs = '{';
-			$Si = ',';
-			$Sd = ':';
-		} else {
-			$rs = "{\n";
-			$Si = ",\n" . $si;
-			$Sd = ': ';
-		}
+		$rs = '{';
+		if ($ri !== false)
+			$rs .= "\n";
 		foreach ($k as $v) {
 			$rs .= $xi . minijson_encode_internal(strval($v),
 			    false, $depth, $truncsz, $dumprsrc) .
@@ -333,15 +327,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			return '{}';
 		}
 		asort($k, SORT_STRING);
-		if ($ri === false) {
-			$rs = '{';
-			$Si = ',';
-			$Sd = ':';
-		} else {
-			$rs = "{\n";
-			$Si = ",\n" . $si;
-			$Sd = ': ';
-		}
+		$rs = '{';
+		if ($ri !== false)
+			$rs .= "\n";
 		foreach ($k as $v => $s) {
 			$rs .= $xi . minijson_encode_internal($s,
 			    false, $depth, $truncsz, $dumprsrc) .
@@ -356,14 +344,11 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
 	if ($dumprsrc && !is_null($rsrctype = @get_resource_type($x))) {
-		$k = strval($rsrctype);
 		$rs = '{';
 		if ($ri !== false)
 			$rs .= "\n" . $ri . '  ';
-		$rs .= '"\u0000resource":';
-		if ($ri !== false)
-			$rs .= ' ';
-		$rs .= minijson_encode_internal($k,
+		$rs .= '"\u0000resource"' . $Sd;
+		$rs .= minijson_encode_internal(strval($rsrctype),
 		    false, $depth, $truncsz, $dumprsrc);
 		if ($ri !== false)
 			$rs .= "\n" . $ri;

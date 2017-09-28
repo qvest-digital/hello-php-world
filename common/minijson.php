@@ -297,9 +297,15 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	    !is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc)
 			return minijson_encode_string($x, $truncsz);
-		return '{' . $xi . '"\u0000' .
-		    substr(minijson_encode_string($x), 1) . $Sd .
-		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
+		$rs = array(
+			'_strval' => strval($x),
+			'_type' => $rsrctype,
+		);
+		if ($rsrctype === 'stream')
+			$rs['stream_meta'] = stream_get_meta_data($x);
+		return '{' . $xi . '"\u0000resource"' . $Sd .
+		    minijson_encode_internal($rs, $si, $depth + 1,
+		    $truncsz, $dumprsrc) . $xr . '}';
 	}
 
 	/* treat everything else as Object */

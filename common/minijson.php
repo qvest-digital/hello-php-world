@@ -170,8 +170,7 @@ function minijson_encode_string($x, $truncsz=0) {
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */
 
-	while ($Sp < $Sx) {
-		$c = ord($x[$Sp++]);
+	while ($Sp < $Sx && ($c = ord($x[$Sp++]))) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
 				$rs .= "\\";
@@ -195,8 +194,6 @@ function minijson_encode_string($x, $truncsz=0) {
 		default:
 			$rs .= sprintf('\u%04X', $c);
 			break;
-		case 0x00:
-			goto minijson_encode_string_done;
 		}
 	}
  minijson_encode_string_done:

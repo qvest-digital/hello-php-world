@@ -60,7 +60,8 @@ function minijson_encode($x, $ri='', $depth=32) {
  * out:	string	encoded
  */
 function minijson_encode_string($x, $truncsz=0) {
-	$x = strval($x);
+	if (!is_string($x))
+		$x = strval($x);
 
 	if (($dotrunc = ($truncsz && (strlen($x) > $truncsz)))) {
 		/* truncate very long texts */
@@ -315,9 +316,13 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	$x = (array)$x;
 	$s = array();
 	foreach (array_keys($x) as $k) {
+		$v = $k;
+		if (!is_string($v))
+			$v = strval($v);
 		/* protected and private members have NULs there */
-		$s[$k] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
-		    '\\\\$1\\\\$2', strval($k));
+		if (strpos($v, "\0") !== false)
+			$v = str_replace("\0", "\\", $v);
+		$s[$k] = $v;
 	}
 	if (!$s)
 		return '{}';

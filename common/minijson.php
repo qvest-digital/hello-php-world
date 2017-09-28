@@ -274,10 +274,10 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 
 	/* resources, if we dump them (otherwise they’re unknown scalars) */
-	if ($dumprsrc && $isRsrc) {
+	if ($isRsrc && $dumprsrc) {
 		$rs = '{';
 		if ($ri !== false)
-			$rs .= "\n" . $ri . '  ';
+			$rs .= "\n" . $si;
 		$rs .= '"\u0000resource"' . $Sd;
 		$rs .= minijson_encode_string($rsrctype, $truncsz);
 		if ($ri !== false)

@@ -265,49 +265,31 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
 
 	/* arrays, potentially empty or non-associative */
-	if (($isnum = is_array($x))) {
-		if (!$x)
+	if (is_array($x)) {
+		if (!($ak = array_keys($x)))
 			return '[]';
-		if (!array_key_exists(0, $x))
-			$isnum = false;
-	}
 
-	if ($isnum) {
-		$k = array_keys($x);
-
-		foreach ($k as $v) {
-			if (is_int($v)) {
-				$y = (int)$v;
-				$z = strval($y);
-				if ($v != $z) {
-					/* non-numeric array key */
-					$isnum = false;
-					break;
-				}
-			} else {
-				$isnum = false;
-				break;
-			}
+		foreach ($ak as $v) {
+			if (!is_int($v))
+				goto minijson_encode_object;
+			$y = (int)$v;
+			$z = strval($y);
+			/* non-numeric array key? */
+			if ($v != $z)
+				goto minijson_encode_object;
 		}
-	}
 
-	if ($isnum) {
 		/* all array keys are integers */
-		$s = $k;
+		$s = $ak;
 		sort($s, SORT_NUMERIC);
 		/* test keys for order and delta */
 		$y = 0;
 		foreach ($s as $v) {
-			if ($v !== $y) {
-				/* non-contiguous array key (sparse array) */
-				$isnum = false;
-				break;
-			}
-			$y++;
+			/* non-contiguous array key (sparse array)? */
+			if ($v !== $y++)
+				goto minijson_encode_object;
 		}
-	}
 
-	if ($isnum) {
 		/* all array keys are integers 0‥n */
 		$rs = '[';
 		foreach ($s as $v) {
@@ -322,8 +304,11 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* PHP objects are mostly like associative arrays */
 	$x = (array)$x;
+	if (!($ak = array_keys($x)))
+		return '{}';
+ minijson_encode_object:
 	$s = array();
-	foreach (array_keys($x) as $k) {
+	foreach ($ak as $k) {
 		$v = $k;
 		if (!is_string($v))
 			$v = strval($v);
@@ -332,8 +317,6 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$v = str_replace("\0", "\\", $v);
 		$s[$k] = $v;
 	}
-	if (!$s)
-		return '{}';
 	asort($s, SORT_STRING);
 	$rs = '{';
 	foreach ($s as $v => $k) {

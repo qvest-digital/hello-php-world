@@ -256,7 +256,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	$Si = ',' . $xi;
 
 	/* resources, if we dump them (otherwise they’re unknown scalars) */
-	if ($isRsrc && $dumprsrc)
+	if ($isRsrc)
 		return '{' . $xi . '"\u0000' .
 		    substr(minijson_encode_string($x), 1) . $Sd .
 		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
@@ -313,18 +313,18 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* PHP objects are mostly like associative arrays */
 	$x = (array)$x;
-	$k = array();
-	foreach (array_keys($x) as $v) {
+	$s = array();
+	foreach (array_keys($x) as $k) {
 		/* protected and private members have NULs there */
-		$k[$v] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
-		    '\\\\$1\\\\$2', strval($v));
+		$s[$k] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
+		    '\\\\$1\\\\$2', strval($k));
 	}
-	if (!$k)
+	if (!$s)
 		return '{}';
-	asort($k, SORT_STRING);
+	asort($s, SORT_STRING);
 	$rs = '{';
-	foreach ($k as $v => $s) {
-		$rs .= $xi . minijson_encode_string($s, $truncsz) .
+	foreach ($s as $v => $k) {
+		$rs .= $xi . minijson_encode_string($k, $truncsz) .
 		    $Sd . minijson_encode_internal($x[$v],
 		    $si, $depth, $truncsz, $dumprsrc);
 		$xi = $Si;

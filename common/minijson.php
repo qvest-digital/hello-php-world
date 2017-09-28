@@ -68,9 +68,6 @@ function minijson_encode_string($x, $truncsz=0) {
 		$x = substr($x, 0, $truncsz);
 	}
 
-	/* NUL terminates */
-	$x .= "\0";
-
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */
 

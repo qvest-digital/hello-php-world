@@ -1,5 +1,6 @@
 <?php
-if (count(get_included_files()) === 1) define('__main__', __FILE__);
+if (count(get_included_files()) === 1 && !defined('__main__'))
+	define('__main__', __FILE__);
 /**
  * Minimal complete JSON generator and parser for FusionForge/Evolvis
  * and SimKolab, including for debugging output serialisation

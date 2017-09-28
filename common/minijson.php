@@ -69,12 +69,13 @@ function minijson_encode_string($x, $truncsz=0) {
 
 	/* NUL terminates */
 	$x .= "\0";
-	$rs = ''; /* result */
-	$Sp = 0; /* position */
+
+	$rs = '';	/* result */
+	$Sp = 0;	/* position */
+
 	/* assume UTF-8 first, for sanity */
-	$Ss = 0; /* state */
-	$wc = 0; /* wide character */
-	$wnext = 0;
+	$Ss = 0;	/* state */
+	$wc = 0;	/* wide character */
  minijson_encode_string_utf8:
 	/* read next octet */
 	if (($c = ord($x[$Sp++])) === 0) {
@@ -83,6 +84,7 @@ function minijson_encode_string($x, $truncsz=0) {
 			goto minijson_encode_string_latin1;
 		goto minijson_encode_string_done;
 	}
+
 	if ($Ss === 0) {
 		/* lead byte */
 		if ($c < 0x80) {
@@ -110,6 +112,7 @@ function minijson_encode_string($x, $truncsz=0) {
 		--$Ss;
 		$wc |= $c << (6 * $Ss);
 	}
+
 	if ($Ss !== 0)
 		goto minijson_encode_string_utf8;
 	/* complete wide character */
@@ -122,6 +125,7 @@ function minijson_encode_string($x, $truncsz=0) {
 		$wc = 0xD800 | ($wc >> 10);
 	} else
 		$wnext = 0;
+
  minijson_encode_string_utf16:
 	/* process UTF-16 char */
 	switch ($wc) {
@@ -162,6 +166,7 @@ function minijson_encode_string($x, $truncsz=0) {
 			    chr(0x80 | ($wc & 0x3F));
 		break;
 	}
+
 	/* process next UTF-16 char */
 	if ($wnext !== 0) {
 		$wc = $wnext;
@@ -173,8 +178,10 @@ function minijson_encode_string($x, $truncsz=0) {
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */
 	/* note JSON is not binary-safe */
-	$rs = ''; /* result */
-	$Sp = 0; /* position */
+
+	$rs = '';	/* result */
+	$Sp = 0;	/* position */
+
 	while (($c = ord($x[$Sp++])) !== 0) switch ($c) {
 	case 8:
 		$rs .= '\b';

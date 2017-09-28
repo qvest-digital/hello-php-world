@@ -260,23 +260,11 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if (!($ak = array_keys($x)))
 			return '[]';
 
-		foreach ($ak as $v) {
-			if (!is_int($v))
-				goto minijson_encode_object;
-			$y = (int)$v;
-			$z = strval($y);
-			/* non-numeric array key? */
-			if ($v != $z)
-				goto minijson_encode_object;
-		}
-
-		/* all array keys are integers */
 		$s = $ak;
 		sort($s, SORT_NUMERIC);
-		/* test keys for order and delta */
+		/* test keys for type, order and delta */
 		$y = 0;
 		foreach ($s as $v) {
-			/* non-contiguous array key (sparse array)? */
 			if ($v !== $y++)
 				goto minijson_encode_object;
 		}

@@ -65,11 +65,8 @@ function minijson_encode_string($x, $truncsz=0) {
 	if (!($Sx = strlen($x)))
 		return '""';
 
-	if (($dotrunc = ($truncsz && ($Sx > $truncsz)))) {
-		/* truncate very long texts */
-		$x = substr($x, 0, $truncsz);
+	if (($dotrunc = ($truncsz && ($Sx > $truncsz))))
 		$Sx = $truncsz;
-	}
 
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */

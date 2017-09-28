@@ -264,26 +264,20 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if ($ri === false) {
 		$si = false;
 		$xi = '';
-		$Si = ',';
+		$xr = '';
 		$Sd = ':';
 	} else {
 		$si = $ri . '  ';
-		$xi = $si;
-		$Si = ",\n" . $si;
+		$xi = "\n" . $si;
+		$xr = "\n" . $ri;
 		$Sd = ': ';
 	}
+	$Si = ',' . $xi;
 
 	/* resources, if we dump them (otherwise they’re unknown scalars) */
-	if ($isRsrc && $dumprsrc) {
-		$rs = '{';
-		if ($ri !== false)
-			$rs .= "\n" . $si;
-		$rs .= '"\u0000resource"' . $Sd;
-		$rs .= minijson_encode_string($rsrctype, $truncsz);
-		if ($ri !== false)
-			$rs .= "\n" . $ri;
-		return $rs.'}';
-	}
+	if ($isRsrc && $dumprsrc)
+		return '{' . $xi . '"\u0000resource"' . $Sd .
+		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
 
 	/* arrays, potentially non-associative */
 	if (($isnum = is_array($x))) {
@@ -325,16 +319,12 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if ($isnum) {
 		/* all array keys are integers 0‥n */
 		$rs = '[';
-		if ($ri !== false)
-			$rs .= "\n";
 		foreach ($s as $v) {
 			$rs .= $xi . minijson_encode_internal($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
 		}
-		if ($ri !== false)
-			$rs .= "\n" . $ri;
-		return $rs.']';
+		return $rs . $xr . ']';
 	}
 
 	/* treat everything else as Object */
@@ -347,22 +337,17 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$k[$v] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
 		    '\\\\$1\\\\$2', strval($v));
 	}
-	if (!$k) {
+	if (!$k)
 		return '{}';
-	}
 	asort($k, SORT_STRING);
 	$rs = '{';
-	if ($ri !== false)
-		$rs .= "\n";
 	foreach ($k as $v => $s) {
 		$rs .= $xi . minijson_encode_string($s, $truncsz) .
 		    $Sd . minijson_encode_internal($x[$v],
 		    $si, $depth, $truncsz, $dumprsrc);
 		$xi = $Si;
 	}
-	if ($ri !== false)
-		$rs .= "\n" . $ri;
-	return $rs.'}';
+	return $rs . $xr . '}';
 }
 
 /**

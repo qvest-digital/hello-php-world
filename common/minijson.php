@@ -74,7 +74,7 @@ function minijson_encode_string($x, $truncsz=0) {
 	/* assume UTF-8 first, for sanity */
  minijson_encode_string_utf8:
 	/* read next octet */
-	$c = ord(@$x[$Sp++]);
+	$c = isset($x[$Sp]) ? ord($x[$Sp++]) : 0;
 	/* ASCII? */
 	if ($c < 0x80) {
 		if ($c >= 0x20 && $c < 0x7F) {

@@ -83,10 +83,33 @@ function minijson_encode_string($x, $truncsz=0) {
 	/* lead byte? */
 	if ($Ss === 0) {
 		if ($c < 0x80) {
-			if ($c === 0)
+			if ($c >= 0x20 && $c < 0x7F) {
+				if ($c === 0x22 || $c === 0x5C)
+					$rs .= "\\";
+				$rs .= chr($c);
+			} else switch ($c) {
+			case 0x08:
+				$rs .= '\b';
+				break;
+			case 0x09:
+				$rs .= '\t';
+				break;
+			case 0x0A:
+				$rs .= '\n';
+				break;
+			case 0x0C:
+				$rs .= '\f';
+				break;
+			case 0x0D:
+				$rs .= '\r';
+				break;
+			default:
+				$rs .= sprintf('\u%04X', $c);
+				break;
+			case 0x00:
 				goto minijson_encode_string_done;
-			$wc = $c;
-			goto minijson_encode_string_utf16;
+			}
+			goto minijson_encode_string_utf8;
 		} elseif ($c < 0xC2 || $c >= 0xF8) {
 			goto minijson_encode_string_latin1;
 		} elseif ($c < 0xE0) {

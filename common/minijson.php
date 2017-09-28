@@ -40,28 +40,180 @@ if (count(get_included_files()) === 1 && !defined('__main__'))
  */
 
 /**
- * Encodes an array (indexed or associative) as JSON.
- * Strings not comprised of only valid UTF-8 are interpreted as latin1;
- * NUL terminates strings.
+ * Encodes an array (indexed or associative) or any value as JSON.
  *
- * in:	array x (Value to be encoded)
- * in:	string indent or bool false to skip beautification
+ * in:	array	x (Value to be encoded)
+ * in:	string	indent or bool false to skip beautification
  * in:	integer	(optional) recursion depth (default: 32)
- * out:	string encoded
+ * out:	string	encoded
  */
 function minijson_encode($x, $ri='', $depth=32) {
 	return (minijson_encode_internal($x, $ri, $depth, 0, false));
 }
 
 /**
+ * Encodes a string as JSON. NUL terminates strings; strings
+ * not comprised of only valid UTF-8 are interpreted as latin1.
+ *
+ * in:	string	x (Value to be encoded)
+ * in:	integer	truncation size (0 to not truncate), makes output not JSON
+ * out:	string	encoded
+ */
+function minijson_encode_string($x, $truncsz=0) {
+	$x = strval($x);
+
+	if (($dotrunc = ($truncsz && (strlen($x) > $truncsz)))) {
+		/* truncate very long texts */
+		$x = substr($x, 0, $truncsz);
+	}
+
+	/* NUL terminates */
+	$x .= "\0";
+	$rs = ''; /* result */
+	$Sp = 0; /* position */
+	/* assume UTF-8 first, for sanity */
+	$Ss = 0; /* state */
+	$wc = 0; /* wide character */
+	$wnext = 0;
+ minijson_encode_string_utf8:
+	/* read next octet */
+	if (($c = ord($x[$Sp++])) === 0) {
+		/* NUL */
+		if ($Ss !== 0)
+			goto minijson_encode_string_latin1;
+		goto minijson_encode_string_done;
+	}
+	if ($Ss === 0) {
+		/* lead byte */
+		if ($c < 0x80) {
+			$wc = $c;
+			$wmin = 0;
+		} elseif ($c < 0xC2 || $c >= 0xF8) {
+			goto minijson_encode_string_latin1;
+		} elseif ($c < 0xE0) {
+			$wc = ($c & 0x1F) << 6;
+			$wmin = 0x80;
+			$Ss = 1;
+		} elseif ($c < 0xF0) {
+			$wc = ($c & 0x0F) << 12;
+			$wmin = 0x800;
+			$Ss = 2;
+		} else {
+			$wc = ($c & 0x07) << 18;
+			$wmin = 0x10000;
+			$Ss = 3;
+		}
+	} else if (($c ^= 0x80) > 0x3F) {
+		goto minijson_encode_string_latin1;
+	} else {
+		/* trail byte */
+		--$Ss;
+		$wc |= $c << (6 * $Ss);
+	}
+	if ($Ss !== 0)
+		goto minijson_encode_string_utf8;
+	/* complete wide character */
+	if ($wc < $wmin || $wc > 0x10FFFF)
+		goto minijson_encode_string_latin1;
+	/* UTF-16 */
+	if ($wc > 0xFFFF) {
+		$wc -= 0x10000;
+		$wnext = 0xDC00 | ($wc & 0x03FF);
+		$wc = 0xD800 | ($wc >> 10);
+	} else
+		$wnext = 0;
+ minijson_encode_string_utf16:
+	/* process UTF-16 char */
+	switch ($wc) {
+	case 8:
+		$rs .= '\b';
+		break;
+	case 9:
+		$rs .= '\t';
+		break;
+	case 10:
+		$rs .= '\n';
+		break;
+	case 12:
+		$rs .= '\f';
+		break;
+	case 13:
+		$rs .= '\r';
+		break;
+	case 34:
+		$rs .= '\"';
+		break;
+	case 92:
+		$rs .= '\\\\';
+		break;
+	default:
+		if ($wc < 0x20 || ($wc > 0x7E && $wc < 0xA0) ||
+		    ($wc >= 0x2028 && $wc <= 0x2029) ||
+		    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
+			$rs .= sprintf('\u%04X', $wc);
+		elseif ($wc < 0x0080)
+			$rs .= chr($wc);
+		elseif ($wc < 0x0800)
+			$rs .= chr(0xC0 | ($wc >> 6)) .
+			    chr(0x80 | ($wc & 0x3F));
+		else
+			$rs .= chr(0xE0 | ($wc >> 12)) .
+			    chr(0x80 | (($wc >> 6) & 0x3F)) .
+			    chr(0x80 | ($wc & 0x3F));
+		break;
+	}
+	/* process next UTF-16 char */
+	if ($wnext !== 0) {
+		$wc = $wnext;
+		$wnext = 0;
+		goto minijson_encode_string_utf16;
+	}
+	goto minijson_encode_string_utf8;
+
+ minijson_encode_string_latin1:
+	/* failed, interpret as sorta latin1 but display only ASCII */
+	/* note JSON is not binary-safe */
+	$rs = ''; /* result */
+	$Sp = 0; /* position */
+	while (($c = ord($x[$Sp++])) !== 0) switch ($c) {
+	case 8:
+		$rs .= '\b';
+		break;
+	case 9:
+		$rs .= '\t';
+		break;
+	case 10:
+		$rs .= '\n';
+		break;
+	case 12:
+		$rs .= '\f';
+		break;
+	case 13:
+		$rs .= '\r';
+		break;
+	case 34:
+		$rs .= '\"';
+		break;
+	case 92:
+		$rs .= '\\\\';
+		break;
+	default:
+		$rs .= $c < 0x20 || $c > 0x7E ? sprintf('\u%04X', $c) : chr($c);
+		break;
+	}
+ minijson_encode_string_done:
+	return ($dotrunc ? 'TOO_LONG_STRING_TRUNCATED:"' : '"') . $rs . '"';
+}
+
+/**
  * Encodes content as JSON for debugging (not round-trip safe).
  *
- * in:	array x (Value to be encoded)
- * in:	string indent or bool false to skip beautification
+ * in:	array	x (Value to be encoded)
+ * in:	string	indent or bool false to skip beautification
  * in:	integer	recursion depth
- * in:	integer truncation size (0 to not truncate), makes output not JSON
- * in:	bool whether to pretty-print resources as strings
- * out:	string encoded
+ * in:	integer	truncation size (0 to not truncate), makes output not JSON
+ * in:	bool	whether to pretty-print resources as strings
+ * out:	string	encoded
  */
 function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (!$depth-- || !isset($x) || is_null($x) || (is_float($x) &&
@@ -92,151 +244,8 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs;
 	}
 
-	if (is_string($x)) {
-		if ($truncsz && (strlen($x) > $truncsz)) {
-			/* truncate very long texts */
-			$rs = 'TOO_LONG_STRING_TRUNCATED:"';
-			$x = substr($x, 0, $truncsz);
-		} else
-			$rs = '"';
-		/* NUL terminates */
-		$x .= "\0";
-		/* assume UTF-8 first, for sanity */
-		$Ss = 0; /* state */
-		$Sp = 0; /* position */
-		$wc = 0; /* wide character */
-		$wnext = 0;
- minijson_encode_string_utf8:
-		/* read next octet */
-		if (($c = ord($x[$Sp++])) === 0) {
-			/* NUL */
-			if ($Ss !== 0)
-				goto minijson_encode_string_latin1;
-			return $rs.'"';
-		}
-		if ($Ss === 0) {
-			/* lead byte */
-			if ($c < 0x80) {
-				$wc = $c;
-				$wmin = 0;
-			} elseif ($c < 0xC2 || $c >= 0xF8) {
-				goto minijson_encode_string_latin1;
-			} elseif ($c < 0xE0) {
-				$wc = ($c & 0x1F) << 6;
-				$wmin = 0x80;
-				$Ss = 1;
-			} elseif ($c < 0xF0) {
-				$wc = ($c & 0x0F) << 12;
-				$wmin = 0x800;
-				$Ss = 2;
-			} else {
-				$wc = ($c & 0x07) << 18;
-				$wmin = 0x10000;
-				$Ss = 3;
-			}
-		} else if (($c ^= 0x80) > 0x3F) {
-			goto minijson_encode_string_latin1;
-		} else {
-			/* trail byte */
-			--$Ss;
-			$wc |= $c << (6 * $Ss);
-		}
-		if ($Ss !== 0)
-			goto minijson_encode_string_utf8;
-		/* complete wide character */
-		if ($wc < $wmin || $wc > 0x10FFFF)
-			goto minijson_encode_string_latin1;
-		/* UTF-16 */
-		if ($wc > 0xFFFF) {
-			$wc -= 0x10000;
-			$wnext = 0xDC00 | ($wc & 0x03FF);
-			$wc = 0xD800 | ($wc >> 10);
-		} else
-			$wnext = 0;
- minijson_encode_string_utf16:
-		/* process UTF-16 char */
-		switch ($wc) {
-		case 8:
-			$rs .= '\b';
-			break;
-		case 9:
-			$rs .= '\t';
-			break;
-		case 10:
-			$rs .= '\n';
-			break;
-		case 12:
-			$rs .= '\f';
-			break;
-		case 13:
-			$rs .= '\r';
-			break;
-		case 34:
-			$rs .= '\"';
-			break;
-		case 92:
-			$rs .= '\\\\';
-			break;
-		default:
-			if ($wc < 0x20 || ($wc > 0x7E && $wc < 0xA0) ||
-			    ($wc >= 0x2028 && $wc <= 0x2029) ||
-			    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
-				$rs .= sprintf('\u%04X', $wc);
-			elseif ($wc < 0x0080)
-				$rs .= chr($wc);
-			elseif ($wc < 0x0800)
-				$rs .= chr(0xC0 | ($wc >> 6)) .
-				    chr(0x80 | ($wc & 0x3F));
-			else
-				$rs .= chr(0xE0 | ($wc >> 12)) .
-				    chr(0x80 | (($wc >> 6) & 0x3F)) .
-				    chr(0x80 | ($wc & 0x3F));
-			break;
-		}
-		/* process next UTF-16 char */
-		if ($wnext !== 0) {
-			$wc = $wnext;
-			$wnext = 0;
-			goto minijson_encode_string_utf16;
-		}
-		goto minijson_encode_string_utf8;
-
- minijson_encode_string_latin1:
-		/* failed, interpret as sorta latin1 but binary */
-		/* note JSON is not binary-safe */
-		$rs = $rs[0] === 'T' ? 'TOO_LONG_STRING_TRUNCATED:"' : '"';
-		$Sp = 0;
-		while (($wc = ord($x[$Sp++])) !== 0) switch ($wc) {
-		case 8:
-			$rs .= '\b';
-			break;
-		case 9:
-			$rs .= '\t';
-			break;
-		case 10:
-			$rs .= '\n';
-			break;
-		case 12:
-			$rs .= '\f';
-			break;
-		case 13:
-			$rs .= '\r';
-			break;
-		case 34:
-			$rs .= '\"';
-			break;
-		case 92:
-			$rs .= '\\\\';
-			break;
-		default:
-			if ($wc < 0x20 || $wc > 0x7E)
-				$rs .= sprintf('\u%04X', $wc);
-			else
-				$rs .= chr($wc);
-			break;
-		}
-		return $rs.'"';
-	}
+	if (is_string($x))
+		return minijson_encode_string($x, $truncsz);
 
 	if ($ri === false) {
 		$si = false;
@@ -364,7 +373,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 /**
  * Decodes a UTF-8 string from JSON (ECMA 262).
  *
- * in:	string json
+ * in:	string	json
  * in:	reference output-variable (or error string)
  * in:	integer	(optional) recursion depth (default: 32)
  * out:	boolean	false if an error occured, true = output is valid

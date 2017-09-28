@@ -350,36 +350,32 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs.'}';
 	}
 
-	if (is_object($x)) {
-		/* PHP objects are mostly like associative arrays */
-		$x = (array)$x;
-		$k = array();
-		foreach (array_keys($x) as $v) {
-			/* protected and private members have NULs there */
-			$k[$v] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
-			    '\\\\$1\\\\$2', strval($v));
-		}
-		if (!$k) {
-			return '{}';
-		}
-		asort($k, SORT_STRING);
-		$rs = '{';
-		if ($ri !== false)
-			$rs .= "\n";
-		foreach ($k as $v => $s) {
-			$rs .= $xi . minijson_encode_string($s, $truncsz) .
-			    $Sd . minijson_encode_internal($x[$v],
-			    $si, $depth, $truncsz, $dumprsrc);
-			$xi = $Si;
-		}
-		if ($ri !== false)
-			$rs .= "\n" . $ri;
-		return $rs.'}';
-	}
+	/* treat everything else as Object */
 
-	/* treat everything else as array */
-	return minijson_encode_internal((array)$x,
-	    $ri, $depth, $truncsz, $dumprsrc);
+	/* PHP objects are mostly like associative arrays */
+	$x = (array)$x;
+	$k = array();
+	foreach (array_keys($x) as $v) {
+		/* protected and private members have NULs there */
+		$k[$v] = preg_replace('/^\0([a-zA-Z_\x7F-\xFF][a-zA-Z0-9_\x7F-\xFF]*|\*)\0(.)/',
+		    '\\\\$1\\\\$2', strval($v));
+	}
+	if (!$k) {
+		return '{}';
+	}
+	asort($k, SORT_STRING);
+	$rs = '{';
+	if ($ri !== false)
+		$rs .= "\n";
+	foreach ($k as $v => $s) {
+		$rs .= $xi . minijson_encode_string($s, $truncsz) .
+		    $Sd . minijson_encode_internal($x[$v],
+		    $si, $depth, $truncsz, $dumprsrc);
+		$xi = $Si;
+	}
+	if ($ri !== false)
+		$rs .= "\n" . $ri;
+	return $rs.'}';
 }
 
 /**

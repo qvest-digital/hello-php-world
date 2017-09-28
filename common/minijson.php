@@ -262,7 +262,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		    minijson_encode_string($rsrctype, $truncsz) . $xr . '}';
 
 	/* arrays, potentially non-associative */
-	if (($isnum = is_array($x))) {
+	if (($isnum = is_array($x) && array_key_exists(0, $x))) {
 		if (!($k = array_keys($x)))
 			return '[]';
 

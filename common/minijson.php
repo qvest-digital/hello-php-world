@@ -147,45 +147,16 @@ function minijson_encode_string($x, $truncsz=0) {
 
  minijson_encode_string_utf16:
 	/* process UTF-16 char */
-	switch ($wc) {
-	case 8:
-		$rs .= '\b';
-		break;
-	case 9:
-		$rs .= '\t';
-		break;
-	case 10:
-		$rs .= '\n';
-		break;
-	case 12:
-		$rs .= '\f';
-		break;
-	case 13:
-		$rs .= '\r';
-		break;
-	case 34:
-		$rs .= '\"';
-		break;
-	case 92:
-		$rs .= '\\\\';
-		break;
-	default:
-		if ($wc >= 0x20 && $wc < 0x7F)
-			$rs .= chr($wc);
-		elseif ($wc < 0x00A0 || $wc === 0x2028 || $wc === 0x2029 ||
-		    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
-			$rs .= sprintf('\u%04X', $wc);
-		elseif ($wc < 0x0080)
-			$rs .= chr($wc);
-		elseif ($wc < 0x0800)
-			$rs .= chr(0xC0 | ($wc >> 6)) .
-			    chr(0x80 | ($wc & 0x3F));
-		else
-			$rs .= chr(0xE0 | ($wc >> 12)) .
-			    chr(0x80 | (($wc >> 6) & 0x3F)) .
-			    chr(0x80 | ($wc & 0x3F));
-		break;
-	}
+	if ($wc < 0x00A0 || $wc === 0x2028 || $wc === 0x2029 ||
+	    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
+		$rs .= sprintf('\u%04X', $wc);
+	elseif ($wc < 0x0800)
+		$rs .= chr(0xC0 | ($wc >> 6)) .
+		    chr(0x80 | ($wc & 0x3F));
+	else
+		$rs .= chr(0xE0 | ($wc >> 12)) .
+		    chr(0x80 | (($wc >> 6) & 0x3F)) .
+		    chr(0x80 | ($wc & 0x3F));
 
 	/* process next UTF-16 char */
 	if ($wnext !== 0) {

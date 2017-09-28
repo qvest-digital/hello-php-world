@@ -127,7 +127,7 @@ function minijson_encode_string($x, $truncsz=0) {
 		$Ss = 3;
 	}
 	/* trail bytes */
-	if ($Sp + $Ss >= $Sx)
+	if ($Sp + $Ss > $Sx)
 		goto minijson_encode_string_latin1;
 	while ($Ss--)
 		if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
@@ -161,7 +161,9 @@ function minijson_encode_string($x, $truncsz=0) {
 		    chr(0x80 | ($wc & 0x3F));
 
 	/* process next char */
-	goto minijson_encode_string_utf8;
+	if ($Sp < $Sx)
+		goto minijson_encode_string_utf8;
+	goto minijson_encode_string_done;
 
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */

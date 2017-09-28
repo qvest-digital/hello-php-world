@@ -79,16 +79,12 @@ function minijson_encode_string($x, $truncsz=0) {
 	$wnext = 0;	/* other surrogate */
  minijson_encode_string_utf8:
 	/* read next octet */
-	if (($c = ord($x[$Sp++])) === 0) {
-		/* NUL */
-		if ($Ss !== 0)
-			goto minijson_encode_string_latin1;
-		goto minijson_encode_string_done;
-	}
-
+	$c = ord($x[$Sp++]);
+	/* lead byte? */
 	if ($Ss === 0) {
-		/* lead byte */
 		if ($c < 0x80) {
+			if ($c === 0)
+				goto minijson_encode_string_done;
 			$wc = $c;
 			goto minijson_encode_string_utf16;
 		} elseif ($c < 0xC2 || $c >= 0xF8) {
@@ -106,13 +102,12 @@ function minijson_encode_string($x, $truncsz=0) {
 			$wmin = 0x10000;
 			$Ss = 3;
 		}
-	} else if (($c ^= 0x80) > 0x3F) {
-		goto minijson_encode_string_latin1;
-	} else {
+	} else if (($c ^= 0x80) <= 0x3F) {
 		/* trail byte */
 		--$Ss;
 		$wc |= $c << (6 * $Ss);
-	}
+	} else
+		goto minijson_encode_string_latin1;
 
 	if ($Ss !== 0)
 		goto minijson_encode_string_utf8;

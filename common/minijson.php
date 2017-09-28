@@ -243,16 +243,22 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (is_float($x)) {
 		$rs = sprintf('%.14e', $x);
 		$v = explode('e', $rs);
-		$rs = rtrim($v[0], '0');
-		if (substr($rs, -1) === '.')
-			$rs .= '0';
+		$rs = rtrim($v[0], '.0');
 		if ($v[1] !== '-0' && $v[1] !== '+0')
 			$rs .= 'E' . $v[1];
 		return $rs;
 	}
 
-	if (is_string($x))
+	$isStr = is_string($x);
+	$isAoO = is_array($x) || is_object($x);
+	$isRes = !$isStr && !$isAoO && $dumprsrc &&
+	    !is_null($rsrctype = @get_resource_type($x));
+
+	/* strings or unknown scalars */
+	if ($isStr || (!$isAoO && !$isRes && is_scalar($x)))
 		return minijson_encode_string($x, $truncsz);
+
+	/* arrays, objects, potentially resources, or unknown non-scalars */
 
 	if ($ri === false) {
 		$si = false;
@@ -369,9 +375,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs.'}';
 	}
 
-	/* treat everything else as array or string */
-	if (is_scalar($x))
-		return minijson_encode_string($x, $truncsz);
+	/* treat everything else as array */
 	return minijson_encode_internal((array)$x,
 	    $ri, $depth, $truncsz, $dumprsrc);
 }

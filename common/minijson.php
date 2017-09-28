@@ -76,7 +76,6 @@ function minijson_encode_string($x, $truncsz=0) {
 	/* assume UTF-8 first, for sanity */
 	$Ss = 0;	/* state */
 	$wc = 0;	/* wide character */
-	$wnext = 0;	/* other surrogate */
  minijson_encode_string_utf8:
 	/* read next octet */
 	$c = ord($x[$Sp++]);
@@ -135,22 +134,22 @@ function minijson_encode_string($x, $truncsz=0) {
 	if ($Ss !== 0)
 		goto minijson_encode_string_utf8;
 	/* complete wide character */
-	if ($wc < $wmin || $wc > 0x10FFFF)
+	if ($wc < $wmin)
 		goto minijson_encode_string_latin1;
-	/* UTF-16 */
-	if ($wc > 0xFFFF) {
-		$wc -= 0x10000;
-		$wnext = 0xDC00 | ($wc & 0x03FF);
-		$wc = 0xD800 | ($wc >> 10);
-	} else
-		$wnext = 0;
 
- minijson_encode_string_utf16:
-	/* process UTF-16 char */
 	if ($wc < 0x00A0 || $wc === 0x2028 || $wc === 0x2029 ||
-	    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
-		$rs .= sprintf('\u%04X', $wc);
-	elseif ($wc < 0x0800)
+	    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD) {
+		if ($wc > 0xFFFF) {
+			if ($wc > 0x10FFFF)
+				goto minijson_encode_string_latin1;
+			/* UTF-16 */
+			$wc -= 0x10000;
+			$rs .= sprintf('\u%04X\u%04X',
+			    0xD800 | ($wc >> 10),
+			    0xDC00 | ($wc & 0x03FF));
+		} else
+			$rs .= sprintf('\u%04X', $wc);
+	} elseif ($wc < 0x0800)
 		$rs .= chr(0xC0 | ($wc >> 6)) .
 		    chr(0x80 | ($wc & 0x3F));
 	else
@@ -158,12 +157,7 @@ function minijson_encode_string($x, $truncsz=0) {
 		    chr(0x80 | (($wc >> 6) & 0x3F)) .
 		    chr(0x80 | ($wc & 0x3F));
 
-	/* process next UTF-16 char */
-	if ($wnext !== 0) {
-		$wc = $wnext;
-		$wnext = 0;
-		goto minijson_encode_string_utf16;
-	}
+	/* process next char */
 	goto minijson_encode_string_utf8;
 
  minijson_encode_string_latin1:

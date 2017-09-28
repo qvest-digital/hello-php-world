@@ -24,8 +24,8 @@ if (count(get_included_files()) === 1 && !defined('__main__'))
  * of said person’s immediate fault when using the work as intended.
  *-
  * Do *not* use PHP’s json_encode because it is broken.
- * Note that JSON is case-sensitive.  My notes are at:
- * https://www.mirbsd.org/cvs.cgi/contrib/hosted/tg/json.txt?rev=HEAD
+ * Note that JSON is case-sensitive and not binary-safe. My notes at:
+ * http://www.mirbsd.org/cvs.cgi/contrib/hosted/tg/code/MirJSON/json.txt?rev=HEAD
  *
  * Call as CLI script to filter input as JSON pretty-printer. Options
  * are -c (compact output, no indentation or spaces), -d depth (parse
@@ -34,9 +34,9 @@ if (count(get_included_files()) === 1 && !defined('__main__'))
  */
 
 /*-
- * I was really, really bad at writing parsers. I still am really bad at
- * writing parsers.
- * -- Rasmus Lerdorf
+ * I was really, really bad at writing parsers.
+ * I still am really bad at writing parsers.
+ *  -- Rasmus Lerdorf
  */
 
 /**
@@ -209,7 +209,7 @@ function minijson_encode_string($x, $truncsz=0) {
  * in:	string	indent or bool false to skip beautification
  * in:	integer	recursion depth
  * in:	integer	truncation size (0 to not truncate), makes output not JSON
- * in:	bool	whether to pretty-print resources as strings
+ * in:	bool	whether to pretty-print resources
  * out:	string	encoded
  */
 function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {

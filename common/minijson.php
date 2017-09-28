@@ -257,23 +257,12 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* arrays, potentially empty or non-associative */
 	if (is_array($x)) {
-		if (!($ak = array_keys($x)))
+		if (!($n = count($x)))
 			return '[]';
-		if (!array_key_exists(0, $x))
-			goto minijson_encode_object;
-
-		$s = $ak;
-		sort($s, SORT_NUMERIC);
-		/* test keys for type, order and delta */
-		$y = 0;
-		foreach ($s as $v) {
-			if ($v !== $y++)
-				goto minijson_encode_object;
-		}
-
-		/* all array keys are integers 0‥n */
 		$rs = '[';
-		foreach ($s as $v) {
+		for ($v = 0; $v < $n; ++$v) {
+			if (!array_key_exists($v, $x))
+				goto minijson_encode_object;
 			$rs .= $xi . minijson_encode_internal($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
@@ -281,10 +270,8 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs . $xr . ']';
 	}
 
-	/* resources */
-	if (!is_object($x) &&
-	    /* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	    !is_null($rsrctype = @get_resource_type($x))) {
+	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
+	if (!is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc)
 			return minijson_encode_string($x, $truncsz);
 		$rs = array(
@@ -301,12 +288,11 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	/* treat everything else as Object */
 
 	/* PHP objects are mostly like associative arrays */
-	$x = (array)$x;
-	if (!($ak = array_keys($x)))
+	if (!($x = (array)$x))
 		return '{}';
  minijson_encode_object:
 	$s = array();
-	foreach ($ak as $k) {
+	foreach (array_keys($x) as $k) {
 		$v = $k;
 		if (!is_string($v))
 			$v = strval($v);
@@ -317,9 +303,9 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 	asort($s, SORT_STRING);
 	$rs = '{';
-	foreach ($s as $v => $k) {
-		$rs .= $xi . minijson_encode_string($k, $truncsz) .
-		    $Sd . minijson_encode_internal($x[$v],
+	foreach ($s as $k => $v) {
+		$rs .= $xi . minijson_encode_string($v, $truncsz) . $Sd .
+		    minijson_encode_internal($x[$k],
 		    $si, $depth, $truncsz, $dumprsrc);
 		$xi = $Si;
 	}

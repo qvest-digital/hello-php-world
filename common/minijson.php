@@ -152,8 +152,9 @@ function minijson_encode_string($x, $truncsz=0) {
 		$rs .= '\\\\';
 		break;
 	default:
-		if ($wc < 0x20 || ($wc > 0x7E && $wc < 0xA0) ||
-		    ($wc >= 0x2028 && $wc <= 0x2029) ||
+		if ($wc >= 0x20 && $wc < 0x7F)
+			$rs .= chr($wc);
+		elseif ($wc < 0x00A0 || $wc === 0x2028 || $wc === 0x2029 ||
 		    ($wc >= 0xD800 && $wc <= 0xDFFF) || $wc > 0xFFFD)
 			$rs .= sprintf('\u%04X', $wc);
 		elseif ($wc < 0x0080)

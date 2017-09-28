@@ -62,16 +62,17 @@ function minijson_encode($x, $ri='', $depth=32) {
 function minijson_encode_string($x, $truncsz=0) {
 	if (!is_string($x))
 		$x = strval($x);
+	if (!($Sx = strlen($x)))
+		return '""';
 
-	if (($dotrunc = ($truncsz && (strlen($x) > $truncsz)))) {
+	if (($dotrunc = ($truncsz && ($Sx > $truncsz)))) {
 		/* truncate very long texts */
 		$x = substr($x, 0, $truncsz);
+		$Sx = $truncsz;
 	}
 
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */
-
-	$Sx = strlen($x);
 
 	/* assume UTF-8 first, for sanity */
  minijson_encode_string_utf8:

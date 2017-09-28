@@ -166,27 +166,25 @@ function minijson_encode_string($x, $truncsz=0) {
 	$Sp = 0;	/* position */
 
 	while (($c = ord($x[$Sp++])) !== 0) switch ($c) {
-	case 8:
+	case 0x08:
 		$rs .= '\b';
 		break;
-	case 9:
+	case 0x09:
 		$rs .= '\t';
 		break;
-	case 10:
+	case 0x0A:
 		$rs .= '\n';
 		break;
-	case 12:
+	case 0x0C:
 		$rs .= '\f';
 		break;
-	case 13:
+	case 0x0D:
 		$rs .= '\r';
 		break;
-	case 34:
-		$rs .= '\"';
-		break;
-	case 92:
-		$rs .= '\\\\';
-		break;
+	case 0x22:
+	case 0x5C:
+		$rs .= "\\";
+		/* FALLTHROUGH */
 	default:
 		$rs .= $c < 0x20 || $c > 0x7E ? sprintf('\u%04X', $c) : chr($c);
 		break;

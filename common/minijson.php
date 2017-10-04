@@ -667,103 +667,20 @@ function minijson_decode_string($s, &$Sp, $Sx, &$ov) {
 }
 
 function minijson_decode_number($s, &$Sp, $Sx, &$ov) {
-	$s = '';
-	$isint = true;
-
-	/* check for an optional minus sign */
-	$wc = $j[$p];
-	unset($j[$p]);
-	++$p;
-	if ($wc == 0x2D) {
-		$s = '-';
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-	}
-
-	if ($wc == 0x30) {
-		/* begins with zero (0 or 0.x) */
-		$s .= '0';
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc >= 0x30 && $wc <= 0x39) {
-			$ov = 'no leading zeroes please at wchar #' . $p;
-			return false;
-		}
-	} elseif ($wc >= 0x31 && $wc <= 0x39) {
-		/* begins with 1‥9 */
-		while ($wc >= 0x30 && $wc <= 0x39) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-	} else {
-		$ov = 'decimal digit expected at wchar #' . $p;
-		if ($s[0] != '-') {
-			/* we had none, so it’s allowed to prepend one */
-			$ov = 'minus sign or ' . $ov;
-		}
+	$matches = array('');
+	if (!preg_match('/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[Ee][+-]?[0-9]+)?/A',
+	    $s, $matches, 0, $Sp) || strlen($matches[0]) < 1) {
+		$ov = 'expected Number';
 		return false;
 	}
-
-	/* do we have a fractional part? */
-	if ($wc == 0x2E) {
-		$s .= '.';
-		$isint = false;
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc < 0x30 || $wc > 0x39) {
-			$ov = 'fractional digit expected at wchar #' . $p;
-			return false;
-		}
-		while ($wc >= 0x30 && $wc <= 0x39) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-	}
-
-	/* do we have an exponent, treat number as mantissa? */
-	if ($wc == 0x45 || $wc == 0x65) {
-		$s .= 'E';
-		$isint = false;
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc == 0x2B || $wc == 0x2D) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-		if ($wc < 0x30 || $wc > 0x39) {
-			$ov = 'exponent digit expected at wchar #' . $p;
-			return false;
-		}
-		while ($wc >= 0x30 && $wc <= 0x39) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-	}
-	$p--;
-	$j[$p] = $wc;
-
-	if ($isint) {
-		/* no fractional part, no exponent */
-
-		$v = (int)$s;
-		if (strval($v) == $s) {
-			$ov = $v;
+	$Sp += strlen($matches[0]);
+	if (strpos($matches[0], '.') === false) {
+		/* possible integer */
+		$ov = (int)$matches[0];
+		if (strval($ov) === $matches[0])
 			return true;
-		}
 	}
-	$ov = (float)$s;
+	$ov = (float)$matches[0];
 	return true;
 }
 

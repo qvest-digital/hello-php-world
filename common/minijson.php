@@ -323,443 +323,453 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
  * out:	boolean	false if an error occured, true = output is valid
  */
 function minijson_decode($sj, &$ov, $depth=32) {
-	if (!isset($sj) || !$sj) {
-		$ov = 'empty input';
-		return false;
-	}
-
-	/* mb_convert_encoding simply must exist for the decoder */
-	$mb_encoding = mb_internal_encoding();
-	mb_internal_encoding('UTF-8');
-
-	/* see note about mb_check_encoding in the JSON encoder… */
-	$wj = mb_convert_encoding($sj, 'UTF-16LE', 'UTF-8');
-	$mj = mb_convert_encoding($wj, 'UTF-8', 'UTF-16LE');
-	$rv = ($mj == $sj);
-	unset($sj);
-	unset($mj);
-
-	if ($rv) {
-		/* convert UTF-16LE string to array of wchar_t */
-		$j = array();
-		foreach (str_split($wj, 2) as $v) {
-			$wc = ord($v[0]) | (ord($v[1]) << 8);
-			$j[] = $wc;
-		}
-		$j[] = 0;
-		unset($wj);
-
-		/* skip Byte Order Mark if present */
-		$p = 0;
-		if ($j[$p] == 0xFEFF) {
-			unset($j[$p]);
-			$p++;
-		}
-
-		/* parse recursively */
-		$rv = minijson_decode_value($j, $p, $ov, $depth);
-	} else {
-		$ov = 'input not valid UTF-8';
-	}
-
-	if ($rv) {
-		/* skip optional whitespace after tokens */
-		minijson_skip_wsp($j, $p);
-
-		/* end of string? */
-		if ($j[$p] !== 0) {
-			/* no, trailing waste */
-			$ov = 'expected EOS at wchar #' . $p;
-			$rv = false;
-		}
-	}
-
-	mb_internal_encoding($mb_encoding);
+	$decoder = new MiniJSON_decoder($sj, $depth);
+	$rv = $decoder->status;
+	$ov = $decoder->output;
 	return $rv;
 }
 
-function minijson_skip_wsp(&$j, &$p) {
-	/* skip all wide characters that are JSON whitespace */
-	do {
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-	} while ($wc == 0x09 || $wc == 0x0A || $wc == 0x0D || $wc == 0x20);
-	$p--;
-	$j[$p] = $wc;
-}
+class MiniJSON_decoder {
+	function __construct($sj, $depth) {
+		$this->status = false;
 
-function minijson_get_hexdigit(&$j, &$p, &$v, $i) {
-	$wc = $j[$p];
-	unset($j[$p]);
-	++$p;
-	if ($wc >= 0x30 && $wc <= 0x39) {
-		$v += $wc - 0x30;
-	} elseif ($wc >= 0x41 && $wc <= 0x46) {
-		$v += $wc - 0x37;
-	} elseif ($wc >= 0x61 && $wc <= 0x66) {
-		$v += $wc - 0x57;
-	} else {
-		$ov = sprintf('invalid hex in unicode escape' .
-		    ' sequence (%d) at wchar #%u', $i, $p);
-		return false;
-	}
-	return true;
-}
-
-function minijson_decode_array(&$j, &$p, &$ov, $depth) {
-	$ov = array();
-	$first = true;
-
-	/* I wish there were a goto in PHP… */
-	while (true) {
-		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($j, $p);
-
-		/* end of the array? */
-		if ($j[$p] == 0x5D) {
-			/* regular exit point for the loop */
-
-			unset($j[$p]);
-			$p++;
-			return true;
+		if (!isset($sj) || !$sj) {
+			$this->output = 'empty input';
+			return;
 		}
 
-		/* member separator? */
-		if ($j[$p] == 0x2C) {
-			unset($j[$p]);
-			$p++;
-			if ($first) {
-				/* no comma before the first member */
-				$ov = 'unexpected comma at wchar #' . $p;
-				return false;
+		/* mb_convert_encoding simply must exist for the decoder */
+		$mb_encoding = mb_internal_encoding();
+		mb_internal_encoding('UTF-8');
+
+		/* see note about mb_check_encoding in the JSON encoder… */
+		$wj = mb_convert_encoding($sj, 'UTF-16LE', 'UTF-8');
+		$mj = mb_convert_encoding($wj, 'UTF-8', 'UTF-16LE');
+		$rv = ($mj == $sj);
+		unset($sj);
+		unset($mj);
+
+		if ($rv) {
+			/* convert UTF-16LE string to array of wchar_t */
+			$this->j = array();
+			foreach (str_split($wj, 2) as $v) {
+				$wc = ord($v[0]) | (ord($v[1]) << 8);
+				$this->j[] = $wc;
 			}
-		} elseif (!$first) {
-			/*
-			 * all but the first member require a separating
-			 * comma; this also catches e.g. trailing
-			 * rubbish after numbers
-			 */
-			$ov = 'expected comma at wchar #' . $p;
-			return false;
-		}
-		$first = false;
+			$this->j[] = 0;
+			unset($wj);
 
-		/* parse the member value */
-		$v = NULL;
-		if (!minijson_decode_value($j, $p, $v, $depth)) {
-			/* pass through error code */
-			$ov = $v;
-			return false;
-		}
-		$ov[] = $v;
-	}
-}
-
-function minijson_decode_object(&$j, &$p, &$ov, $depth) {
-	$ov = array();
-	$first = true;
-
-	while (true) {
-		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($j, $p);
-
-		/* end of the object? */
-		if ($j[$p] == 0x7D) {
-			/* regular exit point for the loop */
-
-			unset($j[$p]);
-			$p++;
-			return true;
-		}
-
-		/* member separator? */
-		if ($j[$p] == 0x2C) {
-			unset($j[$p]);
-			$p++;
-			if ($first) {
-				/* no comma before the first member */
-				$ov = 'unexpected comma at wchar #' . $p;
-				return false;
+			/* skip Byte Order Mark if present */
+			$this->p = 0;
+			if ($this->j[$this->p] == 0xFEFF) {
+				unset($this->j[$this->p]);
+				$this->p++;
 			}
-		} elseif (!$first) {
-			/*
-			 * all but the first member require a separating
-			 * comma; this also catches e.g. trailing
-			 * rubbish after numbers
-			 */
-			$ov = 'expected comma at wchar #' . $p;
-			return false;
-		}
-		$first = false;
 
-		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($j, $p);
-
-		/* parse the member key */
-		if ($j[$p++] != 0x22) {
-			$ov = 'expected key string at wchar #' . $p;
-			return false;
-		}
-		$k = null;
-		if (!minijson_decode_string($j, $p, $k)) {
-			/* pass through error code */
-			$ov = $k;
-			return false;
+			/* parse recursively */
+			$rv = $this->decode_value($this->output, $depth);
+		} else {
+			$this->output = 'input not valid UTF-8';
 		}
 
-		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($j, $p);
+		if ($rv) {
+			/* skip optional whitespace after tokens */
+			$this->skip_wsp();
 
-		/* key-value separator? */
-		if ($j[$p++] != 0x3A) {
-			$ov = 'expected colon at wchar #' . $p;
-			return false;
-		}
-
-		/* parse the member value */
-		$v = NULL;
-		if (!minijson_decode_value($j, $p, $v, $depth)) {
-			/* pass through error code */
-			$ov = $v;
-			return false;
-		}
-		$ov[$k] = $v;
-	}
-}
-
-function minijson_decode_value(&$j, &$p, &$ov, $depth) {
-	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($j, $p);
-
-	/* parse begin of Value token */
-	$wc = $j[$p];
-	unset($j[$p]);
-	++$p;
-
-	/* style: falling through exits with false */
-	if ($wc == 0) {
-		$ov = 'unexpected EOS at wchar #' . $p;
-	} elseif ($wc == 0x6E) {
-		/* literal null? */
-		if ($j[$p++] == 0x75 &&
-		    $j[$p++] == 0x6C &&
-		    $j[$p++] == 0x6C) {
-			$ov = NULL;
-			return true;
-		}
-		$ov = 'expected ull after n near wchar #' . $p;
-	} elseif ($wc == 0x74) {
-		/* literal true? */
-		if ($j[$p++] == 0x72 &&
-		    $j[$p++] == 0x75 &&
-		    $j[$p++] == 0x65) {
-			$ov = true;
-			return true;
-		}
-		$ov = 'expected rue after t near wchar #' . $p;
-	} elseif ($wc == 0x66) {
-		/* literal false? */
-		if ($j[$p++] == 0x61 &&
-		    $j[$p++] == 0x6C &&
-		    $j[$p++] == 0x73 &&
-		    $j[$p++] == 0x65) {
-			$ov = false;
-			return true;
-		}
-		$ov = 'expected alse after f near wchar #' . $p;
-	} elseif ($wc == 0x5B) {
-		if (--$depth > 0) {
-			return minijson_decode_array($j, $p, $ov, $depth);
-		}
-		$ov = 'recursion limit exceeded at wchar #' . $p;
-	} elseif ($wc == 0x7B) {
-		if (--$depth > 0) {
-			return minijson_decode_object($j, $p, $ov, $depth);
-		}
-		$ov = 'recursion limit exceeded at wchar #' . $p;
-	} elseif ($wc == 0x22) {
-		return minijson_decode_string($j, $p, $ov);
-	} elseif ($wc == 0x2D || ($wc >= 0x30 && $wc <= 0x39)) {
-		$p--;
-		$j[$p] = $wc;
-		return minijson_decode_number($j, $p, $ov);
-	} else {
-		$ov = sprintf('unexpected U+%04X at wchar #%u', $wc, $p);
-	}
-	return false;
-}
-
-function minijson_decode_string(&$j, &$p, &$ov) {
-	/* UTF-16LE string buffer */
-	$s = '';
-
-	while (true) {
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc < 0x20) {
-			$ov = 'unescaped control character $wc at wchar #' . $p;
-			return false;
-		} elseif ($wc == 0x22) {
-			/* regular exit point for the loop */
-
-			/* convert to UTF-8, then re-check against UTF-16 */
-			$ov = mb_convert_encoding($s, 'UTF-8', 'UTF-16LE');
-			$tmp = mb_convert_encoding($ov, 'UTF-16LE', 'UTF-8');
-			if ($tmp !== $s) {
-				$ov = 'no Unicode string before wchar #' . $p;
-				return false;
+			/* end of string? */
+			if ($this->j[$this->p] !== 0) {
+				/* no, trailing waste */
+				$this->output = 'expected EOS at wchar #' . $this->p;
+				$rv = false;
 			}
-			return true;
-		} elseif ($wc == 0x5C) {
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-			if ($wc == 0x22 ||
-			    $wc == 0x2F ||
-			    $wc == 0x5C) {
-				$s .= chr($wc) . chr(0);
-			} elseif ($wc == 0x62) {
-				$s .= chr(0x08) . chr(0);
-			} elseif ($wc == 0x66) {
-				$s .= chr(0x0C) . chr(0);
-			} elseif ($wc == 0x6E) {
-				$s .= chr(0x0A) . chr(0);
-			} elseif ($wc == 0x72) {
-				$s .= chr(0x0D) . chr(0);
-			} elseif ($wc == 0x74) {
-				$s .= chr(0x09) . chr(0);
-			} elseif ($wc == 0x75) {
-				$v = 0;
-				for ($tmp = 1; $tmp <= 4; $tmp++) {
-					$v <<= 4;
-					if (!minijson_get_hexdigit($j, $p,
-					    $v, $tmp)) {
-						/* pass through error code */
-						return false;
-					}
-				}
-				if ($v < 1 || $v > 0xFFFD) {
-					$ov = 'non-Unicode escape $v before wchar #' . $p;
+		}
+
+		mb_internal_encoding($mb_encoding);
+		$this->status = $rv;
+	}
+
+	function skip_wsp() {
+		/* skip all wide characters that are JSON whitespace */
+		do {
+			$wc = $this->j[$this->p];
+			unset($this->j[$this->p]);
+			++$this->p;
+		} while ($wc == 0x09 || $wc == 0x0A || $wc == 0x0D || $wc == 0x20);
+		$this->p--;
+		$this->j[$this->p] = $wc;
+	}
+
+	function get_hexdigit(&$v, $i) {
+		$wc = $this->j[$this->p];
+		unset($this->j[$this->p]);
+		++$this->p;
+		if ($wc >= 0x30 && $wc <= 0x39) {
+			$v += $wc - 0x30;
+		} elseif ($wc >= 0x41 && $wc <= 0x46) {
+			$v += $wc - 0x37;
+		} elseif ($wc >= 0x61 && $wc <= 0x66) {
+			$v += $wc - 0x57;
+		} else {
+			$ov = sprintf('invalid hex in unicode escape' .
+			    ' sequence (%d) at wchar #%u', $i, $this->p);
+			return false;
+		}
+		return true;
+	}
+
+	function decode_array(&$ov, $depth) {
+		$ov = array();
+		$first = true;
+
+		/* I wish there were a goto in PHP… */
+		while (true) {
+			/* skip optional whitespace between tokens */
+			$this->skip_wsp();
+
+			/* end of the array? */
+			if ($this->j[$this->p] == 0x5D) {
+				/* regular exit point for the loop */
+
+				unset($this->j[$this->p]);
+				$this->p++;
+				return true;
+			}
+
+			/* member separator? */
+			if ($this->j[$this->p] == 0x2C) {
+				unset($this->j[$this->p]);
+				$this->p++;
+				if ($first) {
+					/* no comma before the first member */
+					$ov = 'unexpected comma at wchar #' . $this->p;
 					return false;
 				}
-				$s .= chr($v & 0xFF) . chr($v >> 8);
-			} else {
-				$ov = 'invalid escape sequence at wchar #' . $p;
+			} elseif (!$first) {
+				/*
+				 * all but the first member require a separating
+				 * comma; this also catches e.g. trailing
+				 * rubbish after numbers
+				 */
+				$ov = 'expected comma at wchar #' . $this->p;
 				return false;
 			}
-		} elseif ($wc > 0xD7FF && $wc < 0xE000) {
-			$ov = 'surrogate $wc at wchar #' . $p;
-			return false;
-		} elseif ($wc > 0xFFFD) {
-			$ov = 'non-Unicode char $wc at wchar #' . $p;
-			return false;
+			$first = false;
+
+			/* parse the member value */
+			$v = NULL;
+			if (!$this->decode_value($v, $depth)) {
+				/* pass through error code */
+				$ov = $v;
+				return false;
+			}
+			$ov[] = $v;
+		}
+	}
+
+	function decode_object(&$ov, $depth) {
+		$ov = array();
+		$first = true;
+
+		while (true) {
+			/* skip optional whitespace between tokens */
+			$this->skip_wsp();
+
+			/* end of the object? */
+			if ($this->j[$this->p] == 0x7D) {
+				/* regular exit point for the loop */
+
+				unset($this->j[$this->p]);
+				$this->p++;
+				return true;
+			}
+
+			/* member separator? */
+			if ($this->j[$this->p] == 0x2C) {
+				unset($this->j[$this->p]);
+				$this->p++;
+				if ($first) {
+					/* no comma before the first member */
+					$ov = 'unexpected comma at wchar #' . $this->p;
+					return false;
+				}
+			} elseif (!$first) {
+				/*
+				 * all but the first member require a separating
+				 * comma; this also catches e.g. trailing
+				 * rubbish after numbers
+				 */
+				$ov = 'expected comma at wchar #' . $this->p;
+				return false;
+			}
+			$first = false;
+
+			/* skip optional whitespace between tokens */
+			$this->skip_wsp();
+
+			/* parse the member key */
+			if ($this->j[$this->p++] != 0x22) {
+				$ov = 'expected key string at wchar #' . $this->p;
+				return false;
+			}
+			$k = null;
+			if (!$this->decode_string($k)) {
+				/* pass through error code */
+				$ov = $k;
+				return false;
+			}
+
+			/* skip optional whitespace between tokens */
+			$this->skip_wsp();
+
+			/* key-value separator? */
+			if ($this->j[$this->p++] != 0x3A) {
+				$ov = 'expected colon at wchar #' . $this->p;
+				return false;
+			}
+
+			/* parse the member value */
+			$v = NULL;
+			if (!$this->decode_value($v, $depth)) {
+				/* pass through error code */
+				$ov = $v;
+				return false;
+			}
+			$ov[$k] = $v;
+		}
+	}
+
+	function decode_value(&$ov, $depth) {
+		/* skip optional whitespace between tokens */
+		$this->skip_wsp();
+
+		/* parse begin of Value token */
+		$wc = $this->j[$this->p];
+		unset($this->j[$this->p]);
+		++$this->p;
+
+		/* style: falling through exits with false */
+		if ($wc == 0) {
+			$ov = 'unexpected EOS at wchar #' . $this->p;
+		} elseif ($wc == 0x6E) {
+			/* literal null? */
+			if ($this->j[$this->p++] == 0x75 &&
+			    $this->j[$this->p++] == 0x6C &&
+			    $this->j[$this->p++] == 0x6C) {
+				$ov = NULL;
+				return true;
+			}
+			$ov = 'expected ull after n near wchar #' . $this->p;
+		} elseif ($wc == 0x74) {
+			/* literal true? */
+			if ($this->j[$this->p++] == 0x72 &&
+			    $this->j[$this->p++] == 0x75 &&
+			    $this->j[$this->p++] == 0x65) {
+				$ov = true;
+				return true;
+			}
+			$ov = 'expected rue after t near wchar #' . $this->p;
+		} elseif ($wc == 0x66) {
+			/* literal false? */
+			if ($this->j[$this->p++] == 0x61 &&
+			    $this->j[$this->p++] == 0x6C &&
+			    $this->j[$this->p++] == 0x73 &&
+			    $this->j[$this->p++] == 0x65) {
+				$ov = false;
+				return true;
+			}
+			$ov = 'expected alse after f near wchar #' . $this->p;
+		} elseif ($wc == 0x5B) {
+			if (--$depth > 0) {
+				return $this->decode_array($ov, $depth);
+			}
+			$ov = 'recursion limit exceeded at wchar #' . $this->p;
+		} elseif ($wc == 0x7B) {
+			if (--$depth > 0) {
+				return $this->decode_object($ov, $depth);
+			}
+			$ov = 'recursion limit exceeded at wchar #' . $this->p;
+		} elseif ($wc == 0x22) {
+			return $this->decode_string($ov);
+		} elseif ($wc == 0x2D || ($wc >= 0x30 && $wc <= 0x39)) {
+			$this->p--;
+			$this->j[$this->p] = $wc;
+			return $this->decode_number($ov);
 		} else {
-			$s .= chr($wc & 0xFF) . chr($wc >> 8);
-		}
-	}
-}
-
-function minijson_decode_number(&$j, &$p, &$ov) {
-	$s = '';
-	$isint = true;
-
-	/* check for an optional minus sign */
-	$wc = $j[$p];
-	unset($j[$p]);
-	++$p;
-	if ($wc == 0x2D) {
-		$s = '-';
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-	}
-
-	if ($wc == 0x30) {
-		/* begins with zero (0 or 0.x) */
-		$s .= '0';
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc >= 0x30 && $wc <= 0x39) {
-			$ov = 'no leading zeroes please at wchar #' . $p;
-			return false;
-		}
-	} elseif ($wc >= 0x31 && $wc <= 0x39) {
-		/* begins with 1‥9 */
-		while ($wc >= 0x30 && $wc <= 0x39) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-	} else {
-		$ov = 'decimal digit expected at wchar #' . $p;
-		if ($s[0] != '-') {
-			/* we had none, so it’s allowed to prepend one */
-			$ov = 'minus sign or ' . $ov;
+			$ov = sprintf('unexpected U+%04X at wchar #%u', $wc, $this->p);
 		}
 		return false;
 	}
 
-	/* do we have a fractional part? */
-	if ($wc == 0x2E) {
-		$s .= '.';
-		$isint = false;
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc < 0x30 || $wc > 0x39) {
-			$ov = 'fractional digit expected at wchar #' . $p;
+	function decode_string(&$ov) {
+		/* UTF-16LE string buffer */
+		$s = '';
+
+		while (true) {
+			$wc = $this->j[$this->p];
+			unset($this->j[$this->p]);
+			++$this->p;
+			if ($wc < 0x20) {
+				$ov = 'unescaped control character $wc at wchar #' . $this->p;
+				return false;
+			} elseif ($wc == 0x22) {
+				/* regular exit point for the loop */
+
+				/* convert to UTF-8, then re-check against UTF-16 */
+				$ov = mb_convert_encoding($s, 'UTF-8', 'UTF-16LE');
+				$tmp = mb_convert_encoding($ov, 'UTF-16LE', 'UTF-8');
+				if ($tmp !== $s) {
+					$ov = 'no Unicode string before wchar #' . $this->p;
+					return false;
+				}
+				return true;
+			} elseif ($wc == 0x5C) {
+				$wc = $this->j[$this->p];
+				unset($this->j[$this->p]);
+				++$this->p;
+				if ($wc == 0x22 ||
+				    $wc == 0x2F ||
+				    $wc == 0x5C) {
+					$s .= chr($wc) . chr(0);
+				} elseif ($wc == 0x62) {
+					$s .= chr(0x08) . chr(0);
+				} elseif ($wc == 0x66) {
+					$s .= chr(0x0C) . chr(0);
+				} elseif ($wc == 0x6E) {
+					$s .= chr(0x0A) . chr(0);
+				} elseif ($wc == 0x72) {
+					$s .= chr(0x0D) . chr(0);
+				} elseif ($wc == 0x74) {
+					$s .= chr(0x09) . chr(0);
+				} elseif ($wc == 0x75) {
+					$v = 0;
+					for ($tmp = 1; $tmp <= 4; $tmp++) {
+						$v <<= 4;
+						if (!$this->get_hexdigit($v, $tmp)) {
+							/* pass through error code */
+							return false;
+						}
+					}
+					if ($v < 1 || $v > 0xFFFD) {
+						$ov = 'non-Unicode escape $v before wchar #' . $this->p;
+						return false;
+					}
+					$s .= chr($v & 0xFF) . chr($v >> 8);
+				} else {
+					$ov = 'invalid escape sequence at wchar #' . $this->p;
+					return false;
+				}
+			} elseif ($wc > 0xD7FF && $wc < 0xE000) {
+				$ov = 'surrogate $wc at wchar #' . $this->p;
+				return false;
+			} elseif ($wc > 0xFFFD) {
+				$ov = 'non-Unicode char $wc at wchar #' . $this->p;
+				return false;
+			} else {
+				$s .= chr($wc & 0xFF) . chr($wc >> 8);
+			}
+		}
+	}
+
+	function decode_number(&$ov) {
+		$s = '';
+		$isint = true;
+
+		/* check for an optional minus sign */
+		$wc = $this->j[$this->p];
+		unset($this->j[$this->p]);
+		++$this->p;
+		if ($wc == 0x2D) {
+			$s = '-';
+			$wc = $this->j[$this->p];
+			unset($this->j[$this->p]);
+			++$this->p;
+		}
+
+		if ($wc == 0x30) {
+			/* begins with zero (0 or 0.x) */
+			$s .= '0';
+			$wc = $this->j[$this->p];
+			unset($this->j[$this->p]);
+			++$this->p;
+			if ($wc >= 0x30 && $wc <= 0x39) {
+				$ov = 'no leading zeroes please at wchar #' . $this->p;
+				return false;
+			}
+		} elseif ($wc >= 0x31 && $wc <= 0x39) {
+			/* begins with 1‥9 */
+			while ($wc >= 0x30 && $wc <= 0x39) {
+				$s .= chr($wc);
+				$wc = $this->j[$this->p];
+				unset($this->j[$this->p]);
+				++$this->p;
+			}
+		} else {
+			$ov = 'decimal digit expected at wchar #' . $this->p;
+			if ($s[0] != '-') {
+				/* we had none, so it’s allowed to prepend one */
+				$ov = 'minus sign or ' . $ov;
+			}
 			return false;
 		}
-		while ($wc >= 0x30 && $wc <= 0x39) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-	}
 
-	/* do we have an exponent, treat number as mantissa? */
-	if ($wc == 0x45 || $wc == 0x65) {
-		$s .= 'E';
-		$isint = false;
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc == 0x2B || $wc == 0x2D) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
+		/* do we have a fractional part? */
+		if ($wc == 0x2E) {
+			$s .= '.';
+			$isint = false;
+			$wc = $this->j[$this->p];
+			unset($this->j[$this->p]);
+			++$this->p;
+			if ($wc < 0x30 || $wc > 0x39) {
+				$ov = 'fractional digit expected at wchar #' . $this->p;
+				return false;
+			}
+			while ($wc >= 0x30 && $wc <= 0x39) {
+				$s .= chr($wc);
+				$wc = $this->j[$this->p];
+				unset($this->j[$this->p]);
+				++$this->p;
+			}
 		}
-		if ($wc < 0x30 || $wc > 0x39) {
-			$ov = 'exponent digit expected at wchar #' . $p;
-			return false;
-		}
-		while ($wc >= 0x30 && $wc <= 0x39) {
-			$s .= chr($wc);
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-		}
-	}
-	$p--;
-	$j[$p] = $wc;
 
-	if ($isint) {
-		/* no fractional part, no exponent */
-
-		$v = (int)$s;
-		if (strval($v) == $s) {
-			$ov = $v;
-			return true;
+		/* do we have an exponent, treat number as mantissa? */
+		if ($wc == 0x45 || $wc == 0x65) {
+			$s .= 'E';
+			$isint = false;
+			$wc = $this->j[$this->p];
+			unset($this->j[$this->p]);
+			++$this->p;
+			if ($wc == 0x2B || $wc == 0x2D) {
+				$s .= chr($wc);
+				$wc = $this->j[$this->p];
+				unset($this->j[$this->p]);
+				++$this->p;
+			}
+			if ($wc < 0x30 || $wc > 0x39) {
+				$ov = 'exponent digit expected at wchar #' . $this->p;
+				return false;
+			}
+			while ($wc >= 0x30 && $wc <= 0x39) {
+				$s .= chr($wc);
+				$wc = $this->j[$this->p];
+				unset($this->j[$this->p]);
+				++$this->p;
+			}
 		}
+		$this->p--;
+		$this->j[$this->p] = $wc;
+
+		if ($isint) {
+			/* no fractional part, no exponent */
+
+			$v = (int)$s;
+			if (strval($v) == $s) {
+				$ov = $v;
+				return true;
+			}
+		}
+		$ov = (float)$s;
+		return true;
 	}
-	$ov = (float)$s;
-	return true;
 }
 
 if (defined('__main__') && constant('__main__') === __FILE__) {

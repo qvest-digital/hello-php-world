@@ -698,7 +698,7 @@ require_once('minijson.php');
 
 /* used by structured debugging, see above */
 function minijson_encdbg($x, $ri='') {
-	return (minijson_encode_internal($x, $ri, 32,
+	return (minijson_encode($x, $ri, 32,
 	    defined('JSONDEBUG_TRUNCATE_SIZE') ?
 	    constant('JSONDEBUG_TRUNCATE_SIZE') : 0, true));
 }

@@ -596,6 +596,18 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 }
 
 function minijson_decode_string($s, &$Sp, $Sx, &$ov) {
+	/* XXX incorrect, just for testing */
+	$se = strpos($s, '"', $Sp);
+	if ($se === false || $se < $Sp) {
+		$ov = 'cannot find end of string';
+		return false;
+	}
+	$ov = substr($s, $Sp, $se - $Sp);
+	$Sp = $se + 1;
+	return true;
+
+	/* XXX old code: */
+
 	/* UTF-16LE string buffer */
 	$s = '';
 

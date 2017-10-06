@@ -79,8 +79,9 @@ function minijson_encode_string($x, $truncsz=0) {
 	if ($c < 0x80) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
-				$rs .= "\\";
-			$rs .= $ch;
+				$rs .= "\\" . $ch;
+			else
+				$rs .= $ch;
 		} else switch ($c) {
 		case 0x08:
 			$rs .= '\b';
@@ -171,8 +172,9 @@ function minijson_encode_string($x, $truncsz=0) {
 	while ($Sp < $Sx && ($c = ord(($ch = $x[$Sp++])))) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
-				$rs .= "\\";
-			$rs .= $ch;
+				$rs .= "\\" . $ch;
+			else
+				$rs .= $ch;
 		} else switch ($c) {
 		case 0x08:
 			$rs .= '\b';

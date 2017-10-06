@@ -68,7 +68,7 @@ function minijson_encode_string($x, $truncsz=0) {
 	if (($dotrunc = ($truncsz && ($Sx > $truncsz))))
 		$Sx = $truncsz;
 
-	$rs = '';	/* result */
+	$rs = '"';	/* result */
 	$Sp = 0;	/* position */
 
 	/* assume UTF-8 first, for sanity */
@@ -166,7 +166,7 @@ function minijson_encode_string($x, $truncsz=0) {
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */
 
-	$rs = '';	/* result */
+	$rs = '"';	/* result */
 	$Sp = 0;	/* position */
 
 	while ($Sp < $Sx && ($c = ord(($ch = $x[$Sp++])))) {
@@ -197,7 +197,9 @@ function minijson_encode_string($x, $truncsz=0) {
 		}
 	}
  minijson_encode_string_done:
-	return ($dotrunc ? 'TOO_LONG_STRING_TRUNCATED:"' : '"') . $rs . '"';
+	if ($dotrunc)
+		$rs = 'TOO_LONG_STRING_TRUNCATED:' . $rs;
+	return $rs . '"';
 }
 
 /**

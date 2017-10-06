@@ -74,13 +74,13 @@ function minijson_encode_string($x, $truncsz=0) {
 	/* assume UTF-8 first, for sanity */
  minijson_encode_string_utf8:
 	/* read next octet */
-	$c = ord($x[$Sp++]);
+	$c = ord(($ch = $x[$Sp++]));
 	/* ASCII? */
 	if ($c < 0x80) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
 				$rs .= "\\";
-			$rs .= chr($c);
+			$rs .= $ch;
 		} else switch ($c) {
 		case 0x08:
 			$rs .= '\b';
@@ -168,11 +168,11 @@ function minijson_encode_string($x, $truncsz=0) {
 	$rs = '';	/* result */
 	$Sp = 0;	/* position */
 
-	while ($Sp < $Sx && ($c = ord($x[$Sp++]))) {
+	while ($Sp < $Sx && ($c = ord(($ch = $x[$Sp++])))) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
 				$rs .= "\\";
-			$rs .= chr($c);
+			$rs .= $ch;
 		} else switch ($c) {
 		case 0x08:
 			$rs .= '\b';

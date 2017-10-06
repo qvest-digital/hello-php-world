@@ -43,12 +43,16 @@ if (count(get_included_files()) <= 1 && !defined('__main__'))
  * Encodes an array (indexed or associative) or any value as JSON.
  *
  * in:	array	x (Value to be encoded)
- * in:	string	indent or bool false to skip beautification
+ * in:	string	(indent); bool false to skip beautification
  * in:	integer	(optional) recursion depth (default: 32)
+ * in:	integer	truncation size (0 to not truncate), makes output not JSON
+ * in:	bool	whether to pretty-print resources
  * out:	string	encoded
  */
-function minijson_encode($x, $ri='', $depth=32) {
-	return (minijson_encode_internal($x, $ri, $depth, 0, false));
+function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
+	ob_start();
+	minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc);
+	return ob_get_clean();
 }
 
 /**
@@ -219,22 +223,30 @@ function minijson_encode_string($x, $truncsz=0) {
  * in:	bool	whether to pretty-print resources
  * out:	string	encoded
  */
-function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
+function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (!$depth-- || !isset($x) || is_null($x) || (is_float($x) &&
-	    (is_nan($x) || is_infinite($x))))
-		return 'null';
+	    (is_nan($x) || is_infinite($x)))) {
+		echo 'null';
+		return;
+	}
 
-	if ($x === true)
-		return 'true';
-	if ($x === false)
-		return 'false';
+	if ($x === true) {
+		echo 'true';
+		return;
+	}
+	if ($x === false) {
+		echo 'false';
+		return;
+	}
 
 	if (is_int($x)) {
 		$y = (int)$x;
 		$z = strval($y);
 		$x = strval($x);
-		if ($x === $z)
-			return $z;
+		if ($x === $z) {
+			echo $z;
+			return;
+		}
 	}
 
 	if (is_float($x)) {
@@ -245,13 +257,16 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$rs .= '0';
 		if ($v[1] !== '-0' && $v[1] !== '+0')
 			$rs .= 'E' . $v[1];
-		return $rs;
+		echo $rs;
+		return;
 	}
 
 	/* strings or unknown scalars */
 	if (is_string($x) ||
-	    (!is_array($x) && !is_object($x) && is_scalar($x)))
-		return minijson_encode_string($x, $truncsz);
+	    (!is_array($x) && !is_object($x) && is_scalar($x))) {
+		echo minijson_encode_string($x, $truncsz);
+		return;
+	}
 
 	/* arrays, objects, resources, unknown non-scalars */
 
@@ -270,39 +285,47 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 	/* arrays, potentially empty or non-associative */
 	if (is_array($x)) {
-		if (!($n = count($x)))
-			return '[]';
-		$rs = '[';
+		if (!($n = count($x))) {
+			echo '[]';
+			return;
+		}
+		echo '[';
 		for ($v = 0; $v < $n; ++$v) {
 			if (!array_key_exists($v, $x))
 				goto minijson_encode_object;
-			$rs .= $xi . minijson_encode_internal($x[$v],
+			echo $xi;
+			minijson_encode_ob($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
 		}
-		return $rs . $xr . ']';
+		echo $xr . ']';
 	}
 
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
 	if (!is_null($rsrctype = @get_resource_type($x))) {
-		if (!$dumprsrc)
-			return minijson_encode_string($x, $truncsz);
+		if (!$dumprsrc) {
+			echo minijson_encode_string($x, $truncsz);
+			return;
+		}
 		$rs = array(
 			'_strval' => strval($x),
 			'_type' => $rsrctype,
 		);
 		if ($rsrctype === 'stream')
 			$rs['stream_meta'] = stream_get_meta_data($x);
-		return '{' . $xi . '"\u0000resource"' . $Sd .
-		    minijson_encode_internal($rs, $si, $depth + 1,
-		    $truncsz, $dumprsrc) . $xr . '}';
+		echo '{' . $xi . '"\u0000resource"' . $Sd;
+		minijson_encode_ob($rs, $si, $depth + 1,
+		    $truncsz, $dumprsrc);
+		echo $xr . '}';
 	}
 
 	/* treat everything else as Object */
 
 	/* PHP objects are mostly like associative arrays */
-	if (!($x = (array)$x))
-		return '{}';
+	if (!($x = (array)$x)) {
+		echo '{}';
+		return;
+	}
  minijson_encode_object:
 	$s = array();
 	foreach (array_keys($x) as $k) {
@@ -315,14 +338,16 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$s[$k] = $v;
 	}
 	asort($s, SORT_STRING);
-	$rs = '{';
+	echo '{';
 	foreach ($s as $k => $v) {
-		$rs .= $xi . minijson_encode_string($v, $truncsz) . $Sd .
-		    minijson_encode_internal($x[$k],
+		echo $xi;
+		echo minijson_encode_string($v, $truncsz);
+		echo $Sd;
+		minijson_encode_ob($x[$k],
 		    $si, $depth, $truncsz, $dumprsrc);
 		$xi = $Si;
 	}
-	return $rs . $xr . '}';
+	echo $xr . '}';
 }
 
 /**
@@ -779,7 +804,7 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 		    )) . "\n");
 		exit(1);
 	}
-	fwrite(STDOUT, minijson_encode_internal($odat, $indent, $depth,
+	fwrite(STDOUT, minijson_encode($odat, $indent, $depth,
 	    $truncsz, $rsrc) . "\n");
 	exit(0);
 }

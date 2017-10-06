@@ -65,11 +65,14 @@ function minijson_encode_string($x, $truncsz=0) {
 	if (!($Sx = strlen($x)))
 		return '""';
 
-	if (($dotrunc = ($truncsz && ($Sx > $truncsz))))
-		$Sx = $truncsz;
-
-	$rs = '"';	/* result */
+	ob_start();	/* result */
 	$Sp = 0;	/* position */
+
+	if (($dotrunc = ($truncsz && ($Sx > $truncsz)))) {
+		echo 'TOO_LONG_STRING_TRUNCATED:';
+		$Sx = $truncsz;
+	}
+	echo '"';
 
 	/* assume UTF-8 first, for sanity */
  minijson_encode_string_utf8:
@@ -79,27 +82,27 @@ function minijson_encode_string($x, $truncsz=0) {
 	if ($c < 0x80) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
-				$rs .= "\\" . $ch;
+				echo "\\" . $ch;
 			else
-				$rs .= $ch;
+				echo $ch;
 		} else switch ($c) {
 		case 0x08:
-			$rs .= '\b';
+			echo '\b';
 			break;
 		case 0x09:
-			$rs .= '\t';
+			echo '\t';
 			break;
 		case 0x0A:
-			$rs .= '\n';
+			echo '\n';
 			break;
 		case 0x0C:
-			$rs .= '\f';
+			echo '\f';
 			break;
 		case 0x0D:
-			$rs .= '\r';
+			echo '\r';
 			break;
 		default:
-			$rs .= sprintf('\u%04X', $c);
+			printf('\u%04X', $c);
 			break;
 		case 0x00:
 			goto minijson_encode_string_done;
@@ -137,9 +140,9 @@ function minijson_encode_string($x, $truncsz=0) {
 		goto minijson_encode_string_latin1;
 
 	if ($wc < 0x00A0)
-		$rs .= sprintf('\u%04X', $wc);
+		printf('\u%04X', $wc);
 	elseif ($wc < 0x0800)
-		$rs .= chr(0xC0 | ($wc >> 6)) .
+		echo chr(0xC0 | ($wc >> 6)) .
 		    chr(0x80 | ($wc & 0x3F));
 	elseif ($wc > 0xFFFD || ($wc >= 0xD800 && $wc <= 0xDFFF) ||
 	    ($wc >= 0x2028 && $wc <= 0x2029)) {
@@ -148,13 +151,13 @@ function minijson_encode_string($x, $truncsz=0) {
 				goto minijson_encode_string_latin1;
 			/* UTF-16 */
 			$wc -= 0x10000;
-			$rs .= sprintf('\u%04X\u%04X',
+			printf('\u%04X\u%04X',
 			    0xD800 | ($wc >> 10),
 			    0xDC00 | ($wc & 0x03FF));
 		} else
-			$rs .= sprintf('\u%04X', $wc);
+			printf('\u%04X', $wc);
 	} else
-		$rs .= chr(0xE0 | ($wc >> 12)) .
+		echo chr(0xE0 | ($wc >> 12)) .
 		    chr(0x80 | (($wc >> 6) & 0x3F)) .
 		    chr(0x80 | ($wc & 0x3F));
 
@@ -165,41 +168,45 @@ function minijson_encode_string($x, $truncsz=0) {
 
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */
+	ob_end_clean();
 
-	$rs = '"';	/* result */
+	ob_start();	/* result */
 	$Sp = 0;	/* position */
+
+	if ($dotrunc)
+		echo 'TOO_LONG_STRING_TRUNCATED:';
+	echo '"';
 
 	while ($Sp < $Sx && ($c = ord(($ch = $x[$Sp++])))) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
-				$rs .= "\\" . $ch;
+				echo "\\" . $ch;
 			else
-				$rs .= $ch;
+				echo $ch;
 		} else switch ($c) {
 		case 0x08:
-			$rs .= '\b';
+			echo '\b';
 			break;
 		case 0x09:
-			$rs .= '\t';
+			echo '\t';
 			break;
 		case 0x0A:
-			$rs .= '\n';
+			echo '\n';
 			break;
 		case 0x0C:
-			$rs .= '\f';
+			echo '\f';
 			break;
 		case 0x0D:
-			$rs .= '\r';
+			echo '\r';
 			break;
 		default:
-			$rs .= sprintf('\u%04X', $c);
+			printf('\u%04X', $c);
 			break;
 		}
 	}
  minijson_encode_string_done:
-	if ($dotrunc)
-		$rs = 'TOO_LONG_STRING_TRUNCATED:' . $rs;
-	return $rs . '"';
+	echo '"';
+	return ob_get_clean();
 }
 
 /**

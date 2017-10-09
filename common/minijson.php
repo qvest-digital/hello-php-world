@@ -105,7 +105,7 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 
 	if ($c < 0x80) {
 		/* C0 control character, space, !, " or DEL */
-		if (($c & ~1) === 0x20)
+		if (($c & 0x7E) === 0x20)
 			echo $ch;
 		elseif ($c === 0x22)
 			echo '\"';

@@ -294,15 +294,20 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 			echo '[]';
 			return;
 		}
+		ob_start();
 		echo '[';
 		for ($v = 0; $v < $n; ++$v) {
-			if (!array_key_exists($v, $x))
+			if (!array_key_exists($v, $x)) {
+				/* failed — sparse or associative */
+				ob_end_clean();
 				goto minijson_encode_object;
+			}
 			echo $xi;
 			minijson_encode_ob($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
 		}
+		ob_end_flush();
 		echo $xr . ']';
 	}
 

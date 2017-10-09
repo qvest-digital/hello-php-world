@@ -699,7 +699,18 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 			} elseif ($wc < 1 || $wc > 0xFFFD)
 				return sprintf('non-Unicode escape %04X', $wc);
  minijson_decode_string_unicode_char:
-			echo $wc; //XXX…
+			if ($wc < 0x0800)
+				echo chr(0xC0 | ($wc >> 6)) .
+				    chr(0x80 | ($wc & 0x3F));
+			elseif ($wc <= 0xFFFF)
+				echo chr(0xE0 | ($wc >> 12)) .
+				    chr(0x80 | (($wc >> 6) & 0x3F)) .
+				    chr(0x80 | ($wc & 0x3F));
+			else
+				echo chr(0xF0 | ($wc >> 18)) .
+				    chr(0x80 | (($wc >> 12) & 0x3F)) .
+				    chr(0x80 | (($wc >> 6) & 0x3F)) .
+				    chr(0x80 | ($wc & 0x3F));
 		}
 		goto minijson_decode_string_loop;
 	}
@@ -724,10 +735,10 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 	if ($Sp + $Ss > $Sx)
 		return 'unexpected EOS after UTF-8 lead byte in String';
 	while ($Ss--)
-		if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
+		if (($c = ord($s[$Sp++]) ^ 0x80) <= 0x3F)
 			$wc |= $c << (6 * $Ss);
 		else
-			return sprintf('invalid UTF-8 trail octet 0x%02X in String', $c);
+			return sprintf('invalid UTF-8 trail octet 0x%02X in String', $c ^ 0x80);
 	if ($wc < $wmin)
 		return sprintf('non-minimalistic encoding for Unicode char %04X in String', $wc);
 

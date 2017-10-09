@@ -309,6 +309,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		}
 		ob_end_flush();
 		echo $xr . ']';
+		return;
 	}
 
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
@@ -326,6 +327,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		echo '{' . $xi . '"\u0000resource"' . $Sd;
 		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
 		echo $xr . '}';
+		return;
 	}
 
 	/* treat everything else as Object */

@@ -381,7 +381,7 @@ function minijson_decode($s, &$ov, $depth=32) {
 	$rv = false;
 
 	/* skip Byte Order Mark if present */
-	if (substr($s, 0, 3) === "\xEF\xBF\xBD")
+	if (substr($s, 0, 3) === "\xEF\xBB\xBF")
 		$Sp = 3;
 
 	/* skip leading whitespace */

@@ -41,9 +41,11 @@ if (count(get_included_files()) <= 1 && !defined('__main__'))
 
 /**
  * Encodes an array (indexed or associative) or any value as JSON.
+ * See minijson_encode_ob_string() for limitations on strings;
+ * strings not encoded in UTF-8 and resources may not round-trip.
  *
  * in:	array	x (Value to be encoded)
- * in:	string	(indent); bool false to skip beautification
+ * in:	string	(optional) or bool false to skip beautification (default: '')
  * in:	integer	(optional) recursion depth (default: 32)
  * in:	integer	(optional) truncation size (default 0 to not truncate),
  *		makes output invalid JSON
@@ -185,6 +187,7 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 
 	$Sp = 0;
 	while ($Sp < $Sx && ($c = ord(($ch = $x[$Sp++])))) {
+		/* similar logic as above, just not as golfed for speed */
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
 				echo "\\" . $ch;
@@ -215,14 +218,15 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 }
 
 /**
- * Encodes content as JSON for debugging (not round-trip safe).
+ * Encodes a value as JSON to the currently active output buffer.
+ * See minijson_encode() for details.
  *
  * in:	array	x (Value to be encoded)
  * in:	string	indent or bool false to skip beautification
  * in:	integer	recursion depth
  * in:	integer	truncation size (0 to not truncate), makes output not JSON
  * in:	bool	whether to pretty-print resources
- * out:	string	encoded
+ * out:	stdout	encoded
  */
 function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (!$depth-- || !isset($x) || is_null($x) || (is_float($x) &&
@@ -315,8 +319,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if ($rsrctype === 'stream')
 			$rs['stream_meta'] = stream_get_meta_data($x);
 		echo '{' . $xi . '"\u0000resource"' . $Sd;
-		minijson_encode_ob($rs, $si, $depth + 1,
-		    $truncsz, $dumprsrc);
+		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
 		echo $xr . '}';
 	}
 
@@ -344,8 +347,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		echo $xi;
 		minijson_encode_ob_string($v, $truncsz);
 		echo $Sd;
-		minijson_encode_ob($x[$k],
-		    $si, $depth, $truncsz, $dumprsrc);
+		minijson_encode_ob($x[$k], $si, $depth, $truncsz, $dumprsrc);
 		$xi = $Si;
 	}
 	echo $xr . '}';
@@ -353,11 +355,13 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 
 /**
  * Decodes a UTF-8 string from JSON (ECMA 262).
+ * Empty Objects are returned as empty PHP arrays and thus
+ * trip around as empty Arrays.
  *
- * in:	string	json
- * in:	reference output-variable (or error string)
+ * in:	string	JSON text to decode
+ * in:	reference output Value (or error string)
  * in:	integer	(optional) recursion depth (default: 32)
- * out:	boolean	false if an error occured, true = output is valid
+ * out:	boolean	false if an error occured, true if the output is valid
  */
 function minijson_decode($s, &$ov, $depth=32) {
 	if (!isset($s))

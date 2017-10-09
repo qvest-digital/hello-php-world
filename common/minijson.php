@@ -635,7 +635,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 		}
 		$ov = ob_get_clean();
 		return true;
-	} elseif ($c === '-' || (ord($c) >= 0x30 && ord($c) < 0x39)) {
+	} elseif ($c === '-' || (ord($c) >= 0x30 && ord($c) <= 0x39)) {
 		--$Sp;
 		return minijson_decode_number($s, $Sp, $Sx, $ov);
 	} elseif (ord($c) >= 0x20 && ord($c) <= 0x7E) {

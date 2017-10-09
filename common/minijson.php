@@ -424,28 +424,6 @@ function minijson_skip_wsp($s, &$Sp, $Sx) {
 		}
 }
 
-function minijson_get_hexdigit($s, &$Sp, &$v) {
-	switch (ord($s[$Sp++])) {
-	case 0x30:			  return true;
-	case 0x31:		$v +=  1; return true;
-	case 0x32:		$v +=  2; return true;
-	case 0x33:		$v +=  3; return true;
-	case 0x34:		$v +=  4; return true;
-	case 0x35:		$v +=  5; return true;
-	case 0x36:		$v +=  6; return true;
-	case 0x37:		$v +=  7; return true;
-	case 0x38:		$v +=  8; return true;
-	case 0x39: 		$v +=  9; return true;
-	case 0x41: case 0x61:	$v += 10; return true;
-	case 0x42: case 0x62:	$v += 11; return true;
-	case 0x43: case 0x63:	$v += 12; return true;
-	case 0x44: case 0x64:	$v += 13; return true;
-	case 0x45: case 0x65:	$v += 14; return true;
-	case 0x46: case 0x66:	$v += 15; return true;
-	}
-	return false;
-}
-
 function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 	$ov = array();
 
@@ -685,8 +663,26 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 				return 'unexpected EOS in Unicode escape sequence';
 			for ($tmp = 1; $tmp <= 4; $tmp++) {
 				$wc <<= 4;
-				if (!minijson_get_hexdigit($s, $Sp, $wc))
-					return "invalid hex digit #$tmp in Unicode escape sequence";
+				switch (ord($s[$Sp++])) {
+				case 0x30:			   break;
+				case 0x31:		$wc +=  1; break;
+				case 0x32:		$wc +=  2; break;
+				case 0x33:		$wc +=  3; break;
+				case 0x34:		$wc +=  4; break;
+				case 0x35:		$wc +=  5; break;
+				case 0x36:		$wc +=  6; break;
+				case 0x37:		$wc +=  7; break;
+				case 0x38:		$wc +=  8; break;
+				case 0x39: 		$wc +=  9; break;
+				case 0x41: case 0x61:	$wc += 10; break;
+				case 0x42: case 0x62:	$wc += 11; break;
+				case 0x43: case 0x63:	$wc += 12; break;
+				case 0x44: case 0x64:	$wc += 13; break;
+				case 0x45: case 0x65:	$wc += 14; break;
+				case 0x46: case 0x66:	$wc += 15; break;
+				default:
+					return "invalid hex digit #$tmp/4 in Unicode escape sequence";
+				}
 			}
 			if ($surrogate) {
 				if ($wc < 0xDC00 || $wc > 0xDFFF)

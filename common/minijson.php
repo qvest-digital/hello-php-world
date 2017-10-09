@@ -68,10 +68,8 @@ function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
 function minijson_encode_ob_string($x, $truncsz=0) {
 	if (!is_string($x))
 		$x = strval($x);
-	if (!($Sx = strlen($x))) {
-		echo '""';
-		return;
-	}
+
+	$Sx = strlen($x);
 
 	if ($truncsz && ($Sx > $truncsz)) {
 		echo 'TOO_LONG_STRING_TRUNCATED:';
@@ -84,6 +82,12 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 
 	$Sp = 0;
  minijson_encode_string_utf8:
+	if ($Sp >= $Sx) {
+ minijson_encode_string_done:
+		ob_end_flush();
+		echo '"';
+		return;
+	}
 	/* read next octet */
 	$c = ord(($ch = $x[$Sp++]));
 	if ($c > 0x22 && $c < 0x7F) {
@@ -176,12 +180,7 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 	}
 
 	/* process next char */
-	if ($Sp < $Sx)
-		goto minijson_encode_string_utf8;
- minijson_encode_string_done:
-	ob_end_flush();
-	echo '"';
-	return;
+	goto minijson_encode_string_utf8;
 
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */

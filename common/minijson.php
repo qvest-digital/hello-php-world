@@ -45,8 +45,9 @@ if (count(get_included_files()) <= 1 && !defined('__main__'))
  * in:	array	x (Value to be encoded)
  * in:	string	(indent); bool false to skip beautification
  * in:	integer	(optional) recursion depth (default: 32)
- * in:	integer	truncation size (0 to not truncate), makes output not JSON
- * in:	bool	whether to pretty-print resources
+ * in:	integer	(optional) truncation size (default 0 to not truncate),
+ *		makes output invalid JSON
+ * in:	bool	(optional) whether to pretty-print resources (default: false)
  * out:	string	encoded
  */
 function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
@@ -60,25 +61,28 @@ function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
  * not comprised of only valid UTF-8 are interpreted as latin1.
  *
  * in:	string	x (Value to be encoded)
- * in:	integer	truncation size (0 to not truncate), makes output not JSON
- * out:	string	encoded
+ * in:	integer	(optional) truncation size (default 0 to not truncate),
+ *		makes output invalid JSON
+ * out:	stdout	encoded
  */
-function minijson_encode_string($x, $truncsz=0) {
+function minijson_encode_ob_string($x, $truncsz=0) {
 	if (!is_string($x))
 		$x = strval($x);
-	if (!($Sx = strlen($x)))
-		return '""';
+	if (!($Sx = strlen($x))) {
+		echo '""';
+		return;
+	}
 
-	ob_start();	/* result */
-	$Sp = 0;	/* position */
-
-	if (($dotrunc = ($truncsz && ($Sx > $truncsz)))) {
+	if ($truncsz && ($Sx > $truncsz)) {
 		echo 'TOO_LONG_STRING_TRUNCATED:';
 		$Sx = $truncsz;
 	}
 	echo '"';
 
 	/* assume UTF-8 first, for sanity */
+	ob_start();	/* in case a restart is needed */
+
+	$Sp = 0;
  minijson_encode_string_utf8:
 	/* read next octet */
 	$c = ord(($ch = $x[$Sp++]));
@@ -168,19 +172,16 @@ function minijson_encode_string($x, $truncsz=0) {
 	/* process next char */
 	if ($Sp < $Sx)
 		goto minijson_encode_string_utf8;
-	goto minijson_encode_string_done;
+ minijson_encode_string_done:
+	ob_end_flush();
+	echo '"';
+	return;
 
  minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */
 	ob_end_clean();
 
-	ob_start();	/* result */
-	$Sp = 0;	/* position */
-
-	if ($dotrunc)
-		echo 'TOO_LONG_STRING_TRUNCATED:';
-	echo '"';
-
+	$Sp = 0;
 	while ($Sp < $Sx && ($c = ord(($ch = $x[$Sp++])))) {
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
@@ -208,9 +209,7 @@ function minijson_encode_string($x, $truncsz=0) {
 			break;
 		}
 	}
- minijson_encode_string_done:
 	echo '"';
-	return ob_get_clean();
 }
 
 /**
@@ -264,7 +263,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	/* strings or unknown scalars */
 	if (is_string($x) ||
 	    (!is_array($x) && !is_object($x) && is_scalar($x))) {
-		echo minijson_encode_string($x, $truncsz);
+		minijson_encode_ob_string($x, $truncsz);
 		return;
 	}
 
@@ -304,7 +303,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
 	if (!is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc) {
-			echo minijson_encode_string($x, $truncsz);
+			minijson_encode_ob_string($x, $truncsz);
 			return;
 		}
 		$rs = array(
@@ -341,7 +340,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	echo '{';
 	foreach ($s as $k => $v) {
 		echo $xi;
-		echo minijson_encode_string($v, $truncsz);
+		minijson_encode_ob_string($v, $truncsz);
 		echo $Sd;
 		minijson_encode_ob($x[$k],
 		    $si, $depth, $truncsz, $dumprsrc);

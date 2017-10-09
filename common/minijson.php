@@ -424,7 +424,7 @@ function minijson_skip_wsp($s, &$Sp, $Sx) {
 		}
 }
 
-function minijson_get_hexdigit($s, &$Sp, &$v, $i) {
+function minijson_get_hexdigit($s, &$Sp, &$v) {
 	switch (ord($s[$Sp++])) {
 	case 0x30:			  return true;
 	case 0x31:		$v +=  1; return true;
@@ -662,6 +662,7 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 	if ($ch === "\\") {
 		if ($Sp >= $Sx)
 			return 'unexpected EOS after backslash in String';
+		$ch = $s[$Sp++];
 		if ($ch === '"' || $ch === '/' || $ch === "\\")
 			echo $ch;
 		elseif ($ch === 't')
@@ -700,6 +701,10 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 				goto minijson_decode_string_unicode_escape;
 			} elseif ($wc < 1 || $wc > 0xFFFD)
 				return sprintf('non-Unicode escape %04X', $wc);
+			if ($wc < 0x80) {
+				echo chr($wc);
+				goto minijson_decode_string_loop;
+			}
  minijson_decode_string_unicode_char:
 			if ($wc < 0x0800)
 				echo chr(0xC0 | ($wc >> 6)) .

@@ -92,12 +92,15 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 	/* read next octet */
 	$c = ord(($ch = $x[$Sp++]));
 
+	if ($c === 0x5C) {
+		/* just backslash */
+		echo "\\\\";
+		goto minijson_encode_string_utf8;
+	}
+
 	if ($c > 0x22 && $c < 0x7F) {
-		/* printable ASCII except space, ! and " */
-		if ($c === 0x5C)
-			echo "\\\\";
-		else
-			echo $ch;
+		/* printable ASCII except space, !, " and backslash */
+		echo $ch;
 		goto minijson_encode_string_utf8;
 	}
 

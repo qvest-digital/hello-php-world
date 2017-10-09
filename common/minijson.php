@@ -83,7 +83,6 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 	$Sp = 0;
  minijson_encode_string_utf8:
 	if ($Sp >= $Sx) {
- minijson_encode_string_done:
 		ob_end_flush();
 		echo '"';
 		return;
@@ -106,35 +105,24 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 
 	if ($c < 0x80) {
 		/* C0 control character, space, !, " or DEL */
-		switch ($c) {
-		case 0x20:
-		case 0x21:
+		if (($c & ~1) === 0x20)
 			echo $ch;
-			break;
-		case 0x22:
+		elseif ($c === 0x22)
 			echo '\"';
-			break;
-		case 0x08:
+		elseif ($c === 0x08)
 			echo '\b';
-			break;
-		case 0x09:
+		elseif ($c === 0x09)
 			echo '\t';
-			break;
-		case 0x0A:
+		elseif ($c === 0x0A)
 			echo '\n';
-			break;
-		case 0x0C:
+		elseif ($c === 0x0C)
 			echo '\f';
-			break;
-		case 0x0D:
+		elseif ($c === 0x0D)
 			echo '\r';
-			break;
-		default:
+		elseif (!$c)
+			$Sp = $Sx;
+		else
 			printf('\u%04X', $c);
-			break;
-		case 0x00:
-			goto minijson_encode_string_done;
-		}
 		goto minijson_encode_string_utf8;
 	}
 

@@ -86,15 +86,22 @@ function minijson_encode_ob_string($x, $truncsz=0) {
  minijson_encode_string_utf8:
 	/* read next octet */
 	$c = ord(($ch = $x[$Sp++]));
-	if ($c >= 0x20 && $c < 0x7F) {
-		/* printable ASCII */
-		if ($c === 0x22 || $c === 0x5C)
-			echo "\\" . $ch;
+	if ($c > 0x22 && $c < 0x7F) {
+		/* printable ASCII except space, ! and " */
+		if ($c === 0x5C)
+			echo "\\\\";
 		else
 			echo $ch;
 	} elseif ($c < 0x80) {
-		/* C0 control character or DEL */
+		/* C0 control character, space, !, " or DEL */
 		switch ($c) {
+		case 0x20:
+		case 0x21:
+			echo $ch;
+			break;
+		case 0x22:
+			echo '\"';
+			break;
 		case 0x08:
 			echo '\b';
 			break;

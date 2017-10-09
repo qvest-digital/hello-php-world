@@ -441,7 +441,6 @@ function minijson_get_hexdigit($s, &$Sp, &$v, $i) {
 	case 0x45: case 0x65:	$v += 14; return true;
 	case 0x46: case 0x66:	$v += 15; return true;
 	}
-	$ov = "invalid hex in unicode escape sequence ($i)";
 	return false;
 }
 
@@ -551,12 +550,13 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 		$ov = 'expected key string for Object member';
 		return false;
 	}
-	$k = NULL;
-	if (!minijson_decode_string($s, $Sp, $Sx, $k)) {
+	if (($k = minijson_decode_string($s, $Sp, $Sx)) !== true) {
+		ob_end_clean();
 		/* pass through error code */
 		$ov = $k;
 		return false;
 	}
+	$k = ob_get_clean();
 
 	/* skip optional whitespace between tokens */
 	minijson_skip_wsp($s, $Sp, $Sx);
@@ -627,7 +627,12 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 			return minijson_decode_object($s, $Sp, $Sx, $ov, $depth);
 		$ov = 'recursion limit exceeded by Object';
 	} elseif ($c === '"') {
-		return minijson_decode_string($s, $Sp, $Sx, $ov);
+		if (($ov = minijson_decode_string($s, $Sp, $Sx)) !== true) {
+			ob_end_clean();
+			return false;
+		}
+		$ov = ob_get_clean();
+		return true;
 	} elseif ($c === '-' || (ord($c) >= 0x30 && ord($c) < 0x39)) {
 		--$Sp;
 		return minijson_decode_number($s, $Sp, $Sx, $ov);
@@ -641,87 +646,96 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 	return false;
 }
 
-function minijson_decode_string($s, &$Sp, $Sx, &$ov) {
-	/* XXX incorrect, just for testing */
-	$se = strpos($s, '"', $Sp);
-	if ($se === false || $se < $Sp) {
-		$ov = 'cannot find end of string';
-		return false;
+function minijson_decode_string($s, &$Sp, $Sx) {
+	ob_start();
+ minijson_decode_string_loop:
+	if ($Sp >= $Sx)
+		return 'unexpected EOS in String';
+	/* get next octet; switch on what to do with it */
+	if (($ch = $s[$Sp++]) === '"') {
+		/* regular exit point for the loop */
+		return true;
 	}
-	$ov = substr($s, $Sp, $se - $Sp);
-	$Sp = $se + 1;
-	return true;
-
-	/* XXX old code: */
-
-	/* UTF-16LE string buffer */
-	$s = '';
-
-	while (true) {
-		$wc = $j[$p];
-		unset($j[$p]);
-		++$p;
-		if ($wc < 0x20) {
-			$ov = 'unescaped control character $wc at wchar #' . $p;
-			return false;
-		} elseif ($wc == 0x22) {
-			/* regular exit point for the loop */
-
-			/* convert to UTF-8, then re-check against UTF-16 */
-			$ov = mb_convert_encoding($s, 'UTF-8', 'UTF-16LE');
-			$tmp = mb_convert_encoding($ov, 'UTF-16LE', 'UTF-8');
-			if ($tmp !== $s) {
-				$ov = 'no Unicode string before wchar #' . $p;
-				return false;
+	/* backslash escape? */
+	if ($ch === "\\") {
+		if ($Sp >= $Sx)
+			return 'unexpected EOS after backslash in String';
+		if ($ch === '"' || $ch === '/' || $ch === "\\")
+			echo $ch;
+		elseif ($ch === 't')
+			echo "\x09";
+		elseif ($ch === 'n')
+			echo "\x0A";
+		elseif ($ch === 'r')
+			echo "\x0D";
+		elseif ($ch === 'b')
+			echo "\x08";
+		elseif ($ch === 'f')
+			echo "\x0C";
+		elseif ($ch !== 'u')
+			return "invalid escape '\\$ch' in String";
+		else {
+			$surrogate = 0;
+ minijson_decode_string_unicode_escape:
+			$wc = 0;
+			if ($Sp + 4 > $Sx)
+				return 'unexpected EOS in Unicode escape sequence';
+			for ($tmp = 1; $tmp <= 4; $tmp++) {
+				$wc <<= 4;
+				if (!minijson_get_hexdigit($s, $Sp, $wc))
+					return "invalid hex digit #$tmp in Unicode escape sequence";
 			}
-			return true;
-		} elseif ($wc == 0x5C) {
-			$wc = $j[$p];
-			unset($j[$p]);
-			++$p;
-			if ($wc == 0x22 ||
-			    $wc == 0x2F ||
-			    $wc == 0x5C) {
-				$s .= chr($wc) . chr(0);
-			} elseif ($wc == 0x62) {
-				$s .= chr(0x08) . chr(0);
-			} elseif ($wc == 0x66) {
-				$s .= chr(0x0C) . chr(0);
-			} elseif ($wc == 0x6E) {
-				$s .= chr(0x0A) . chr(0);
-			} elseif ($wc == 0x72) {
-				$s .= chr(0x0D) . chr(0);
-			} elseif ($wc == 0x74) {
-				$s .= chr(0x09) . chr(0);
-			} elseif ($wc == 0x75) {
-				$v = 0;
-				for ($tmp = 1; $tmp <= 4; $tmp++) {
-					$v <<= 4;
-					if (!minijson_get_hexdigit($j, $p,
-					    $v, $tmp)) {
-						/* pass through error code */
-						return false;
-					}
-				}
-				if ($v < 1 || $v > 0xFFFD) {
-					$ov = 'non-Unicode escape $v before wchar #' . $p;
-					return false;
-				}
-				$s .= chr($v & 0xFF) . chr($v >> 8);
-			} else {
-				$ov = 'invalid escape sequence at wchar #' . $p;
-				return false;
-			}
-		} elseif ($wc > 0xD7FF && $wc < 0xE000) {
-			$ov = 'surrogate $wc at wchar #' . $p;
-			return false;
-		} elseif ($wc > 0xFFFD) {
-			$ov = 'non-Unicode char $wc at wchar #' . $p;
-			return false;
-		} else {
-			$s .= chr($wc & 0xFF) . chr($wc >> 8);
+			if ($surrogate) {
+				if ($wc < 0xDC00 || $wc > 0xDFFF)
+					return sprintf('expected low surrogate, not %04X, after high surrogate %04X', $wc, $surrogate);
+				$wc = 0x10000 + (($surrogate & 0x03FF) << 10) + ($wc & 0x03FF);
+			} elseif ($wc >= 0xD800 && $wc <= 0xDBFF) {
+				$surrogate = $wc;
+				/* UTF-16 expects the low surrogate */
+				if (substr($s, $Sp, 2) !== '\u')
+					return 'expected Unicode escape after high surrogate';
+				$Sp += 2;
+				goto minijson_decode_string_unicode_escape;
+			} elseif ($wc < 1 || $wc > 0xFFFD)
+				return sprintf('non-Unicode escape %04X', $wc);
+ minijson_decode_string_unicode_char:
+			echo $wc; //XXX…
 		}
+		goto minijson_decode_string_loop;
 	}
+	if (($c = ord($ch)) < 0x20)
+		return sprintf('unescaped control character 0x%02X in String', $c);
+	if ($c < 0x80) {
+		echo $ch;
+		goto minijson_decode_string_loop;
+	}
+	/* decode UTF-8 */
+	if ($c < 0xC2 || $c >= 0xF0)
+		return sprintf('invalid UTF-8 lead octet 0x%02X in String', $c);
+	if ($c < 0xE0) {
+		$wc = ($c & 0x1F) << 6;
+		$wmin = 0x80;
+		$Ss = 1;
+	} else {
+		$wc = ($c & 0x0F) << 12;
+		$wmin = 0x800;
+		$Ss = 2;
+	}
+	if ($Sp + $Ss > $Sx)
+		return 'unexpected EOS after UTF-8 lead byte in String';
+	while ($Ss--)
+		if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
+			$wc |= $c << (6 * $Ss);
+		else
+			return sprintf('invalid UTF-8 trail octet 0x%02X in String', $c);
+	if ($wc < $wmin)
+		return sprintf('non-minimalistic encoding for Unicode char %04X in String', $wc);
+
+	if ($wc >= 0xD800 && $wc <= 0xDFFF)
+		return sprintf('unescaped surrogate %04X in String', $wc);
+	if ($wc <= 0xFFFD)
+		goto minijson_decode_string_unicode_char;
+	return sprintf('non-Unicode char %04X in String', $wc);
 }
 
 function minijson_decode_number($s, &$Sp, $Sx, &$ov) {

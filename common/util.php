@@ -213,14 +213,14 @@ function util_html_secure($s) {
 
 /* split text by newlines: ASCII CR-LF / Unix LF; if not found, Macintosh CR */
 function util_split_newlines($text, &$trailing=false, $mop=true) {
-	/* coerce to string */
-	$text = is_array($text) ? implode("\n", $text) : strval($text);
+	if (is_array($text))
+		$text = implode("\n", $text);
 	/*
 	 * First, convert all ASCII CR-LF pairs into ASCII LF, so we
 	 * then have either Unix (one LF) or Macintosh (one CR) line
 	 * endings; any extra CR characters are retained (payload).
 	 */
-	$text = str_replace("\015\012", "\012", $text);
+	$text = str_replace("\015\012", "\012", strval($text));
 	/*
 	 * Now, detect which of the two line ending conventions are
 	 * actually used after the above, with preference on Unix (or

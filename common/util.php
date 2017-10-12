@@ -372,8 +372,7 @@ function util_linequote($s, $pfx, $firstline=false) {
 		return '';
 	if ($firstline && count($s) == 1)
 		return ' ' . $s[0];
-	$s = $pfx . implode("\n" . $pfx, $s);
-	return ($firstline ? "\n" : '') . $s;
+	return ($firstline ? "\n" : '') . $pfx . implode("\n" . $pfx, $s);
 }
 
 /* return integral value (ℕ₀) of passed string if it matches, or false */

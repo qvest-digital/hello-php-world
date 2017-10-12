@@ -207,7 +207,8 @@ function util_unconvert_htmlspecialchars($s) {
 
 /* secure a (possibly already HTML encoded) string */
 function util_html_secure($s) {
-	return util_html_encode(util_unconvert_htmlspecialchars($s));
+	$r = util_html_encode(util_unconvert_htmlspecialchars($s));
+	return is_string($s) && ($r === $s) ? $s : $r;
 }
 
 /* split text by newlines: ASCII CR-LF / Unix LF; if not found, Macintosh CR */

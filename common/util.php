@@ -676,7 +676,6 @@ function util_sendmail($sender, $recip, $hdrs, $body) {
 		}
 		$msg[] = $v;
 	}
-	unset($body);
 
 	/* generate a mail message from that */
 

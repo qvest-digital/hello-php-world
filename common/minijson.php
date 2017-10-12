@@ -247,14 +247,15 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	if (is_int($x)) {
 		$y = (int)$x;
 		$z = strval($y);
-		$x = strval($x);
-		if ($x === $z) {
+		if (strval($x) === $z) {
 			echo $z;
 			return;
 		}
+		goto minijson_encode_number;
 	}
 
 	if (is_float($x)) {
+ minijson_encode_number:
 		$rs = sprintf('%.14e', $x);
 		$v = explode('e', $rs);
 		$rs = rtrim($v[0], '0');

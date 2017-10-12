@@ -253,85 +253,100 @@ function util_sanitise_multiline_submission($text, &$lastnl=false) {
 function util_fixutf8($s) {
 	if ($s === NULL)
 		return NULL;
-	$s = strval($s);
+	if (!is_string($s))
+		$s = strval($s);
+	$Sx = strlen($s);
+	$Sp = 0;
+ util_fixutf8_check:
+	if ($Sp >= $Sx)
+		return $s;
+	/* read next octet */
+	$c = ord(($ch = $s[$Sp++]));
+	/* ASCII? */
+	if ($c < 0x80)
+		goto util_fixutf8_check;
+	/* UTF-8 lead byte */
+	if ($c < 0xC2 || $c >= 0xF8) {
+		goto util_fixutf8_chkfail;
+	} elseif ($c < 0xE0) {
+		$wc = ($c & 0x1F) << 6;
+		$wmin = 0x80;
+		$Ss = 1;
+	} elseif ($c < 0xF0) {
+		$wc = ($c & 0x0F) << 12;
+		$wmin = 0x800;
+		$Ss = 2;
+	} else {
+		$wc = ($c & 0x07) << 18;
+		$wmin = 0x10000;
+		$Ss = 3;
+	}
+	/* UTF-8 trail bytes */
+	if ($Sp + $Ss > $Sx)
+		goto util_fixutf8_chkfail;
+	while ($Ss--)
+		if (($c = ord($s[$Sp++]) ^ 0x80) <= 0x3F)
+			$wc |= $c << (6 * $Ss);
+		else
+			goto util_fixutf8_chkfail;
+	/* complete wide character */
+	if ($wc < $wmin)
+		goto util_fixutf8_chkfail;
 
-	if (!function_exists('mb_internal_encoding') ||
-	    !function_exists('mb_convert_encoding')) {
-		/* we cannot deal with this without the mb functions */
-		return preg_replace('/[^\x01-\x7E]/', '?', $s);
-	}
-	/* save state */
-	$mb_encoding = mb_internal_encoding();
-	/* we use Unicode */
-	mb_internal_encoding('UTF-8');
-	/* check encoding */
-	$w = mb_convert_encoding($s, 'UTF-16LE', 'UTF-8');
-	$n = mb_convert_encoding($w, 'UTF-8', 'UTF-16LE');
-	unset($w);
-	if ($n === $s) {
-		/* correct UTF-8, restore state and return */
-		if ($mb_encoding !== false)
-			mb_internal_encoding($mb_encoding);
-		return ($n);
-	}
-	unset($n);
-	/* parse as cp1252 loosely */
-	$n = str_split($s);
-	$w = '';
-	foreach ($n as $v) {
-		switch (($c = ord($v[0]))) {
-		case 0x80: $wc = 0x20AC; break;
-		case 0x81: $wc = 0x003F; break;	/* not in cp1252 */
-		case 0x82: $wc = 0x201A; break;
-		case 0x83: $wc = 0x0192; break;
-		case 0x84: $wc = 0x201E; break;
-		case 0x85: $wc = 0x2026; break;
-		case 0x86: $wc = 0x2020; break;
-		case 0x87: $wc = 0x2021; break;
-		case 0x88: $wc = 0x02C6; break;
-		case 0x89: $wc = 0x2030; break;
-		case 0x8A: $wc = 0x0160; break;
-		case 0x8B: $wc = 0x2039; break;
-		case 0x8C: $wc = 0x0152; break;
-		case 0x8D: $wc = 0x003F; break;	/* not in cp1252 */
-		case 0x8E: $wc = 0x017D; break;
-		case 0x8F: $wc = 0x003F; break;	/* not in cp1252 */
-		case 0x90: $wc = 0x003F; break;	/* not in cp1252 */
-		case 0x91: $wc = 0x2018; break;
-		case 0x92: $wc = 0x2019; break;
-		case 0x93: $wc = 0x201C; break;
-		case 0x94: $wc = 0x201D; break;
-		case 0x95: $wc = 0x2022; break;
-		case 0x96: $wc = 0x2013; break;
-		case 0x97: $wc = 0x2014; break;
-		case 0x98: $wc = 0x02DC; break;
-		case 0x99: $wc = 0x2122; break;
-		case 0x9A: $wc = 0x0161; break;
-		case 0x9B: $wc = 0x203A; break;
-		case 0x9C: $wc = 0x0153; break;
-		case 0x9D: $wc = 0x003F; break;	/* not in cp1252 */
-		case 0x9E: $wc = 0x017E; break;
-		case 0x9F: $wc = 0x0178; break;
-		default: $wc = $c; break;
+	/* process next char */
+	goto util_fixutf8_check;
+
+ util_fixutf8_chkfail:
+	/* failed, convert using latin1/cp1252 mapping */
+	ob_start();
+	$Sp = 0;
+	while ($Sp < $Sx) {
+		$c = ord($s[$Sp++]);
+		switch ($c) {
+		case 0x80: $c = 0x20AC; break;
+		case 0x81: $c = 0x003F; break;	/* not in cp1252 */
+		case 0x82: $c = 0x201A; break;
+		case 0x83: $c = 0x0192; break;
+		case 0x84: $c = 0x201E; break;
+		case 0x85: $c = 0x2026; break;
+		case 0x86: $c = 0x2020; break;
+		case 0x87: $c = 0x2021; break;
+		case 0x88: $c = 0x02C6; break;
+		case 0x89: $c = 0x2030; break;
+		case 0x8A: $c = 0x0160; break;
+		case 0x8B: $c = 0x2039; break;
+		case 0x8C: $c = 0x0152; break;
+		case 0x8D: $c = 0x003F; break;	/* not in cp1252 */
+		case 0x8E: $c = 0x017D; break;
+		case 0x8F: $c = 0x003F; break;	/* not in cp1252 */
+		case 0x90: $c = 0x003F; break;	/* not in cp1252 */
+		case 0x91: $c = 0x2018; break;
+		case 0x92: $c = 0x2019; break;
+		case 0x93: $c = 0x201C; break;
+		case 0x94: $c = 0x201D; break;
+		case 0x95: $c = 0x2022; break;
+		case 0x96: $c = 0x2013; break;
+		case 0x97: $c = 0x2014; break;
+		case 0x98: $c = 0x02DC; break;
+		case 0x99: $c = 0x2122; break;
+		case 0x9A: $c = 0x0161; break;
+		case 0x9B: $c = 0x203A; break;
+		case 0x9C: $c = 0x0153; break;
+		case 0x9D: $c = 0x003F; break;	/* not in cp1252 */
+		case 0x9E: $c = 0x017E; break;
+		case 0x9F: $c = 0x0178; break;
 		}
-		$w .= chr($wc & 0xFF) . chr($wc >> 8);
+		if ($c < 0x80)
+			echo chr($c);
+		elseif ($c < 0x0800)
+			echo chr(0xC0 | ($c >> 6)) .
+			    chr(0x80 | ($c & 0x3F));
+		else /* no mapping outside BMP */
+			echo chr(0xE0 | ($c >> 12)) .
+			    chr(0x80 | (($c >> 6) & 0x3F)) .
+			    chr(0x80 | ($c & 0x3F));
 	}
-	/* convert to UTF-8, then double-check */
-	$n = mb_convert_encoding($w, 'UTF-8', 'UTF-16LE');
-	$x = mb_convert_encoding($n, 'UTF-16LE', 'UTF-8');
-	$ok = $w === $x;
-	unset($w);
-	unset($x);
-	/* restore caller state saved */
-	if ($mb_encoding !== false)
-		mb_internal_encoding($mb_encoding);
-	if (!$ok) {
-		/* something went wrong in Unicode land */
-		unset($n);
-		return preg_replace('/[^\x01-\x7E]/', '?', $s);
-	}
-	/* return UTF-8 result string */
-	return $n;
+	return ob_get_clean();
 }
 /* convert text to XML-safe UTF-8 (most strict) or question marks; nil⇒nil */
 function util_xmlutf8($s, $didfix=false) {

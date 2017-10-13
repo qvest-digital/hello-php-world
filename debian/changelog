@@ -12,8 +12,9 @@ hello-php-world (22) tarent; urgency=high
   * Treat unknown non-scalars as Object; improve rendering of resources
   * Tons of micro-optimisations in miniJSON code, at cost of using goto ☺
   * Fix decoding the one-octet JSON string “0”
+  * Bump Policy (no changes)
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 13 Oct 2017 16:57:41 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 13 Oct 2017 16:59:36 +0200
 
 hello-php-world (21) tarent; urgency=low
 

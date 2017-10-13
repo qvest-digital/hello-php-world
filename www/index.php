@@ -9,7 +9,9 @@ $logId = db_insert_one('id',
     'INSERT INTO log (ts, ip) VALUES (now(), $1)',
     array($_SERVER["REMOTE_ADDR"]));
 
-html_header(array('title' => 'Hello PHP World v' . HPW_VERSION));
+$html = new HpwWeb();
+$html->setTitle('Hello PHP World v' . HPW_VERSION);
+$html->showHeader();
 
 $res = db_query_params('SELECT version FROM z_schema_version', array());
 $schemavsn = false;
@@ -46,4 +48,4 @@ if ($schemavsn === false) {
 
 echo '<hr /><p><a href="pi.php">PHPinfo();</a></p>' . "\n";
 
-html_footer();
+$html->showFooter();

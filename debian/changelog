@@ -1,3 +1,20 @@
+hello-php-world (22) tarent; urgency=high
+
+  * Remove HpwDb demo class as it was inadequate as example
+  * Move simple html_{header,footer} to new HpwWeb demo class
+  * Rewrite good parts of miniJSON and util.php:
+    - Remove minijson_encode_internal function (use minijson_encode)
+    - Avoid variable copying as much as possible
+    - Reduce memory usage and runtime immensely
+  * Improve comment formatting; fix typography
+  * For ECMAscript compatibility, escape U+2028 and U+2029 in JSON output
+  * Improve __main__ header, skips defining it if already extant
+  * Treat unknown non-scalars as Object; improve rendering of resources
+  * Tons of micro-optimisations in miniJSON code, at cost of using goto ☺
+  * Fix decoding the one-octet JSON string “0”
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 13 Oct 2017 16:57:41 +0200
+
 hello-php-world (21) tarent; urgency=low
 
   * Reduce use of (temporary) memory in utility functions

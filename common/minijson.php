@@ -323,8 +323,32 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 			'_strval' => strval($x),
 			'_type' => $rsrctype,
 		);
-		if ($rsrctype === 'stream')
-			$rs['stream_meta'] = stream_get_meta_data($x);
+		switch ($rsrctype) {
+		case 'stream':
+			$rs['info'] = stream_get_meta_data($x);
+			break;
+		case 'curl':
+			$rs['info'] = curl_getinfo($x);
+			$rs['private'] = curl_getinfo($x, CURLINFO_PRIVATE);
+			break;
+		case 'GMP integer':
+			$rs['value'] = gmp_strval($x);
+			break;
+		case 'OpenSSL key':
+			$rs['info'] = openssl_pkey_get_details($x);
+			break;
+		case 'pgsql link':
+		case 'pgsql link persistent':
+			$rs['err'] = pg_last_error($x); // must be first
+			$rs['db'] = pg_dbname($x);
+			$rs['host'] = pg_host($x);
+			$rs['status'] = pg_connection_status($x);
+			$rs['txn'] = pg_transaction_status($x);
+			break;
+		case 'pgsql result':
+			$rs['status'] = pg_result_status($x, PGSQL_STATUS_STRING);
+			break;
+		}
 		echo '{' . $xi . '"\u0000resource"' . $Sd;
 		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
 		echo $xr . '}';

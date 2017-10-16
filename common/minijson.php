@@ -314,7 +314,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	if (!is_null($rsrctype = @get_resource_type($x))) {
+	if (!is_object($x) && !is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc) {
 			minijson_encode_ob_string($x, $truncsz);
 			return;

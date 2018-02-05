@@ -1,2 +1,8 @@
 # no, thanks!
 hello-php-world source: no-dep5-copyright
+
+# we wish to facilitate backports
+hello-php-world source: package-uses-old-debhelper-compat-version 9
+
+# old location is accessible by backports, so keep using it
+hello-php-world source: package-uses-deprecated-source-override-location

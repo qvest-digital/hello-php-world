@@ -24,6 +24,8 @@
  * of said person’s immediate fault when using the work as intended.
  */
 
+require_once(dirname(__FILE__) . '/../phpFUnit.php');
+
 require_once(dirname(__FILE__) . '/../../common/minijson.php');
 
 class Minijson_Tests extends PHPUnit_Framework_TestCase {

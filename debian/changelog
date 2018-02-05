@@ -2,8 +2,9 @@ hello-php-world (24) tarent; urgency=low
 
   * Bump Policy, no relevant changes
   * Update for the introduction of PHP 7.2 into sid
+  * Work around PHPUnit incompatibility with itself…
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 05 Feb 2018 18:16:34 +0100
+ -- Thorsten Glaser <tg@mirbsd.de>  Mon, 05 Feb 2018 18:42:00 +0100
 
 hello-php-world (23) tarent; urgency=medium
 

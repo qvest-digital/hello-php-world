@@ -1,8 +1,9 @@
-hello-php-world (24) tarent; urgency=medium
+hello-php-world (24) tarent; urgency=low
 
   * Bump Policy, no relevant changes
+  * Update for the introduction of PHP 7.2 into sid
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 05 Feb 2018 18:14:42 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 05 Feb 2018 18:16:34 +0100
 
 hello-php-world (23) tarent; urgency=medium
 

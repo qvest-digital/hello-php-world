@@ -101,6 +101,14 @@ syntaxcheck71:
 	done; exit $$rv
 	@echo done.
 
+syntaxcheck72:
+	@echo Running syntax checks, please verify output manually.
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+		php7.2 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
+		(( PIPESTATUS[0] )) && rv=1; \
+	done; exit $$rv
+	@echo done.
+
 CLEANFILES+=var/version.php www/artifact-version
 var/version.php: debian/changelog
 	printf '%s\n' '<?php' '' \
@@ -131,4 +139,4 @@ all: metacheck syntaxcheck dbc-generated var/autoldr.php var/version.php
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 dbc-generated
+.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 dbc-generated

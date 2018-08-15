@@ -3,8 +3,9 @@ hello-php-world (25) tarent; urgency=low
   * Bump Policy
     - R³:no
     - Handle terse build option; build even more verbosely by default
+  * More lintian overrides
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 15 Aug 2018 15:46:59 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 15 Aug 2018 15:50:34 +0200
 
 hello-php-world (24) tarent; urgency=low
 

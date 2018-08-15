@@ -4,10 +4,11 @@ Bugs: mailto:t.glaser@tarent.de
 Section: web
 Priority: optional
 Maintainer: Thorsten Glaser <t.glaser@tarent.de>
-Standards-Version: 4.1.3
+Standards-Version: 4.2.0
 Build-Depends: debhelper (>= 9), dbconfig-common, mksh, moreutils, pcregrep,
  php5-cli | php-cli, php-mbstring | php5-cli, phpab, phpunit
 Homepage: https://www.tarent.de/
+Rules-Requires-Root: no
 VCS-Browser: https://evolvis.org/plugins/scmgit/cgi-bin/gitweb.cgi?p=shellsnippets/hello-php-world.git
 VCS-git: https://evolvis.org/anonscm/git/shellsnippets/hello-php-world.git
 

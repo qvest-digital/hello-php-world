@@ -2,8 +2,9 @@ hello-php-world (26) tarent; urgency=low
 
   * Policy 4.2.1.1
   * Add more lintian overrides
+  * Support PHP 7.3
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 10 Oct 2018 17:10:59 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Wed, 10 Oct 2018 17:17:58 +0200
 
 hello-php-world (25) tarent; urgency=low
 

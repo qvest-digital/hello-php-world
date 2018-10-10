@@ -3,6 +3,7 @@
 ifeq (,$(findstring terse,${DEB_BUILD_OPTIONS}))
 export DH_VERBOSE=1
 export V=1
+export VERBOSE=1
 endif
 
 %:

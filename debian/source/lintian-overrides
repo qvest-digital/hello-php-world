@@ -1,10 +1,7 @@
-# no, thanks!
-hello-php-world source: no-dep5-copyright
-
 # we wish to facilitate backports
 hello-php-world source: package-uses-old-debhelper-compat-version 9
 hello-php-world source: debian-source-options-has-custom-compression-settings
 hello-php-world source: debian-rules-should-not-use-custom-compression-settings
 
-# old location is accessible by backports, so keep using it
-hello-php-world source: package-uses-deprecated-source-override-location
+# no, thanks!
+hello-php-world source: no-dep5-copyright

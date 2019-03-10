@@ -7,9 +7,9 @@ hello-php-world: apache2-reverse-dependency-calls-invoke-rc.d prerm
 # this is correct, debconf is used only indirectly via dbconfig-common
 hello-php-world: no-debconf-templates
 
-# this package is not currently uploaded to Debian proper,
-# although a suggestion to do so has been posted to the PHP maintainers
-hello-php-world: bugs-field-does-not-refer-to-debian-infrastructure
+# this package is not currently uploaded to Debian proper, although a
+# suggestion to do that was posted to and ignored by the PHP maintainers
+hello-php-world: bugs-field-does-not-refer-to-debian-infrastructure mailto:t.glaser@tarent.de
 
 # deliberate, not a “documentation” file
 hello-php-world: package-contains-documentation-outside-usr-share-doc var/lib/hello-php-world/README

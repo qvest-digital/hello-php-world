@@ -81,9 +81,11 @@ dbc_generate_include=php:/var/lib/hello-php-world/dbconfig.inc
 #dbc_pgsql_createdb_encoding="SQL_ASCII' lc_collate='C"
 # hack to force 'C' locale and UTF-8 encoding (for correctness)
 dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
-# use UTF-8 encoding and server locale, in the hope that works
-# (correct collation, when desired, although this is slower and
-# may break replication, see https://t.co/1dwfrabn8j for details)
+# use UTF-8 encoding and server locale, when desired (may break
+# expectations, as it may sort case-insensitively and ignore
+# intra-word punctuation (a_b < ac_d < a_e); it is also slower);
+# hoping this works, as replication may break; details at:
+# https://www.postgresql.org/message-id/BA6132ED-1F6B-4A0B-AC22-81278F5AB81E@tripadvisor.com
 #dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
 . /usr/share/dbconfig-common/dpkg/postinst.pgsql

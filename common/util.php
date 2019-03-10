@@ -478,11 +478,11 @@ function util_emailcase($s) {
  * coding of them this function performs, by the standards.
  *
  * Suggested further reading:
- * ‣ http://me.veekun.com/blog/2012/04/09/php-a-fractal-of-bad-design/
- * ‣ http://gynvael.coldwind.pl/?id=492
+ * ‣ https://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/
+ * ‣ https://gynvael.coldwind.pl/?id=492
  * ‣ https://en.wikiquote.org/wiki/Rasmus_Lerdorf
  * ‣ http://www.rfc-editor.org/rfc/rfc822.txt and its successors
- * ‣ http://www.cs.tut.fi/~jkorpela/rfc/822addr.html
+ * ‣ http://jkorpela.fi/rfc/822addr.html
  */
 
 /**

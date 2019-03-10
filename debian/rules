@@ -6,6 +6,9 @@ export V=1
 export VERBOSE=1
 endif
 
+LC_ALL:=C
+export LC_ALL
+
 %:
 	dh $@
 

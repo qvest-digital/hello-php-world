@@ -2,8 +2,10 @@ hello-php-world (27) UNRELEASED; urgency=medium
 
   * Update links
   * Document another issue arising from not using the "C" collation
+  * Policy 4.3.0.3 (no changes)
+  * Use the C locale consistently during the build
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Sun, 10 Mar 2019 16:47:28 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Sun, 10 Mar 2019 16:52:32 +0100
 
 hello-php-world (26) tarent; urgency=low
 

@@ -1,5 +1,5 @@
 SHELL:=/bin/mksh
-BINFILES:='\.(png|jpe?g|gif|deb|rpm|vpp|rtf|ttf)$$'
+BINFILES:='\.(png|jpe?g|gif|deb|rpm|vpp|rtf)$$'
 
 all:
 

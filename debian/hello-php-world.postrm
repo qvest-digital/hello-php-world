@@ -24,12 +24,14 @@ set -e
 # Called when preinst fails; package is not unpacked. Essential packages
 # and (unpacked or Half-Configured) Pre-Depends are available.
 
+HPW_package=hello-php-world
+
 # Initialise debconf
 . /usr/share/debconf/confmodule
 # Initialise dbconfig-common
 dbc_generate_include_owner=root:www-data
 dbc_generate_include_perms=0640
-dbc_generate_include=php:/var/lib/hello-php-world/dbconfig.inc
+dbc_generate_include=php:/var/lib/$HPW_package/dbconfig.inc
 # hack to force 'C' locale and ASCII encoding (for speed)
 #dbc_pgsql_createdb_encoding="SQL_ASCII' lc_collate='C"
 # hack to force 'C' locale and UTF-8 encoding (for correctness)
@@ -43,7 +45,7 @@ dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
 dbc_authmethod_user=password
 if test -f /usr/share/dbconfig-common/dpkg/postrm.pgsql; then
 	. /usr/share/dbconfig-common/dpkg/postrm.pgsql
-	dbc_go hello-php-world "$@"
+	dbc_go "$HPW_package" "$@"
 fi
 
 # custom actions
@@ -53,13 +55,13 @@ remove)
 
 purge)
 	# unregister
-	rm -f /var/lib/hello-php-world/dbconfig.inc
+	rm -f "/var/lib/$HPW_package/dbconfig.inc"
 	if command -v ucf >/dev/null 2>&1; then
-		ucf --purge /var/lib/hello-php-world/dbconfig.inc
-		ucfr --purge hello-php-world /var/lib/hello-php-world/dbconfig.inc
+		ucf --purge "/var/lib/$HPW_package/dbconfig.inc"
+		ucfr --purge "$HPW_package" "/var/lib/$HPW_package/dbconfig.inc"
 	fi
 	# remove state/dynamic data
-	rm -rf /var/lib/hello-php-world
+	rm -rf "/var/lib/$HPW_package"
 	;;
 
 upgrade|disappear|failed-upgrade|abort-install|abort-upgrade)

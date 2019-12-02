@@ -18,6 +18,8 @@ set -e
 # Called when 'old-prerm "upgrade"' fails; new package not unpacked, all
 # other constraints the same as above.
 
+HPW_package=hello-php-world
+
 test -n "$HPW_PRERM_DIDWEB" || \
     if test -e /usr/share/apache2/apache2-maintscript-helper; then
 	. /usr/share/apache2/apache2-maintscript-helper
@@ -32,15 +34,15 @@ do_webserver_config() {
 
 	if test -e /usr/share/apache2/apache2-maintscript-helper; then
 		# Apache 2.4
-		apache2_invoke disconf hello-php-world || exit $?
+		apache2_invoke disconf "$HPW_package" || exit $?
 	elif test x"$apache22common_state" = x"installed" || \
 	    test x"$apache22common_state" = x"unpacked"; then
 		# Apache 2.2
-		test '!' -L /etc/apache2/conf.d/hello-php-world.conf || \
-		    rm /etc/apache2/conf.d/hello-php-world.conf
+		test '!' -L "/etc/apache2/conf.d/$HPW_package.conf" || \
+		    rm "/etc/apache2/conf.d/$HPW_package.conf"
 	else
 		# neither Apache 2.2 nor Apache 2.4
-		echo >&2 "I: no web server configured for hello-php-world"
+		echo >&2 "I: no web server configured for $HPW_package"
 		return 0
 	fi
 	if invoke-rc.d --disclose-deny apache2 status >/dev/null 2>&1; then
@@ -81,7 +83,7 @@ esac
 # Initialise dbconfig-common
 dbc_generate_include_owner=root:www-data
 dbc_generate_include_perms=0640
-dbc_generate_include=php:/var/lib/hello-php-world/dbconfig.inc
+dbc_generate_include=php:/var/lib/$HPW_package/dbconfig.inc
 # hack to force 'C' locale and ASCII encoding (for speed)
 #dbc_pgsql_createdb_encoding="SQL_ASCII' lc_collate='C"
 # hack to force 'C' locale and UTF-8 encoding (for correctness)
@@ -94,7 +96,7 @@ dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
 #dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
 . /usr/share/dbconfig-common/dpkg/prerm.pgsql
-dbc_go hello-php-world "$@"
+dbc_go "$HPW_package" "$@"
 
 # custom actions
 case $1 in

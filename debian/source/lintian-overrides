@@ -1,7 +1,12 @@
 # we wish to facilitate backports
-hello-php-world source: package-uses-old-debhelper-compat-version 9
-hello-php-world source: debian-source-options-has-custom-compression-settings
 hello-php-world source: debian-rules-should-not-use-custom-compression-settings
+hello-php-world source: debian-source-options-has-custom-compression-settings
+
+# it uses both but a workaround for sadt only setting ADTTMP is needed
+hello-php-world source: uses-deprecated-adttmp debian/tests/phpunit (line 4)
 
 # no, thanks!
 hello-php-world source: no-dep5-copyright
+
+# we wish to facilitate backports
+hello-php-world source: package-uses-old-debhelper-compat-version 9

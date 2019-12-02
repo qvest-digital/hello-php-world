@@ -4,7 +4,7 @@ Bugs: mailto:t.glaser@tarent.de
 Section: web
 Priority: optional
 Maintainer: Thorsten Glaser <t.glaser@tarent.de>
-Standards-Version: 4.3.0
+Standards-Version: 4.4.1
 Build-Depends: debhelper (>= 9), dbconfig-common, mksh, moreutils, pcregrep,
  php5-cli | php-cli, php-mbstring | php5-cli, phpab, phpunit
 Homepage: https://www.tarent.de/
@@ -24,4 +24,4 @@ Description: Hello World example for PHP packaging with PostgreSQL
  written in PHP, using a locally set up PostgreSQL database cluster,
  configured with dbconfig-common, for Debian. The recommended web
  server setup here is Apache 2 (both 2.2 and 2.4 are supported)
- with mod_php5.
+ with mod_php5 or mod_php (version 7.x or up).

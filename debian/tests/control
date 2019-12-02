@@ -29,3 +29,7 @@ Restrictions: allow-stderr
 Tests: syntax73
 Depends: @, mksh, php7.3-cli, php7.3-mbstring
 Restrictions: allow-stderr
+
+Tests: syntax74
+Depends: @, mksh, php7.4-cli, php7.4-mbstring
+Restrictions: allow-stderr

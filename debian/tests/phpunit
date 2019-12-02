@@ -17,4 +17,4 @@ ln -s /var/lib/hello-php-world var
 
 # actually do run the tests
 cd tests
-exec phpunit .
+exec phpunit --do-not-cache-result .

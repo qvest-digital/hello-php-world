@@ -152,7 +152,10 @@ var/autoldr.php:
 CLEANFILES+=dbconfig/install/*~ var/*~
 all: metacheck syntaxcheck dbc-generated var/autoldr.php var/version.php
 
+check:
+	cd tests && exec phpunit --do-not-cache-result .
+
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated
+.PHONY: all check clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated

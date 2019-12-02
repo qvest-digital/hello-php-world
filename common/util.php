@@ -21,7 +21,7 @@
 
 error_reporting(-1);
 
-require_once(dirname(__FILE__) . '/version.php');
+require_once(dirname(__FILE__) . '/VERSION.php');
 
 /* replace this with your own custom proper error handling */
 function util_logerr($loglevel, $s) {
@@ -723,7 +723,7 @@ function minijson_encdbg($x, $ri='') {
 spl_autoload_register(function ($cls) {
 	static $classlist = NULL;
 	if ($classlist === NULL) {
-		require_once('/var/lib/hello-php-world/autoldr.php');
+		require_once(dirname(__FILE__) . '/AUTOLDR.php');
 	}
 	if (isset($classlist[$cls])) {
 		require_once('/usr/share/hello-php-world/' . $classlist[$cls]);

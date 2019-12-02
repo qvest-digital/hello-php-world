@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+ * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -231,8 +231,8 @@ function util_split_newlines($text, &$trailing=false, $mop=true) {
 	 * (default) which removes them for consistency and security).
 	 */
 	$macintosh = strpos($text, "\012") === false;
-	if ($mop && !$macintosh)
-		$text = str_replace("\015", '', $text);
+	if ($mop)
+		$text = str_replace($macintosh ? "\012" : "\015", '', $text);
 	$nlstr = $macintosh ? "\015" : "\012";
 	/* remove trailing newline indicating in $trailing if one existed */
 	if (($trailing = strlen($text) < 1 ? false :
@@ -242,8 +242,8 @@ function util_split_newlines($text, &$trailing=false, $mop=true) {
 }
 
 /* convert text to ASCII CR-LF by logical newlines, cf. above */
-function util_sanitise_multiline_submission($text, &$lastnl=false) {
-	$r = implode("\015\012", util_split_newlines($text, $lastnl));
+function util_sanitise_multiline_submission($text, &$lastnl=false, $mop=true) {
+	$r = implode("\015\012", util_split_newlines($text, $lastnl, $mop));
 	if ($lastnl)
 		$r .= "\015\012";
 	return is_string($text) && ($r === $text) ? $text : $r;

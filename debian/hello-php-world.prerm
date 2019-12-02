@@ -95,8 +95,10 @@ dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
 # https://www.postgresql.org/message-id/BA6132ED-1F6B-4A0B-AC22-81278F5AB81E@tripadvisor.com
 #dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
-. /usr/share/dbconfig-common/dpkg/prerm.pgsql
-dbc_go "$HPW_package" "$@"
+if test -f /usr/share/dbconfig-common/dpkg/prerm.pgsql; then
+	. /usr/share/dbconfig-common/dpkg/prerm.pgsql
+	dbc_go "$HPW_package" "$@"
+fi
 
 # custom actions
 case $1 in

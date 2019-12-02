@@ -28,8 +28,25 @@ class Util_Tests extends PHPUnit_Framework_TestCase {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/util.php');
 
-		/* currently just a syntax and load test */
-		$this->assertTrue(true);
+		/* very basic, sporadic, tests */
+
+		$this->assertEquals('f&amp;o',
+		    util_html_secure('f&amp;o'));
+		$this->assertEquals('f&amp;o',
+		    util_html_secure('f&o'));
+		$this->assertEquals('f&amp;o&amp;bar',
+		    util_html_secure('f&amp;o&bar'));
+
+		$this->assertEquals("€\fa",
+		    util_fixutf8("\x80\x0Ca"));
+		$this->assertEquals("€?a",
+		    util_xmlutf8("\x80\x0Ca"));
+
+		$rn = util_randnum(0x0F, 2);
+		$this->assertTrue($rn === 0 || $rn === 1 || $rn === 2);
+
+		$this->assertStringContainsString('"uri": "php://stdout",',
+		    minijson_encdbg(STDOUT));
 
 		error_reporting($s);
 	}

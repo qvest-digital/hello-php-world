@@ -3,8 +3,9 @@ hello-php-world (28) UNRELEASED; urgency=low
   * Enable error_reporting(-1) during parsing minijson and testing it
   * Modernise packaging
   * Add PHP 7.4 as listed version
+  * Test more of the included code
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 02 Dec 2019 23:44:28 +0100
+ -- Thorsten Glaser <tg@mirbsd.de>  Tue, 03 Dec 2019 00:45:21 +0100
 
 hello-php-world (27) tarent; urgency=low
 

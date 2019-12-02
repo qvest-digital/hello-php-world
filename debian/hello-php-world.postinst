@@ -9,12 +9,12 @@ set -e
 # are no circular dependencies, configured.
 #
 # * old-postinst "abort-upgrade" $new_version
-# * conflictors-postinst "abort-remove" "in-favour" $package
+# * old-postinst "abort-remove"
+# * conflictors-postinst "abort-remove" "in-favour" $new_package
 #	$new_version
-# * postinst "abort-remove"
 # * deconfigureds-postinst "abort-deconfigure" "in-favour"
-#	$failed_install_package $fip_version ["removing"
-#	$conflicting_package $cp_version]
+#	$failed_install_package $fip_version		# new-package
+#	["removing" $conflicting_package $cp_version]	# old-package
 # The package is unpacked; all dependencies are at least Half-Installed,
 # previously been configured, and not removed. In some error situations,
 # dependencies may not be even fully unpacked.
@@ -107,7 +107,7 @@ triggered)
 	;;
 
 *)
-	echo >&2 "postinst called with unknown subcommand '$1'"
+	echo >&2 "E: postinst called with unknown subcommand '$1'"
 	exit 1
 	;;
 esac

@@ -7,7 +7,7 @@ set -e
 # * postrm "remove"
 # * postrm "purge"
 # * old-postrm "upgrade" $new_version
-# * disappearers-postrm "disappear" $overwriter $o_version
+# * disappearers-postrm "disappear" $overwriter_pkg $overwriter_version
 # The package's files have been removed or replaced; only Essential pak-
 # kages may be available; skip gracefully actions requiring Depends.
 #
@@ -18,7 +18,7 @@ set -e
 # configured and never removed but may be Unpacked or Half-Configured.
 #
 # * new-postrm "abort-install" [$old_version]
-# * new-postrm "abort-install" $old_version $new_version # 1.18.5, stretch
+# * new-postrm "abort-install" [$old_version $new_version] # 1.18.5, stretch
 # * new-postrm "abort-upgrade" $old_version
 # * new-postrm "abort-upgrade" $old_version $new_version # 1.18.5, stretch
 # Called when preinst fails; package is not unpacked. Essential packages
@@ -54,7 +54,7 @@ remove)
 purge)
 	# unregister
 	rm -f /var/lib/hello-php-world/dbconfig.inc
-	if which ucf >/dev/null 2>&1; then
+	if command -v ucf >/dev/null 2>&1; then
 		ucf --purge /var/lib/hello-php-world/dbconfig.inc
 		ucfr --purge hello-php-world /var/lib/hello-php-world/dbconfig.inc
 	fi
@@ -66,7 +66,7 @@ upgrade|disappear|failed-upgrade|abort-install|abort-upgrade)
 	;;
 
 *)
-	echo >&2 "postrm called with unknown subcommand '$1'"
+	echo >&2 "E: postrm called with unknown subcommand '$1'"
 	exit 1
 	;;
 esac

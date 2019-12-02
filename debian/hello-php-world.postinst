@@ -27,36 +27,54 @@ HPW_package=hello-php-world
 if test -e /usr/share/apache2/apache2-maintscript-helper; then
 	. /usr/share/apache2/apache2-maintscript-helper
 fi
+detect_webserver() {
+	# Apache 2.4
+	if test -e /usr/share/apache2/apache2-maintscript-helper; then
+		echo apache24
+		return 0
+	fi
+
+	# Apache 2.2 maybe then?
+	set -- $(LC_ALL=C dpkg-query -f '${Status}' -W 'apache2.2-common' \
+	    2>/dev/null || :)
+	case $3 in
+	unpacked|half-configured|triggers-awaited|triggers-pending|installed)
+		echo apache22
+		return 0
+		;;
+	esac
+
+	# none or others, which are not currently supported
+	echo no
+}
 do_webserver_config() {
 	# set up Apache configuration
-	local apache22common_state nl='
+	local nl='
 '
 
-	apache22common_state=$(dpkg-query -f '${Status}' -W 'apache2.2-common' \
-	    2>/dev/null | awk '{print $3}' || :)
-
-	if test -e /usr/share/apache2/apache2-maintscript-helper; then
-		# Apache 2.4
+	case $(detect_webserver) in
+	apache24)
 		apache2_invoke enconf "$HPW_package" || exit $?
-	elif test x"$apache22common_state" = x"installed" || \
-	    test x"$apache22common_state" = x"unpacked"; then
-		# Apache 2.2
+		;;
+	apache22)
 		if test -d /etc/apache2/conf.d/ && \
 		    test '!' -L "/etc/apache2/conf.d/$HPW_package.conf"; then
 			ln -s "../conf-available/$HPW_package.conf" \
 			    "/etc/apache2/conf.d/$HPW_package.conf"
 		fi
-	else
-		# neither Apache 2.2 nor Apache 2.4
+		;;
+	*)
 		echo >&2 "I: no web server configured for $HPW_package"
 		return 0
-	fi
+		;;
+	esac
 	if invoke-rc.d --disclose-deny apache2 status >/dev/null 2>&1; then
 		echo >&2 "I: restarting Apache to flush the code cache"
 		(invoke-rc.d apache2 stop || :)
-		set +e # ignore Debian Policy here, I’m a shell author FFS!
-		x=$(apache2ctl configtest 2>&1)
+		set +e # necessary to catch errorlevel
+		x=$(LC_ALL=C apache2ctl configtest 2>&1)
 		rv=$?
+		set -e # back to Debian Policy land
 		case $rv:$x in
 		0:Syntax\ OK|0:*${nl}Syntax\ OK)
 			invoke-rc.d apache2 start
@@ -69,7 +87,6 @@ $x
 EOF
 			;;
 		esac
-		set -e # back to Debian Policy land
 	fi
 }
 

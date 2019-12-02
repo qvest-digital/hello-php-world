@@ -21,7 +21,7 @@
 
 error_reporting(-1);
 
-require_once('/var/lib/hello-php-world/version.php');
+require_once(dirname(__FILE__) . '/version.php');
 
 /* replace this with your own custom proper error handling */
 function util_logerr($loglevel, $s) {

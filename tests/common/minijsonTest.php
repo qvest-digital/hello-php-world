@@ -26,8 +26,6 @@
 
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
-require_once(dirname(__FILE__) . '/../../common/minijson.php');
-
 class Minijson_Tests extends PHPUnit_Framework_TestCase {
 	/****************************************************************/
 	/* $s_orig [parse] print_r->$s_printr [encode] $s_ecompact or $s_epadded */
@@ -376,6 +374,9 @@ class Minijson_Tests extends PHPUnit_Framework_TestCase {
 /****************************************************************/
 
 	public function testMiniJson() {
+		$s = error_reporting(-1);
+		require_once(dirname(__FILE__) . '/../../common/minijson.php');
+
 		$parsed = 'bla';
 		$presult = minijson_decode($this->s_orig, $parsed);
 		$this->assertTrue($presult);
@@ -403,5 +404,7 @@ class Minijson_Tests extends PHPUnit_Framework_TestCase {
 
 		$printrd = print_r($reparsed, true);
 		$this->assertEquals($this->s_printrs, $printrd, 'reparsed-padded');
+
+		error_reporting($s);
 	}
 }

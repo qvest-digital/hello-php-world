@@ -1,3 +1,9 @@
+hello-php-world (28) UNRELEASED; urgency=low
+
+  * Enable error_reporting(-1) during parsing minijson and testing it
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 02 Dec 2019 21:46:16 +0100
+
 hello-php-world (27) tarent; urgency=low
 
   * Update links

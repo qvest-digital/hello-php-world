@@ -27,6 +27,7 @@ class Util_Tests extends PHPUnit_Framework_TestCase {
 	public function testUtil() {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/util.php');
+		require_once(dirname(__FILE__) . '/../../common/db.php');
 
 		/* very basic, sporadic, tests */
 

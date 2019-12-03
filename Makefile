@@ -153,8 +153,7 @@ CLEANFILES+=dbconfig/install/*~ var/*~
 all: metacheck syntaxcheck dbc-generated var/AUTOLDR.php common/VERSION.php
 
 check: common/VERSION.php var/AUTOLDR.php
-	cd tests && exec phpunit --do-not-cache-result \
-	    -d zend_extension=xdebug.so --coverage-text .
+	cd tests && exec phpunit --do-not-cache-result .
 
 clean:
 	rm -f ${CLEANFILES}

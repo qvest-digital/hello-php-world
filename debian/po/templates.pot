@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: hello-php-world\n"
 "Report-Msgid-Bugs-To: hello-php-world@packages.debian.org\n"
-"POT-Creation-Date: 2020-05-18 00:34+0200\n"
+"POT-Creation-Date: 2020-05-18 00:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,9 @@ msgstr ""
 #: ../hello-php-world.templates:1001
 msgid ""
 "The dbconfig-common tool is used for database configuration and, optionally, "
-"creation. At the current debconf verbosity level, it shows many questions."
+"creation. Some questions will be asked. “PostgreSQL application password” "
+"should be answered with an empty string to ensure generation of a random "
+"password."
 msgstr ""
 
 #. Type: note
@@ -36,8 +38,9 @@ msgstr ""
 #: ../hello-php-world.templates:1001
 msgid ""
 "If a local PostgreSQL server installation, in Debian’s standard "
-"configuration, is available and running, pressing Enter about ten times is "
-"sufficient to correctly create and initialise a database for this package."
+"configuration, is available and running, pressing Enter about three to ten "
+"times is sufficient to correctly create and initialise a database for this "
+"package."
 msgstr ""
 
 #. Type: note

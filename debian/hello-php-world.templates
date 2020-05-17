@@ -2,13 +2,14 @@ Template: hello-php-world/dbconfig-preamble
 Type: note
 _Description: Database configuration ahead
  The dbconfig-common tool is used for database configuration
- and, optionally, creation. At the current debconf verbosity
- level, it shows many questions.
+ and, optionally, creation. Some questions will be asked.
+ “PostgreSQL application password” should be answered with
+ an empty string to ensure generation of a random password.
  .
  If a local PostgreSQL server installation, in Debian’s
  standard configuration, is available and running, pressing
- Enter about ten times is sufficient to correctly create
- and initialise a database for this package.
+ Enter about three to ten times is sufficient to correctly
+ create and initialise a database for this package.
  .
  If the setup differs, these questions need carefully reviewed
  responses.

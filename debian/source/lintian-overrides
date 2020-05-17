@@ -2,7 +2,7 @@
 hello-php-world source: debian-rules-should-not-use-custom-compression-settings
 hello-php-world source: debian-source-options-has-custom-compression-settings
 
-# it uses both but a workaround for sadt only setting ADTTMP is needed
+# it uses both but a workaround for sadt only setting ADTTMP is needed (#953811)
 hello-php-world source: uses-deprecated-adttmp debian/tests/phpunit (line 4)
 
 # no, thanks!

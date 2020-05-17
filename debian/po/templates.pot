@@ -1,0 +1,40 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the hello-php-world package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: hello-php-world\n"
+"Report-Msgid-Bugs-To: hello-php-world@packages.debian.org\n"
+"POT-Creation-Date: 2020-05-18 00:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid "Database configuration ahead"
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid ""
+"We will now use dbconfig-common to configure the database. This tool asks a "
+"lot of questions at your current debconf verbosity; just pressing Enter for "
+"about ten questions will correctly initialise a database iff a PostgreSQL "
+"server is running locally in Debian’s standard configuration."
+msgstr ""
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid "If you have a differing setup, please review the questions carefully."
+msgstr ""

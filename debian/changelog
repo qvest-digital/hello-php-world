@@ -5,8 +5,9 @@ hello-php-world (29) UNRELEASED; urgency=medium
   * Explicitly use the C.UTF-8 locale where appropriate
   * Refresh overrides for lintian
   * Sync maintainer scripts from my template package (jupp)
+  * Inform about dbconfig-common’s question verbosity if priority is low
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 18 May 2020 00:08:53 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 18 May 2020 00:26:26 +0200
 
 hello-php-world (28) tarent; urgency=low
 

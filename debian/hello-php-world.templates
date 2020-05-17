@@ -1,0 +1,11 @@
+Template: hello-php-world/dbconfig-preamble
+Type: note
+_Description: Database configuration ahead
+ We will now use dbconfig-common to configure the database.
+ This tool asks a lot of questions at your current debconf
+ verbosity; just pressing Enter for about ten questions will
+ correctly initialise a database iff a PostgreSQL server is
+ running locally in Debian’s standard configuration.
+ .
+ If you have a differing setup, please review the questions
+ carefully.

@@ -1,0 +1,53 @@
+# German translation of hello-php-world templates
+# Copyright © 2020 mirabilos
+# This file is distributed under the same license as the hello-php-world package.
+# Thorsten Glaser <t.glaser@tarent.de>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: hello-php-world\n"
+"Report-Msgid-Bugs-To: hello-php-world@packages.debian.org\n"
+"POT-Creation-Date: 2020-05-18 00:34+0200\n"
+"PO-Revision-Date: 2020-05-18 00:41+0200\n"
+"Last-Translator: Thorsten Glaser <t.glaser@tarent.de>\n"
+"Language-Team: German <debian-l10n-german@lists.debian.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid "Database configuration ahead"
+msgstr "Datenbankkonfiguration voraus"
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid ""
+"The dbconfig-common tool is used for database configuration and, optionally, "
+"creation. At the current debconf verbosity level, it shows many questions."
+msgstr ""
+"Das dbconfig-common-Tool wird zur Konfiguration und, optional, zum Anlegen "
+"einer Datenbank verwendet. Bei der aktuell eingestellten Detailtiefe von "
+"debconf werden viele Fragen gestellt."
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid ""
+"If a local PostgreSQL server installation, in Debian’s standard "
+"configuration, is available and running, pressing Enter about ten times is "
+"sufficient to correctly create and initialise a database for this package."
+msgstr ""
+"Falls ein lokaler PostgreSQL-Server in der Debian-Standardkonfiguration "
+"verfügbar ist und läuft, sollte es reichen, zirka zehnmal Enter zu drücken, "
+"um eine Datenbank für dieses Paket anzulegen und korrekt zu initialisieren."
+
+#. Type: note
+#. Description
+#: ../hello-php-world.templates:1001
+msgid ""
+"If the setup differs, these questions need carefully reviewed responses."
+msgstr "In allen anderen Fällen bedürfen diese Fragen sorgfältiger Antworten."

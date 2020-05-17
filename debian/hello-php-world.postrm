@@ -52,10 +52,10 @@ fi
 
 # custom actions
 case $1 in
-remove)
+(remove)
 	;;
 
-purge)
+(purge)
 	# unregister
 	rm -f "/var/lib/$HPW_package/dbconfig.inc"
 	if command -v ucf >/dev/null 2>&1; then
@@ -66,10 +66,10 @@ purge)
 	rm -rf "/var/lib/$HPW_package"
 	;;
 
-upgrade|disappear|failed-upgrade|abort-install|abort-upgrade)
+(upgrade|disappear|failed-upgrade|abort-install|abort-upgrade)
 	;;
 
-*)
+(*)
 	echo >&2 "E: postrm called with unknown subcommand '$1'"
 	exit 1
 	;;

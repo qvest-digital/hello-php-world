@@ -21,6 +21,9 @@ set -e
 #
 # * postinst "triggered" "${triggers[*]}"
 # For trigger-only calls, i.e. if "configure" is not called.
+#
+# * new-postinst "reconfigure" [$most_recently_configured_version](?)
+# Treat this as just like "configure" for a future extension by debconf.
 
 HPW_package=hello-php-world
 
@@ -116,20 +119,20 @@ fi
 
 # custom actions
 case $1 in
-configure)
+(configure|reconfigure)
 	# end debconf connection so we can start services
 	db_stop
 	# set up webserver
 	do_webserver_config
 	;;
 
-abort-upgrade|abort-remove|abort-deconfigure)
+(abort-upgrade|abort-remove|abort-deconfigure)
 	;;
 
-triggered)
+(triggered)
 	;;
 
-*)
+(*)
 	echo >&2 "E: postinst called with unknown subcommand '$1'"
 	exit 1
 	;;

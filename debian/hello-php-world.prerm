@@ -121,13 +121,13 @@ fi
 
 # custom actions
 case $1 in
-remove|deconfigure)
+(remove|deconfigure)
 	;;
 
-upgrade|failed-upgrade)
+(upgrade|failed-upgrade)
 	;;
 
-*)
+(*)
 	echo >&2 "E: prerm called with unknown subcommand '$1'"
 	exit 1
 	;;

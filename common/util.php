@@ -1,6 +1,7 @@
 <?php
 /**
- * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2019
+ * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+ *	       2019, 2020
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -415,7 +416,7 @@ function util_randbytes($num=6) {
 
 	/*XXX check if the result is truly random (how?) */
 	if ($b === false || strlen(strval($b)) != $num) {
-		util_debugJ(true, 'Could not read from random device',
+		util_debugJ('ERR', true, 'Could not read from random device',
 		    array('b' => $b, 'num' => $num));
 		exit(1);
 	}
@@ -428,7 +429,7 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 		$lim = $mask;
 	/* due to PHP limitations, four octets can’t be used */
 	if ($mask > 0xFFFFFF || $lim > $mask) {
-		util_debugJ(true, NULL, "util_randnum($mask, $lim): " .
+		util_debugJ('ERR', true, NULL, "util_randnum($mask, $lim): " .
 		    'arguments out of bounds');
 		exit(1);
 	}

@@ -1,3 +1,9 @@
+hello-php-world (29) UNRELEASED; urgency=medium
+
+  * Retrofit “error”-level logging onto older utility functions
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Sun, 17 May 2020 22:57:25 +0200
+
 hello-php-world (28) tarent; urgency=low
 
   * Enable error_reporting(-1) during parsing minijson and testing it

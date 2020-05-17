@@ -1,4 +1,4 @@
-hello-php-world (29) UNRELEASED; urgency=medium
+hello-php-world (29) wtf; urgency=low
 
   * Retrofit “error”-level logging onto older utility functions
   * Add util_requesttime helper
@@ -7,7 +7,7 @@ hello-php-world (29) UNRELEASED; urgency=medium
   * Sync maintainer scripts from my template package (jupp)
   * Guide about dbconfig-common’s questions
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 18 May 2020 00:50:39 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 18 May 2020 00:53:28 +0200
 
 hello-php-world (28) tarent; urgency=low
 

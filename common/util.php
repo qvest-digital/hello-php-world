@@ -440,6 +440,14 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 	}
 }
 
+function util_requesttime($places=6) {
+	if (!util_ifsetor($_SERVER['REQUEST_TIME_FLOAT'])) {
+		util_debugJ('ERR', true, 'no REQUEST_TIME_FLOAT');
+		return '?';
+	}
+	return round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], $places);
+}
+
 /* convert case-insensitive part of eMail address to lowercase */
 function util_emailcase($s) {
 	$matches = array();

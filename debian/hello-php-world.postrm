@@ -33,9 +33,11 @@ dbc_generate_include_owner=root:www-data
 dbc_generate_include_perms=0640
 dbc_generate_include=php:/var/lib/$HPW_package/dbconfig.inc
 # hack to force 'C' locale and ASCII encoding (for speed)
-#dbc_pgsql_createdb_encoding="SQL_ASCII' lc_collate='C"
+#dbc_pgsql_createdb_encoding="SQL_ASCII' lc_ctype='C' lc_collate='C"
 # hack to force 'C' locale and UTF-8 encoding (for correctness)
-dbc_pgsql_createdb_encoding="UTF8' lc_collate='C"
+dbc_pgsql_createdb_encoding="UTF8' lc_ctype='C.UTF-8' lc_collate='C"
+# slightly more correct but also more fragile
+#dbc_pgsql_createdb_encoding="UTF8' lc_ctype='C.UTF-8' lc_collate='C.UTF-8"
 # use UTF-8 encoding and server locale, when desired (may break
 # expectations, as it may sort case-insensitively and ignore
 # intra-word punctuation (a_b < ac_d < a_e); it is also slower);

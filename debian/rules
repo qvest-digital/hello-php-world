@@ -6,7 +6,7 @@ export V=1
 export VERBOSE=1
 endif
 
-LC_ALL:=C
+LC_ALL:=C.UTF-8
 export LC_ALL
 
 %:

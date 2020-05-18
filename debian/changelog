@@ -1,3 +1,9 @@
+hello-php-world (30) UNRELEASED; urgency=medium
+
+  * Make phpunit workaround not break with phpunit from buster 🤮
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 18 May 2020 02:06:13 +0200
+
 hello-php-world (29) wtf; urgency=low
 
   * Retrofit “error”-level logging onto older utility functions

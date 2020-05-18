@@ -157,7 +157,12 @@ CLEANFILES+=${GENERATED}
 generated: ${GENERATED}
 
 check: generated
-	cd tests && exec phpunit --do-not-cache-result .
+	cd tests && \
+	    if phpunit --do-not-cache-result --help >/dev/null 2>&1; then \
+		exec phpunit --do-not-cache-result .; \
+	    else \
+		exec phpunit .; \
+	fi
 
 clean:
 	rm -f ${CLEANFILES}

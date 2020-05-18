@@ -15,6 +15,13 @@ ln -s /usr/share/hello-php-world/www www
 ln -s /usr/share/dbconfig-common/data/hello-php-world dbconfig
 ln -s /var/lib/hello-php-world var
 
+# php ecosystem what the actual fuck²…
+if phpunit --do-not-cache-result --help >/dev/null 2>&1; then
+	puflag=--do-not-cache-result
+else
+	puflag=
+fi
+
 # actually do run the tests
 cd tests
-exec phpunit --do-not-cache-result .
+exec phpunit $puflag .

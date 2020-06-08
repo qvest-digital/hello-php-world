@@ -265,46 +265,45 @@ function util_fixutf8($s) {
 		$s = strval($s);
 	$Sx = strlen($s);
 	$Sp = 0;
- util_fixutf8_check:
-	if ($Sp >= $Sx)
-		return $s;
-	/* read next octet */
-	$c = ord(($ch = $s[$Sp++]));
-	/* ASCII? */
-	if ($c < 0x80)
-		goto util_fixutf8_check;
-	/* UTF-8 lead byte */
-	if ($c < 0xC2 || $c >= 0xF8) {
-		goto util_fixutf8_chkfail;
-	} elseif ($c < 0xE0) {
-		$wc = ($c & 0x1F) << 6;
-		$wmin = 0x80;
-		$Ss = 1;
-	} elseif ($c < 0xF0) {
-		$wc = ($c & 0x0F) << 12;
-		$wmin = 0x800;
-		$Ss = 2;
-	} else {
-		$wc = ($c & 0x07) << 18;
-		$wmin = 0x10000;
-		$Ss = 3;
+	while (true) {
+		if ($Sp >= $Sx)
+			return $s;
+		/* read next octet */
+		$c = ord(($ch = $s[$Sp++]));
+		/* ASCII? */
+		if ($c < 0x80)
+			continue;
+		/* UTF-8 lead byte */
+		if ($c < 0xC2 || $c >= 0xF8) {
+			break;
+		} elseif ($c < 0xE0) {
+			$wc = ($c & 0x1F) << 6;
+			$wmin = 0x80;
+			$Ss = 1;
+		} elseif ($c < 0xF0) {
+			$wc = ($c & 0x0F) << 12;
+			$wmin = 0x800;
+			$Ss = 2;
+		} else {
+			$wc = ($c & 0x07) << 18;
+			$wmin = 0x10000;
+			$Ss = 3;
+		}
+		/* UTF-8 trail bytes */
+		if ($Sp + $Ss > $Sx)
+			break;
+		while ($Ss--)
+			if (($c = ord($s[$Sp++]) ^ 0x80) <= 0x3F)
+				$wc |= $c << (6 * $Ss);
+			else
+				break 2;
+		/* complete wide character */
+		if ($wc < $wmin)
+			break;
+
+		/* process next char */
 	}
-	/* UTF-8 trail bytes */
-	if ($Sp + $Ss > $Sx)
-		goto util_fixutf8_chkfail;
-	while ($Ss--)
-		if (($c = ord($s[$Sp++]) ^ 0x80) <= 0x3F)
-			$wc |= $c << (6 * $Ss);
-		else
-			goto util_fixutf8_chkfail;
-	/* complete wide character */
-	if ($wc < $wmin)
-		goto util_fixutf8_chkfail;
 
-	/* process next char */
-	goto util_fixutf8_check;
-
- util_fixutf8_chkfail:
 	/* failed, convert using latin1/cp1252 mapping */
 	ob_start();
 	$Sp = 0;

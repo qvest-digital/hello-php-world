@@ -46,6 +46,8 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
  * See minijson_encode_ob_string() for limitations on strings;
  * strings not encoded in UTF-8 and resources do not round-trip.
  *
+ * Optional arguments use the default value if NULL is passed for each.
+ *
  * in:	array	x (Value to be encoded)
  * in:	string	(optional) or bool false to skip beautification (default: '')
  * in:	integer	(optional) recursion depth (default: 32)
@@ -56,7 +58,8 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
  */
 function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
 	ob_start();
-	minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc);
+	minijson_encode_ob($x, $ri ? $ri : '', $depth ? $depth : 32,
+	    $truncsz === NULL ? 0 : $truncsz, $dumprsrc ? $dumprsrc : false);
 	return ob_get_clean();
 }
 

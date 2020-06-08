@@ -164,7 +164,11 @@ check: generated
 		exec phpunit .; \
 	fi
 
+lcheck: generated
+	# run tests without phpunit
+	php tests/fakeunit.php
+
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all generated check clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated
+.PHONY: all generated check lcheck clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated

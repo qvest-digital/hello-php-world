@@ -1,5 +1,7 @@
 <?php
 /**
+ * Copyright © 2020
+ *	mirabilos <m@mirbsd.org>
  * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
  *	       2019, 2020
  * 	mirabilos <t.glaser@tarent.de>
@@ -135,6 +137,11 @@ function util_debug_backtrace_fmt($bt, $ofs) {
 	return $rv;
 }
 
+/* helper lambda for below */
+function debug_string_backtrace_l($match) {
+	return sprintf('#%d', $match[1] - 1);
+}
+
 /* get a backtrace as string */
 function debug_string_backtrace($skip=0) {
 	ob_start();
@@ -148,9 +155,8 @@ function debug_string_backtrace($skip=0) {
 	    $trace, 1);
 
 	/* renumber backtrace items */
-	$trace = preg_replace_callback('/^#(\d+)/m', function ($match) {
-		return sprintf('#%d', $match[1] - 1);
-	    }, $trace);
+	$trace = preg_replace_callback('/^#(\d+)/m',
+	    'debug_string_backtrace_l', $trace);
 
 	return $trace;
 }
@@ -203,7 +209,8 @@ function util_html_encode($s) {
 
 /* unconvert a string converted with util_html_encode() or htmlspecialchars() */
 function util_unconvert_htmlspecialchars($s) {
-	return html_entity_decode(strval($s), ENT_QUOTES | ENT_XHTML, 'UTF-8');
+	return html_entity_decode(strval($s), ENT_QUOTES |
+	    (defined('ENT_XHTML') ? constant('ENT_XHTML') : 0), 'UTF-8');
 }
 
 /* secure a (possibly already HTML encoded) string */
@@ -360,7 +367,10 @@ function util_xmlutf8($s, $didfix=false) {
 
 /* prefix every line of a string */
 function util_linequote($s, $pfx, $firstline=false) {
-	if ($s instanceof \IteratorAggregate) {
+	$i = "\\IteratorAggregate";
+	if (!function_exists("interface_exists") || !interface_exists($i))
+		$i = 'IteratorAggregate';
+	if ($s instanceof $i) {
 		$a = array();
 		foreach ($s as $v)
 			$a[] = $v;
@@ -729,7 +739,7 @@ function minijson_encdbg($x, $ri='') {
 }
 
 /* autoloader */
-spl_autoload_register(function ($cls) {
+function util_hpw_autoloader($cls) {
 	static $classlist = NULL;
 	if ($classlist === NULL) {
 		require_once(dirname(__FILE__) . '/AUTOLDR.php');
@@ -740,6 +750,8 @@ spl_autoload_register(function ($cls) {
 		util_debugJ('ERR', NULL, NULL, 'cannot autoload class', $cls);
 		util_logerr('T', debug_string_backtrace());
 	}
-    });
+}
+if (function_exists('spl_autoload_register'))
+	spl_autoload_register('util_hpw_autoloader');
 
 /* anything else? */

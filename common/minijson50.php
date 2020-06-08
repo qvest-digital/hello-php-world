@@ -291,15 +291,45 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 	}
 
 	if ($dumprsrc && ($rsrctype = @get_resource_type($x)) !== false) {
-		$k = strval($rsrctype);
+		$k = array(
+			'_strval' => strval($x),
+			'_type' => $rsrctype,
+		);
+		switch ($rsrctype) {
+		case 'stream':
+			$k['info'] = stream_get_meta_data($x);
+			break;
+		case 'curl':
+			$k['info'] = curl_getinfo($x);
+			$k['private'] = curl_getinfo($x, CURLINFO_PRIVATE);
+			break;
+		case 'GMP integer':
+			$k['value'] = gmp_strval($x);
+			break;
+		case 'OpenSSL key':
+			$k['info'] = openssl_pkey_get_details($x);
+			break;
+		case 'pgsql link':
+		case 'pgsql link persistent':
+			$k['err'] = pg_last_error($x); // must be first
+			$k['db'] = pg_dbname($x);
+			$k['host'] = pg_host($x);
+			$k['status'] = pg_connection_status($x);
+			$k['txn'] = pg_transaction_status($x);
+			break;
+		case 'pgsql result':
+			$k['status'] = pg_result_status($x, PGSQL_STATUS_STRING);
+			break;
+		}
 		$rs = '{';
 		if ($ri !== false)
 			$rs .= "\n" . $ri . '  ';
 		$rs .= '"\u0000resource":';
 		if ($ri !== false)
 			$rs .= ' ';
-		$rs .= minijson_encode_internal($k, false,
-		    $depth, $truncsz, $dumprsrc);
+		$rs .= minijson_encode_internal($k,
+		    $ri === false ? $ri : $ri . '  ',
+		    $depth + 1, $truncsz, $dumprsrc);
 		if ($ri !== false)
 			$rs .= "\n" . $ri;
 		$rs .= '}';

@@ -31,7 +31,7 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
  *
  * Call as CLI script to filter input as JSON pretty-printer. Options
  * are -c (compact output, no indentation or spaces), -d depth (parse
- * depth defaulting to 32), -r (pretty-print resources as string) and
+ * depth defaulting to 32), -r (pretty-print resources as object) and
  * -t truncsz (truncation size).
  */
 
@@ -44,7 +44,7 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
 /**
  * Encodes an array (indexed or associative) or any value as JSON.
  * See minijson_encode_ob_string() for limitations on strings;
- * strings not encoded in UTF-8 and resources may not round-trip.
+ * strings not encoded in UTF-8 and resources do not round-trip.
  *
  * in:	array	x (Value to be encoded)
  * in:	string	(optional) or bool false to skip beautification (default: '')

@@ -70,9 +70,10 @@ function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
  * in:	string	x (Value to be encoded)
  * in:	integer	(optional) truncation size (default 0 to not truncate),
  *		makes output invalid JSON
+ * in:  string  (optional) always '"'
  * out:	stdout	encoded
  */
-function minijson_encode_ob_string($x, $truncsz=0) {
+function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 	if (!is_string($x))
 		$x = strval($x);
 
@@ -82,7 +83,7 @@ function minijson_encode_ob_string($x, $truncsz=0) {
 		echo 'TOO_LONG_STRING_TRUNCATED:';
 		$Sx = $truncsz;
 	}
-	echo '"';
+	echo $leader;
 
 	/* assume UTF-8 first, for sanity */
 	ob_start();	/* in case a restart is needed */
@@ -323,7 +324,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		if (!$dumprsrc) {
 			$rs = (int)$x;
 			$x = strval($x);
-			$rsrctype = 'Resource('/*)*/ . $rs . ($rsrctype ?
+			$rsrctype = 'resource('/*)*/ . $rs . ($rsrctype ?
 			    (/*(*/')<' . $rsrctype . '>') : /*(*/'?)');
 			if ($x === ('Resource id #' . $rs))
 				$x = $rsrctype . ';';
@@ -331,7 +332,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 				$x = $rsrctype . substr($x, 8);
 			else
 				$x = $rsrctype . '{' . $x . '}';
-			minijson_encode_ob_string($x, $truncsz);
+			minijson_encode_ob_string($x, $truncsz, '"\u0000');
 			return;
 		}
 		$rs = array(
@@ -364,7 +365,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$rs['status'] = pg_result_status($x, PGSQL_STATUS_STRING);
 			break;
 		}
-		echo '{'/*}*/ . $xi . '"\u0000resource"' . $Sd;
+		echo '{'/*}*/ . $xi . '"\u0000resource:"' . $Sd;
 		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
 		echo $xr . /*{*/'}';
 		return;

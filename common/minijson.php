@@ -1,10 +1,12 @@
 <?php
-if (count(get_included_files()) <= 1 && !defined('__main__'))
+if (count(get_included_files()) <= 1 && !defined('__main__') && count(debug_backtrace()) < 1)
 	define('__main__', __FILE__);
 /**
  * Minimal complete JSON generator and parser for FusionForge/Evolvis
  * and SimKolab, including for debugging output serialisation
  *
+ * Copyright © 2020
+ *	mirabilos <m@mirbsd.org>
  * Copyright © 2010, 2011, 2012, 2014, 2016, 2017
  *	mirabilos <t.glaser@tarent.de>
  *

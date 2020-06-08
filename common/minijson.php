@@ -29,7 +29,13 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
  * depth defaulting to 32), -r (pretty-print resources as object) and
  * -t truncsz (truncation size).
  */
-require_once(dirname(__FILE__) . '/minijson53.php');
+if ((defined('PHP_VERSION_ID') ? constant('PHP_VERSION_ID') :
+    call_user_func_array('sprintf', array_merge(array('%d%02d00'),
+    explode('.', PHP_VERSION)))) >= 50300) {
+	require_once(dirname(__FILE__) . '/minijson53.php');
+} else {
+	require_once(dirname(__FILE__) . '/minijson50.php');
+}
 
 if (defined('__main__') && constant('__main__') === __FILE__) {
 	function usage($rc=1) {

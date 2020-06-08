@@ -2,8 +2,11 @@ hello-php-world (30) UNRELEASED; urgency=medium
 
   * Make phpunit workaround not break with phpunit from buster 🤮
   * Revert adding debconf note (too fragile)
+  * Make minijson.php includable from a stdin script also in PHP 7
+  * Improve (debugging) output for resources
+  * Note minijson currently uses PHP 5.3 constructs (goto)
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 18 May 2020 06:36:07 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 08 Jun 2020 22:59:38 +0200
 
 hello-php-world (29) wtf; urgency=low
 

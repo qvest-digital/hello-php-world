@@ -223,6 +223,20 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 	echo '"';
 }
 
+if ((defined('PHP_VERSION_ID') ? constant('PHP_VERSION_ID') :
+    call_user_func_array('sprintf', array_merge(array('%d%02d00'),
+    explode('.', PHP_VERSION)))) >= 50300) {
+	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
+	function minijson_rsrctype($x) {
+		$rsrctype = @get_resource_type($x);
+		return is_null($rsrctype) ? false : $rsrctype;
+	}
+} else {
+	function minijson_rsrctype($x) {
+		return @get_resource_type($x);
+	}
+}
+
 /**
  * Encodes a value as JSON to the currently active output buffer.
  * See minijson_encode() for details.
@@ -319,8 +333,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return;
 	}
 
-	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	if (!is_object($x) && !is_null($rsrctype = @get_resource_type($x))) {
+	if (!is_object($x) && ($rsrctype = minijson_rsrctype($x)) !== false) {
 		if (!$dumprsrc) {
 			$rs = (int)$x;
 			$x = strval($x);

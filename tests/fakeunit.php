@@ -72,7 +72,6 @@ abstract class PHPUnit_Framework_TestCase {
 	protected function assertEquals($e, $a) {
 		$this->c2($e, $a, "not equal", $a != $e);
 	}
-
 }
 
 if (defined('__main__') && constant('__main__') === __FILE__) {

@@ -38,7 +38,7 @@ class Util_Tests extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('f&amp;o&amp;bar',
 		    util_html_secure('f&amp;o&bar'));
 
-		$this->assertEquals("€\fa",
+		$this->assertEquals("€\x0Ca",
 		    util_fixutf8("\x80\x0Ca"));
 		$this->assertEquals("€?a",
 		    util_xmlutf8("\x80\x0Ca"));

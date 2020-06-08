@@ -298,7 +298,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 			return;
 		}
 		ob_start();
-		echo '[';
+		echo '['/*]*/;
 		for ($v = 0; $v < $n; ++$v) {
 			if (!array_key_exists($v, $x)) {
 				/* failed — sparse or associative */
@@ -311,7 +311,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$xi = $Si;
 		}
 		ob_end_flush();
-		echo $xr . ']';
+		echo $xr . /*[*/']';
 		return;
 	}
 
@@ -351,9 +351,9 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 			$rs['status'] = pg_result_status($x, PGSQL_STATUS_STRING);
 			break;
 		}
-		echo '{' . $xi . '"\u0000resource"' . $Sd;
+		echo '{'/*}*/ . $xi . '"\u0000resource"' . $Sd;
 		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
-		echo $xr . '}';
+		echo $xr . /*{*/'}';
 		return;
 	}
 
@@ -376,7 +376,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$s[$k] = $v;
 	}
 	asort($s, SORT_STRING);
-	echo '{';
+	echo '{'/*}*/;
 	foreach ($s as $k => $v) {
 		echo $xi;
 		minijson_encode_ob_string($v, $truncsz);
@@ -384,7 +384,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		minijson_encode_ob($x[$k], $si, $depth, $truncsz, $dumprsrc);
 		$xi = $Si;
 	}
-	echo $xr . '}';
+	echo $xr . /*{*/'}';
 }
 
 /**
@@ -467,7 +467,7 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 	case ',':
 		$ov = 'unexpected leading comma in Array';
 		return false;
-	case ']':
+	case /*[*/']':
 		++$Sp;
 		return true;
 	}
@@ -482,7 +482,7 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 	if ($Sp >= $Sx)
 		goto minijson_decode_array_eos;
 	switch ($s[$Sp++]) {
-	case ']':
+	case /*[*/']':
 		return true;
 	case ',':
 		break;
@@ -520,7 +520,7 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	case ',':
 		$ov = 'unexpected leading comma in Object';
 		return false;
-	case '}':
+	case /*{*/'}':
 		++$Sp;
 		return true;
 	}
@@ -535,7 +535,7 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	if ($Sp >= $Sx)
 		goto minijson_decode_object_eos;
 	switch ($s[$Sp++]) {
-	case '}':
+	case /*{*/'}':
 		return true;
 	case ',':
 		break;
@@ -628,12 +628,12 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 		}
 		--$Sp;
 		$ov = 'expected “alse” after “f”';
-	} elseif ($c === '[') {
+	} elseif ($c === '['/*]*/) {
 		if (--$depth > 0)
 			return minijson_decode_array($s, $Sp, $Sx, $ov, $depth);
 		--$Sp;
 		$ov = 'recursion limit exceeded by Array';
-	} elseif ($c === '{') {
+	} elseif ($c === '{'/*}*/) {
 		if (--$depth > 0)
 			return minijson_decode_object($s, $Sp, $Sx, $ov, $depth);
 		--$Sp;

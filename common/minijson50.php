@@ -44,8 +44,10 @@
  * in:	integer	(optional) recursion depth (default: 32)
  * out:	string encoded
  */
-function minijson_encode($x, $ri='', $depth=32) {
-	return (minijson_encode_internal($x, $ri, $depth, 0, false));
+function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
+	return (minijson_encode_internal($x, !is_null($ri) ? $ri : '',
+	    $depth ? $depth : 32, $truncsz ? $truncsz : 0,
+	    $dumprsrc ? $dumprsrc : false));
 }
 
 /**

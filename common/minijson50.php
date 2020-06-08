@@ -290,8 +290,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return $rs;
 	}
 
-	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	if ($dumprsrc && !is_null($rsrctype = @get_resource_type($x))) {
+	if ($dumprsrc && ($rsrctype = @get_resource_type($x)) !== false) {
 		$k = strval($rsrctype);
 		$rs = '{';
 		if ($ri !== false)

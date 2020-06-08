@@ -58,8 +58,8 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
  */
 function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
 	ob_start();
-	minijson_encode_ob($x, $ri ? $ri : '', $depth ? $depth : 32,
-	    $truncsz === NULL ? 0 : $truncsz, $dumprsrc ? $dumprsrc : false);
+	minijson_encode_ob($x, !is_null($ri) ? $ri : '', $depth ? $depth : 32,
+	    $truncsz ? $truncsz : 0, $dumprsrc ? $dumprsrc : false);
 	return ob_get_clean();
 }
 

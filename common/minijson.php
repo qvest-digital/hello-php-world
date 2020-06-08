@@ -321,6 +321,16 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
 	if (!is_object($x) && !is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc) {
+			$rs = (int)$x;
+			$x = strval($x);
+			$rsrctype = 'Resource('/*)*/ . $rs . ($rsrctype ?
+			    (/*(*/')<' . $rsrctype . '>') : /*(*/'?)');
+			if ($x === ('Resource id #' . $rs))
+				$x = $rsrctype . ';';
+			elseif (strncmp($x, 'Resource ', 9) === 0)
+				$x = $rsrctype . substr($x, 8);
+			else
+				$x = $rsrctype . '{' . $x . '}';
 			minijson_encode_ob_string($x, $truncsz);
 			return;
 		}

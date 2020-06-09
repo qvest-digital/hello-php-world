@@ -1,0 +1,6 @@
+#!/bin/sh
+# ./mjt [50|53]
+cd "$(dirname "$0")" || exit 255
+set -x
+: remember constant CPU speed
+time php mjt.php "$@" <mjt.in

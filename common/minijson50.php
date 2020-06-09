@@ -347,6 +347,8 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
  * out:	boolean	false if an error occured, true = output is valid
  */
 function minijson_decode($sj, &$ov, $depth=32) {
+	if (isset($sj) && !is_string($sj))
+		$sj = strval($sj);
 	if (!isset($sj) || $sj == '') {
 		$ov = 'empty input';
 		return false;

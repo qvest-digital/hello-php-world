@@ -405,6 +405,12 @@ class Minijson_Tests extends PHPUnit_Framework_TestCase {
 		$printrd = print_r($reparsed, true);
 		$this->assertEquals($s_printrs, $printrd, 'reparsed-padded');
 
+		$encoded = '0';
+		$reparsed = 'bla';
+		$presult = minijson_decode($encoded, $reparsed);
+		$this->assertTrue($presult, 'can-parse-0');
+		$this->assertEquals(0, $reparsed);
+
 		error_reporting($s);
 	}
 }

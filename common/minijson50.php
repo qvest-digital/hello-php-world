@@ -1,6 +1,7 @@
 <?php
 /**
- * Minimal complete JSON generator and parser for FusionForge and SimKolab
+ * Minimal complete JSON generator and parser for FusionForge/Evolvis
+ * and SimKolab (php5.0–5.2 legacy/slow/buggier version)
  *
  * Copyright © 2010, 2011, 2012, 2014, 2016, 2017
  *	mirabilos <t.glaser@tarent.de>
@@ -21,19 +22,14 @@
  * of said person’s immediate fault when using the work as intended.
  *-
  * Do *not* use PHP’s json_encode because it is broken.
- * Note that JSON is case-sensitive.  My notes are at:
- * https://www.mirbsd.org/cvs.cgi/contrib/hosted/tg/json.txt?rev=HEAD
- *
- * Call as CLI script to filter input as JSON pretty-printer. Options
- * are -c (compact output, no indentation or spaces), -d depth (parse
- * depth defaulting to 32), -r (pretty-print resources as string) and
- * -t truncsz (truncation size).
+ * Note that JSON is case-sensitive and not binary-safe. My notes at:
+ * http://www.mirbsd.org/cvs.cgi/contrib/hosted/tg/code/MirJSON/json.txt?rev=HEAD
  */
 
 /*-
- * I was really, really bad at writing parsers. I still am really bad at
- * writing parsers.
- * -- Rasmus Lerdorf
+ * I was really, really bad at writing parsers.
+ * I still am really bad at writing parsers.
+ *  -- Rasmus Lerdorf
  */
 
 /**
@@ -57,7 +53,7 @@ function minijson_encode($x, $ri='', $depth=32, $truncsz=0, $dumprsrc=false) {
  * in:	string indent or bool false to skip beautification
  * in:	integer	recursion depth
  * in:	integer truncation size (0 to not truncate), makes output not JSON
- * in:	bool whether to pretty-print resources as strings
+ * in:	bool whether to pretty-print resources
  * out:	string encoded
  */
 function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
@@ -101,7 +97,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 		 * A bit unbelievable: not only does mb_check_encoding
 		 * not exist from the start, but also does it not check
 		 * reliably — so converting forth and back is the way
-		 * they recommend… also, JSON is not binary-safe either…
+		 * they recommend…
 		 */
 		$isunicode = false;
 		$mb_encoding = false;

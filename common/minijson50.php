@@ -145,6 +145,7 @@ function minijson_encode_internal($x, $ri, $depth, $truncsz, $dumprsrc) {
 			} elseif ($y == 92) {
 				$rs .= '\\\\';
 			} elseif ($y < 0x20 || $y > 0xFFFD ||
+			    ($y >= 0x2028 && $y <= 0x2029) ||
 			    ($y >= 0xD800 && $y <= 0xDFFF) ||
 			    ($y > 0x7E && (!$isunicode || $y < 0xA0))) {
 				$rs .= sprintf('\u%04X', $y);

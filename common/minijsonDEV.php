@@ -450,15 +450,11 @@ function minijson_decode($s, &$ov, $depth=32) {
 /* skip all characters that are JSON whitespace */
 function minijson_skip_wsp($s, &$Sp, $Sx) {
 	while ($Sp < $Sx)
-		switch (ord($s[$Sp])) {
-		default:
-			return;
-		case 0x09:
-		case 0x0A:
-		case 0x0D:
-		case 0x20:
+		if (($c = ord($s[$Sp])) === 0x20 ||
+		    $c === 0x0A || $c === 0x09 || $c === 0x0D)
 			++$Sp;
-		}
+		else
+			return;
 }
 
 function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {

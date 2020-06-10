@@ -576,46 +576,11 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 
 function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 	/* skip optional whitespace between tokens */
-	$c = minijson_skip_wsp($s, $Sp, $Sx);
+	$ch = minijson_skip_wsp($s, $Sp, $Sx);
+	$c = ord($ch);
 
 	/* parse start of Value token; falling through exits with false */
-	if ($c === 'n') {
-		/* literal null? */
-		if (substr_compare($s, 'null', $Sp, 4) === 0) {
-			$Sp += 4;
-			$ov = NULL;
-			return true;
-		}
-		$ov = 'expected “ull” after “n”';
-	} elseif ($c === 't') {
-		/* literal true? */
-		if (substr_compare($s, 'true', $Sp, 4) === 0) {
-			$Sp += 4;
-			$ov = true;
-			return true;
-		}
-		$ov = 'expected “rue” after “t”';
-	} elseif ($c === 'f') {
-		/* literal false? */
-		if (substr_compare($s, 'false', $Sp, 5) === 0) {
-			$Sp += 5;
-			$ov = false;
-			return true;
-		}
-		$ov = 'expected “alse” after “f”';
-	} elseif ($c === '['/*]*/) {
-		if (--$depth > 0) {
-			++$Sp;
-			return minijson_decode_array($s, $Sp, $Sx, $ov, $depth);
-		}
-		$ov = 'recursion limit exceeded by Array';
-	} elseif ($c === '{'/*}*/) {
-		if (--$depth > 0) {
-			++$Sp;
-			return minijson_decode_object($s, $Sp, $Sx, $ov, $depth);
-		}
-		$ov = 'recursion limit exceeded by Object';
-	} elseif ($c === '"') {
+	if ($c === 0x22) {
 		++$Sp;
 		if (($ov = minijson_decode_string($s, $Sp, $Sx)) !== true) {
 			ob_end_clean();
@@ -623,12 +588,48 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 		}
 		$ov = ob_get_clean();
 		return true;
-	} elseif ($c === '-' || (ord($c) >= 0x30 && ord($c) <= 0x39)) {
+	} elseif ($c === 0x7B) {
+		if (--$depth > 0) {
+			++$Sp;
+			return minijson_decode_object($s, $Sp, $Sx, $ov, $depth);
+		}
+		$ov = 'recursion limit exceeded by Object';
+	} elseif ($c === 0x5B) {
+		if (--$depth > 0) {
+			++$Sp;
+			return minijson_decode_array($s, $Sp, $Sx, $ov, $depth);
+		}
+		$ov = 'recursion limit exceeded by Array';
+	} elseif ($c <= 0x39 && ($c >= 0x30 || $c === 0x2D)) {
 		return minijson_decode_number($s, $Sp, $Sx, $ov);
-	} elseif (ord($c) >= 0x20 && ord($c) <= 0x7E) {
-		$ov = "unexpected “{$c}”, Value expected";
-	} elseif ($c !== '') {
-		$ov = sprintf('unexpected 0x%02X, Value expected', ord($c));
+	} elseif ($c === 0x6E) {
+		/* literal null? */
+		if (substr_compare($s, 'null', $Sp, 4) === 0) {
+			$Sp += 4;
+			$ov = NULL;
+			return true;
+		}
+		$ov = 'expected “ull” after “n”';
+	} elseif ($c === 0x74) {
+		/* literal true? */
+		if (substr_compare($s, 'true', $Sp, 4) === 0) {
+			$Sp += 4;
+			$ov = true;
+			return true;
+		}
+		$ov = 'expected “rue” after “t”';
+	} elseif ($c === 0x66) {
+		/* literal false? */
+		if (substr_compare($s, 'false', $Sp, 5) === 0) {
+			$Sp += 5;
+			$ov = false;
+			return true;
+		}
+		$ov = 'expected “alse” after “f”';
+	} elseif ($c <= 0x7E && $c >= 0x20) {
+		$ov = "unexpected “{$ch}”, Value expected";
+	} elseif ($ch !== '') {
+		$ov = sprintf('unexpected 0x%02X, Value expected', $c);
 	} else {
 		$ov = 'unexpected EOS, Value expected';
 	}

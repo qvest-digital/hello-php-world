@@ -286,24 +286,28 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		}
 		ob_start();
 		echo '['/*]*/;
+		$isarr = true;
 		for ($v = 0; $v < $n; ++$v) {
 			if (!array_key_exists($v, $x)) {
 				/* failed — sparse or associative */
-				ob_end_clean();
-				goto minijson_encode_object;
+				$isarr = false;
+				break;
 			}
 			echo $xi;
 			minijson_encode_ob($x[$v],
 			    $si, $depth, $truncsz, $dumprsrc);
 			$xi = $Si;
 		}
-		ob_end_flush();
-		echo $xr . /*[*/']';
-		return;
-	}
-
-	/* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	if (!is_object($x) && !is_null($rsrctype = @get_resource_type($x))) {
+		if ($isarr) {
+			ob_end_flush();
+			echo $xr . /*[*/']';
+			return;
+		}
+		ob_end_clean();
+		/* sparse or associative array */
+	} elseif (!is_object($x) &&
+	    /* http://de2.php.net/manual/en/function.is-resource.php#103942 */
+	    !is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc) {
 			$rs = (int)$x;
 			$x = strval($x);
@@ -352,16 +356,18 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
 		echo $xr . /*{*/'}';
 		return;
+	} else {
+		/* treat everything else as Object */
+
+		/* PHP objects are mostly like associative arrays */
+		if (!($x = (array)$x)) {
+			echo '{}';
+			return;
+		}
 	}
 
-	/* treat everything else as Object */
+	/* array, object or unknown non-scalar, cast as associative array */
 
-	/* PHP objects are mostly like associative arrays */
-	if (!($x = (array)$x)) {
-		echo '{}';
-		return;
-	}
- minijson_encode_object:
 	$s = array();
 	foreach (array_keys($x) as $k) {
 		$v = $k;

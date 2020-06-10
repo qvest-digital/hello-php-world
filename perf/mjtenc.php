@@ -29,19 +29,7 @@ require('../common/minijson' . (count($argv) > 1 ? $argv[1] : '') . '.php');
 $tm2load = hrtime();
 $memload = getmemusage();
 
-$in = file_get_contents('php://stdin');
-
-$memfil = getmemusage();
-$tm1dec = hrtime();
-$status = minijson_decode($in, $out);
-$tm2dec = hrtime();
-$memdec = getmemusage();
-
-if (!$status) {
-	print_r($out);
-	echo "\nE: failed\n";
-	exit(1);
-}
+$out = unserialize(file_get_contents('php://stdin'));
 
 $memchk = getmemusage();
 $tm1enc = hrtime();
@@ -53,13 +41,8 @@ $hashval = md5($enc);
 $hashok = $hashval === '48d8a06a5d811e1d9fd1729e2b1dc9e9';
 
 showmemusage('baseline', $membase);
-showmemusage('loading', $memload, $membase, msnice($tm2load, $tm1load));
-showmemusage('decoding', $memdec, $memfil, msnice($tm2dec, $tm1dec));
+showmemusage('unpickle', $memload, $membase, msnice($tm2load, $tm1load));
 showmemusage('encoding', $memenc, $memchk, msnice($tm2enc, $tm1enc));
 showmemusage('total', getmemusage(), NULL, msnice(hrtime(), $tm1load));
 
 printf("hash %s %s\n", $hashval, $hashok ? 'matches' : 'FAILURE');
-
-$h = popen('php mjtenc.php' . (count($argv) > 1 ? (' ' . $argv[1]) : ''), 'w');
-fwrite($h, serialize($out));
-pclose($h);

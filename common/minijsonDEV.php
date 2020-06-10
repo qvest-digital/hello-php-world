@@ -84,22 +84,18 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 	$Sp = 0;
 	while (true) {
 		if ($Sp >= $Sx) {
-			ob_end_flush();
 			echo '"';
+			ob_end_flush();
 			return;
 		}
 
 		/* read next octet */
 		$c = ord(($ch = $x[$Sp++]));
 
-		if ($c === 0x5C) {
-			/* just backslash */
-			echo "\\\\";
-			continue;
-		}
-
 		if ($c > 0x22 && $c < 0x7F) {
-			/* printable ASCII except space, !, " and backslash */
+			/* printable ASCII except space, !, " */
+			if ($c === 0x5C)
+				echo $ch;
 			echo $ch;
 			continue;
 		}
@@ -128,9 +124,9 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 		}
 
 		/* UTF-8 lead byte */
-		if ($c < 0xC2 || $c >= 0xF8) {
-			break;
-		} elseif ($c < 0xE0) {
+		if ($c < 0xE0) {
+			if ($c < 0xC2)
+				break;
 			$wc = ($c & 0x1F) << 6;
 			$wmin = 0x80;
 			$Ss = 1;
@@ -138,10 +134,12 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 			$wc = ($c & 0x0F) << 12;
 			$wmin = 0x800;
 			$Ss = 2;
-		} else {
+		} elseif ($c < 0xF8) {
 			$wc = ($c & 0x07) << 18;
 			$wmin = 0x10000;
 			$Ss = 3;
+		} else {
+			break;
 		}
 		/* UTF-8 trail bytes */
 		if ($Sp + $Ss > $Sx)
@@ -160,22 +158,22 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 		elseif ($wc < 0x0800)
 			echo chr(0xC0 | ($wc >> 6)) .
 			    chr(0x80 | ($wc & 0x3F));
-		elseif ($wc > 0xFFFD || ($wc >= 0xD800 && $wc <= 0xDFFF) ||
-		    ($wc >= 0x2028 && $wc <= 0x2029)) {
-			if ($wc > 0xFFFF) {
-				if ($wc > 0x10FFFF)
-					break;
-				/* UTF-16 */
-				$wc -= 0x10000;
-				printf('\u%04X\u%04X',
-				    0xD800 | ($wc >> 10),
-				    0xDC00 | ($wc & 0x03FF));
-			} else
-				printf('\u%04X', $wc);
-		} else
+		elseif ($wc < 0x2028 ||
+		    ($wc > 0x2029 && $wc < 0xD800) ||
+		    ($wc > 0xDFFF && $wc <= 0xFFFD))
 			echo chr(0xE0 | ($wc >> 12)) .
 			    chr(0x80 | (($wc >> 6) & 0x3F)) .
 			    chr(0x80 | ($wc & 0x3F));
+		elseif ($wc > 0xFFFF) {
+			if ($wc > 0x10FFFF)
+				break;
+			/* UTF-16 */
+			$wc -= 0x10000;
+			printf('\u%04X\u%04X',
+			    0xD800 | ($wc >> 10),
+			    0xDC00 | ($wc & 0x03FF));
+		} else
+			printf('\u%04X', $wc);
 
 		/* process next char */
 	}
@@ -188,9 +186,8 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 		/* similar logic as above, just not as golfed for speed */
 		if ($c >= 0x20 && $c < 0x7F) {
 			if ($c === 0x22 || $c === 0x5C)
-				echo "\\" . $ch;
-			else
-				echo $ch;
+				echo "\\";
+			echo $ch;
 		} else switch ($c) {
 		case 0x08:
 			echo '\b';

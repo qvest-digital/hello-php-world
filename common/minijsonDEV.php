@@ -219,8 +219,7 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
  * out:	stdout	encoded
  */
 function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
-	if (!$depth-- || !isset($x) || is_null($x) || (is_float($x) &&
-	    (is_nan($x) || is_infinite($x)))) {
+	if (!$depth-- || !isset($x) || is_null($x)) {
 		echo 'null';
 		return;
 	}
@@ -234,26 +233,26 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return;
 	}
 
-	if (is_int($x)) {
-		$y = (int)$x;
-		$z = strval($y);
-		if (strval($x) === $z) {
-			echo $z;
+	if (is_int($x) || is_float($x)) {
+		if (is_int($x)) {
+			$y = (int)$x;
+			$z = strval($y);
+			if (strval($x) === $z) {
+				echo $z;
+				return;
+			}
+		} else if (is_nan($x) || is_infinite($x)) {
+			echo 'null';
 			return;
 		}
-		goto minijson_encode_number;
-	}
-
-	if (is_float($x)) {
- minijson_encode_number:
 		$rs = sprintf('%.14e', $x);
 		$v = explode('e', $rs);
 		$rs = rtrim($v[0], '0');
-		if (substr($rs, -1) === '.')
-			$rs .= '0';
-		if ($v[1] !== '-0' && $v[1] !== '+0')
-			$rs .= 'E' . $v[1];
 		echo $rs;
+		if (substr($rs, -1) === '.')
+			echo '0';
+		if ($v[1] !== '-0' && $v[1] !== '+0')
+			echo 'E' . $v[1];
 		return;
 	}
 

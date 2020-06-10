@@ -1,5 +1,5 @@
 #!/bin/sh
-# ./mjt [50|53]
+# ./mjt [50|53|DEV]
 cd "$(dirname "$0")" || exit 255
 set -x
 : remember constant CPU speed

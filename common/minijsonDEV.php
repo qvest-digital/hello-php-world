@@ -450,25 +450,26 @@ function minijson_decode($s, &$ov, $depth=32) {
 /* skip all characters that are JSON whitespace */
 function minijson_skip_wsp($s, &$Sp, $Sx) {
 	while ($Sp < $Sx)
-		if (($c = ord($s[$Sp])) === 0x20 ||
-		    $c === 0x0A || $c === 0x09 || $c === 0x0D)
+		if (($ch = $s[$Sp]) === ' ' ||
+		    $ch === "\n" || $ch === "\t" || $ch === "\r")
 			++$Sp;
 		else
-			return;
+			return $ch;
+	return "\0";
 }
 
 function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 	$ov = array();
 
 	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+	$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* check for end of array or first member */
 	if ($Sp >= $Sx) {
 		$ov = 'unexpected EOS after ['/*]*/;
 		return false;
 	}
-	switch ($s[$Sp]) {
+	switch ($c) {
 	case ',':
 		$ov = 'unexpected leading comma in Array';
 		return false;
@@ -489,20 +490,21 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 		$ov[] = $v;
 
 		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($s, $Sp, $Sx);
+		$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 		/* check for end of array or next member */
 		if ($Sp >= $Sx) {
 			$ov = 'unexpected EOS in Array';
 			return false;
 		}
-		switch ($s[$Sp++]) {
+		switch ($c) {
 		case /*[*/']':
+			++$Sp;
 			return true;
 		case ',':
+			++$Sp;
 			break;
 		default:
-			--$Sp;
 			$ov = 'missing comma in Array';
 			return false;
 		}
@@ -512,14 +514,14 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	$ov = array();
 	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+	$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* check for end of object or first member */
 	if ($Sp >= $Sx) {
 		$ov = 'unexpected EOS after {'/*}*/;
 		return false;
 	}
-	switch ($s[$Sp]) {
+	switch ($c) {
 	case ',':
 		$ov = 'unexpected leading comma in Object';
 		return false;
@@ -530,18 +532,18 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 
 	while (true) {
 		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($s, $Sp, $Sx);
+		$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 		/* look for the member key */
 		if ($Sp >= $Sx) {
 			$ov = 'unexpected EOS in Object (want key)';
 			return false;
 		}
-		if ($s[$Sp++] !== '"') {
-			--$Sp;
+		if ($c !== '"') {
 			$ov = 'expected key string for Object member';
 			return false;
 		}
+		++$Sp;
 		if (($k = minijson_decode_string($s, $Sp, $Sx)) !== true) {
 			ob_end_clean();
 			/* pass through error code */
@@ -551,18 +553,18 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 		$k = ob_get_clean();
 
 		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($s, $Sp, $Sx);
+		$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 		/* check for separator between key and value */
 		if ($Sp >= $Sx) {
 			$ov = 'unexpected EOS in Object (want :)';
 			return false;
 		}
-		if ($s[$Sp++] !== ':') {
-			--$Sp;
+		if ($c !== ':') {
 			$ov = 'expected colon in Object member';
 			return false;
 		}
+		++$Sp;
 
 		/* parse the member value */
 		$v = NULL;
@@ -575,20 +577,21 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 		$ov[$k] = $v;
 
 		/* skip optional whitespace between tokens */
-		minijson_skip_wsp($s, $Sp, $Sx);
+		$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 		/* check for end of object or next member */
 		if ($Sp >= $Sx) {
 			$ov = /*{*/'unexpected EOS in Object (want , or })';
 			return false;
 		}
-		switch ($s[$Sp++]) {
+		switch ($c) {
 		case /*{*/'}':
+			++$Sp;
 			return true;
 		case ',':
+			++$Sp;
 			break;
 		default:
-			--$Sp;
 			$ov = 'missing comma in Object';
 			return false;
 		}
@@ -597,54 +600,51 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 
 function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+	$c = minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* parse begin of Value token */
 	if ($Sp >= $Sx) {
 		$ov = 'unexpected EOS, Value expected';
 		return false;
 	}
-	$c = $s[$Sp++];
 
 	/* style: falling through exits with false */
 	if ($c === 'n') {
 		/* literal null? */
-		if (substr($s, $Sp, 3) === 'ull') {
-			$Sp += 3;
+		if (substr($s, $Sp, 4) === 'null') {
+			$Sp += 4;
 			$ov = NULL;
 			return true;
 		}
-		--$Sp;
 		$ov = 'expected “ull” after “n”';
 	} elseif ($c === 't') {
 		/* literal true? */
-		if (substr($s, $Sp, 3) === 'rue') {
-			$Sp += 3;
+		if (substr($s, $Sp, 4) === 'true') {
+			$Sp += 4;
 			$ov = true;
 			return true;
 		}
-		--$Sp;
 		$ov = 'expected “rue” after “t”';
 	} elseif ($c === 'f') {
 		/* literal false? */
-		if (substr($s, $Sp, 4) === 'alse') {
-			$Sp += 4;
+		if (substr($s, $Sp, 5) === 'false') {
+			$Sp += 5;
 			$ov = false;
 			return true;
 		}
-		--$Sp;
 		$ov = 'expected “alse” after “f”';
 	} elseif ($c === '['/*]*/) {
+		++$Sp;
 		if (--$depth > 0)
 			return minijson_decode_array($s, $Sp, $Sx, $ov, $depth);
-		--$Sp;
 		$ov = 'recursion limit exceeded by Array';
 	} elseif ($c === '{'/*}*/) {
+		++$Sp;
 		if (--$depth > 0)
 			return minijson_decode_object($s, $Sp, $Sx, $ov, $depth);
-		--$Sp;
 		$ov = 'recursion limit exceeded by Object';
 	} elseif ($c === '"') {
+		++$Sp;
 		if (($ov = minijson_decode_string($s, $Sp, $Sx)) !== true) {
 			ob_end_clean();
 			return false;
@@ -652,13 +652,10 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 		$ov = ob_get_clean();
 		return true;
 	} elseif ($c === '-' || (ord($c) >= 0x30 && ord($c) <= 0x39)) {
-		--$Sp;
 		return minijson_decode_number($s, $Sp, $Sx, $ov);
 	} elseif (ord($c) >= 0x20 && ord($c) <= 0x7E) {
-		--$Sp;
 		$ov = "unexpected “{$c}”, Value expected";
 	} else {
-		--$Sp;
 		$ov = sprintf('unexpected 0x%02X, Value expected', ord($c));
 	}
 	return false;

@@ -249,7 +249,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		$v = explode('e', $rs);
 		$rs = rtrim($v[0], '0');
 		echo $rs;
-		if (substr($rs, -1) === '.')
+		if ($rs[strlen($rs) - 1] === '.')
 			echo '0';
 		if ($v[1] !== '-0' && $v[1] !== '+0')
 			echo 'E' . $v[1];
@@ -418,7 +418,7 @@ function minijson_decode($s, &$ov, $depth=32) {
 	$rv = false;
 
 	/* skip Byte Order Mark if present */
-	if (substr($s, 0, 3) === "\xEF\xBB\xBF")
+	if (strncmp($s, "\xEF\xBB\xBF", 3) === 0)
 		$Sp = 3;
 
 	/* skip leading whitespace */
@@ -611,7 +611,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 	/* style: falling through exits with false */
 	if ($c === 'n') {
 		/* literal null? */
-		if (substr($s, $Sp, 4) === 'null') {
+		if (substr_compare($s, 'null', $Sp, 4) === 0) {
 			$Sp += 4;
 			$ov = NULL;
 			return true;
@@ -619,7 +619,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 		$ov = 'expected “ull” after “n”';
 	} elseif ($c === 't') {
 		/* literal true? */
-		if (substr($s, $Sp, 4) === 'true') {
+		if (substr_compare($s, 'true', $Sp, 4) === 0) {
 			$Sp += 4;
 			$ov = true;
 			return true;
@@ -627,7 +627,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 		$ov = 'expected “rue” after “t”';
 	} elseif ($c === 'f') {
 		/* literal false? */
-		if (substr($s, $Sp, 5) === 'false') {
+		if (substr_compare($s, 'false', $Sp, 5) === 0) {
 			$Sp += 5;
 			$ov = false;
 			return true;
@@ -732,7 +732,7 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 			} elseif ($wc >= 0xD800 && $wc <= 0xDBFF) {
 				$surrogate = $wc;
 				/* UTF-16 expects the low surrogate */
-				if (substr($s, $Sp, 2) !== '\u')
+				if ($s[$Sp] !== '\\' || $s[$Sp + 1] !== 'u')
 					return 'expected Unicode escape after high surrogate';
 				$Sp += 2;
 				goto minijson_decode_string_unicode_escape;

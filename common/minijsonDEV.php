@@ -256,14 +256,13 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		return;
 	}
 
-	/* strings or unknown scalars */
-	if (is_string($x) ||
-	    (!is_array($x) && !is_object($x) && is_scalar($x))) {
+	/* strings */
+	if (is_string($x)) {
 		minijson_encode_ob_string($x, $truncsz);
 		return;
 	}
 
-	/* arrays, objects, resources, unknown non-scalars */
+	/* arrays, objects, resources, unknown scalars and nōn-scalars */
 
 	if ($ri === false) {
 		$si = false;
@@ -362,8 +361,12 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		minijson_encode_ob($rs, $si, $depth + 1, $truncsz, $dumprsrc);
 		echo $xr . /*{*/'}';
 		return;
+	} elseif (is_scalar($x)) {
+		/* unknown scalar (treat as String) */
+		minijson_encode_ob_string($x, $truncsz);
+		return;
 	} else {
-		/* treat everything else as Object and cast it (see above) */
+		/* unknown nōn-scalar (treat as Object and cast, see above) */
 		if (!($x = (array)$x)) {
 			echo '{}';
 			return;

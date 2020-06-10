@@ -155,11 +155,7 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 		if ($wc < $wmin)
 			break;
 
-		if ($wc < 0x00A0)
-			printf('\u%04X', $wc);
-		elseif ($wc < 0x0800)
-			echo $u;
-		elseif ($wc < 0x2028 ||
+		if (($wc >= 0x00A0 && $wc < 0x2028) ||
 		    ($wc > 0x2029 && $wc < 0xD800) ||
 		    ($wc > 0xDFFF && $wc <= 0xFFFD))
 			echo $u;

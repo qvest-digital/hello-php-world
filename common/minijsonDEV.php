@@ -455,7 +455,7 @@ function minijson_skip_wsp($s, &$Sp, $Sx) {
 			++$Sp;
 		else
 			return $ch;
-	return "\0";
+	return "";
 }
 
 function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {

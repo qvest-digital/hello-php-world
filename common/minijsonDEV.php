@@ -469,8 +469,7 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 
 	/* check for end of array or first member */
 	if ($Sp >= $Sx) {
- minijson_decode_array_eos:
-		$ov = 'unexpected EOS in Array';
+		$ov = 'unexpected EOS after ['/*]*/;
 		return false;
 	}
 	switch ($s[$Sp]) {
@@ -489,8 +488,10 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 	minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* check for end of array or next member */
-	if ($Sp >= $Sx)
-		goto minijson_decode_array_eos;
+	if ($Sp >= $Sx) {
+		$ov = 'unexpected EOS in Array';
+		return false;
+	}
 	switch ($s[$Sp++]) {
 	case /*[*/']':
 		return true;
@@ -522,8 +523,7 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 
 	/* check for end of object or first member */
 	if ($Sp >= $Sx) {
- minijson_decode_object_eos:
-		$ov = 'unexpected EOS in Object';
+		$ov = 'unexpected EOS after {'/*}*/;
 		return false;
 	}
 	switch ($s[$Sp]) {
@@ -542,8 +542,10 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* check for end of object or next member */
-	if ($Sp >= $Sx)
-		goto minijson_decode_object_eos;
+	if ($Sp >= $Sx) {
+		$ov = /*{*/'unexpected EOS in Object (want , or })';
+		return false;
+	}
 	switch ($s[$Sp++]) {
 	case /*{*/'}':
 		return true;
@@ -560,8 +562,10 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* look for the member key */
-	if ($Sp >= $Sx)
-		goto minijson_decode_object_eos;
+	if ($Sp >= $Sx) {
+		$ov = 'unexpected EOS in Object (want key)';
+		return false;
+	}
 	if ($s[$Sp++] !== '"') {
 		--$Sp;
 		$ov = 'expected key string for Object member';
@@ -579,8 +583,10 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	minijson_skip_wsp($s, $Sp, $Sx);
 
 	/* check for separator between key and value */
-	if ($Sp >= $Sx)
-		goto minijson_decode_object_eos;
+	if ($Sp >= $Sx) {
+		$ov = 'unexpected EOS in Object (want :)';
+		return false;
+	}
 	if ($s[$Sp++] !== ':') {
 		--$Sp;
 		$ov = 'expected colon in Object member';

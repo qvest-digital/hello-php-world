@@ -305,9 +305,15 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		}
 		ob_end_clean();
 		/* sparse or associative array */
-	} elseif (!is_object($x) &&
-	    /* http://de2.php.net/manual/en/function.is-resource.php#103942 */
-	    !is_null($rsrctype = @get_resource_type($x))) {
+	} elseif (is_object($x)) {
+		/* PHP objects are mostly like associative arrays */
+		if (!($x = (array)$x)) {
+			echo '{}';
+			return;
+		}
+		/* converted into nōn-empty associative array */
+	/* https://www.php.net/manual/en/function.is-resource.php#103942 */
+	} elseif (!is_null($rsrctype = @get_resource_type($x))) {
 		if (!$dumprsrc) {
 			$rs = (int)$x;
 			$x = strval($x);
@@ -357,16 +363,14 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 		echo $xr . /*{*/'}';
 		return;
 	} else {
-		/* treat everything else as Object */
-
-		/* PHP objects are mostly like associative arrays */
+		/* treat everything else as Object and cast it (see above) */
 		if (!($x = (array)$x)) {
 			echo '{}';
 			return;
 		}
 	}
 
-	/* array, object or unknown non-scalar, cast as associative array */
+	/* array, object or unknown nōn-scalar, cast as associative array */
 
 	$s = array();
 	foreach (array_keys($x) as $k) {

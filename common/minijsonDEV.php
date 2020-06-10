@@ -141,13 +141,15 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 		} else {
 			break;
 		}
+		$u = $ch;
 		/* UTF-8 trail bytes */
 		if ($Sp + $Ss > $Sx)
 			break;
 		while ($Ss--)
-			if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
+			if (($c = ord(($ch = $x[$Sp++])) ^ 0x80) <= 0x3F) {
 				$wc |= $c << (6 * $Ss);
-			else
+				$u .= $ch;
+			} else
 				break 2;
 		/* complete wide character */
 		if ($wc < $wmin)
@@ -156,14 +158,11 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 		if ($wc < 0x00A0)
 			printf('\u%04X', $wc);
 		elseif ($wc < 0x0800)
-			echo chr(0xC0 | ($wc >> 6)) .
-			    chr(0x80 | ($wc & 0x3F));
+			echo $u;
 		elseif ($wc < 0x2028 ||
 		    ($wc > 0x2029 && $wc < 0xD800) ||
 		    ($wc > 0xDFFF && $wc <= 0xFFFD))
-			echo chr(0xE0 | ($wc >> 12)) .
-			    chr(0x80 | (($wc >> 6) & 0x3F)) .
-			    chr(0x80 | ($wc & 0x3F));
+			echo $u;
 		elseif ($wc > 0xFFFF) {
 			if ($wc > 0x10FFFF)
 				break;

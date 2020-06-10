@@ -812,10 +812,11 @@ function minijson_decode_string($s, &$Sp, $Sx) {
 		$Sp -= 3;
 		return sprintf('unescaped surrogate %04X in String', $wc);
 	}
-	if ($wc <= 0xFFFD)
-		goto minijson_decode_string_unicode_char;
-	$Sp -= 3;
-	return sprintf('non-Unicode char %04X in String', $wc);
+	if ($wc > 0xFFFD) {
+		$Sp -= 3; /* or 4 */
+		return sprintf('non-Unicode char %04X in String', $wc);
+	}
+	goto minijson_decode_string_unicode_char;
 }
 
 function minijson_decode_number($s, &$Sp, $Sx, &$ov) {

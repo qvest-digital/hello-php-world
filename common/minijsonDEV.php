@@ -481,36 +481,36 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 		return true;
 	}
 
- minijson_decode_array_member:
-	/* parse the member value */
-	$v = NULL;
-	if (!minijson_decode_value($s, $Sp, $Sx, $v, $depth)) {
-		/* pass through error code */
-		$ov = $v;
-		return false;
-	}
-	/* consume, rinse, repeat */
-	$ov[] = $v;
+	while (true) {
+		/* parse the member value */
+		$v = NULL;
+		if (!minijson_decode_value($s, $Sp, $Sx, $v, $depth)) {
+			/* pass through error code */
+			$ov = $v;
+			return false;
+		}
+		/* consume, rinse, repeat */
+		$ov[] = $v;
 
-	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+		/* skip optional whitespace between tokens */
+		minijson_skip_wsp($s, $Sp, $Sx);
 
-	/* check for end of array or next member */
-	if ($Sp >= $Sx) {
-		$ov = 'unexpected EOS in Array';
-		return false;
+		/* check for end of array or next member */
+		if ($Sp >= $Sx) {
+			$ov = 'unexpected EOS in Array';
+			return false;
+		}
+		switch ($s[$Sp++]) {
+		case /*[*/']':
+			return true;
+		case ',':
+			break;
+		default:
+			--$Sp;
+			$ov = 'missing comma in Array';
+			return false;
+		}
 	}
-	switch ($s[$Sp++]) {
-	case /*[*/']':
-		return true;
-	case ',':
-		break;
-	default:
-		--$Sp;
-		$ov = 'missing comma in Array';
-		return false;
-	}
-	goto minijson_decode_array_member;
 }
 
 function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
@@ -532,71 +532,71 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 		return true;
 	}
 
- minijson_decode_object_member:
-	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+	while (true) {
+		/* skip optional whitespace between tokens */
+		minijson_skip_wsp($s, $Sp, $Sx);
 
-	/* look for the member key */
-	if ($Sp >= $Sx) {
-		$ov = 'unexpected EOS in Object (want key)';
-		return false;
-	}
-	if ($s[$Sp++] !== '"') {
-		--$Sp;
-		$ov = 'expected key string for Object member';
-		return false;
-	}
-	if (($k = minijson_decode_string($s, $Sp, $Sx)) !== true) {
-		ob_end_clean();
-		/* pass through error code */
-		$ov = $k;
-		return false;
-	}
-	$k = ob_get_clean();
+		/* look for the member key */
+		if ($Sp >= $Sx) {
+			$ov = 'unexpected EOS in Object (want key)';
+			return false;
+		}
+		if ($s[$Sp++] !== '"') {
+			--$Sp;
+			$ov = 'expected key string for Object member';
+			return false;
+		}
+		if (($k = minijson_decode_string($s, $Sp, $Sx)) !== true) {
+			ob_end_clean();
+			/* pass through error code */
+			$ov = $k;
+			return false;
+		}
+		$k = ob_get_clean();
 
-	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+		/* skip optional whitespace between tokens */
+		minijson_skip_wsp($s, $Sp, $Sx);
 
-	/* check for separator between key and value */
-	if ($Sp >= $Sx) {
-		$ov = 'unexpected EOS in Object (want :)';
-		return false;
-	}
-	if ($s[$Sp++] !== ':') {
-		--$Sp;
-		$ov = 'expected colon in Object member';
-		return false;
-	}
+		/* check for separator between key and value */
+		if ($Sp >= $Sx) {
+			$ov = 'unexpected EOS in Object (want :)';
+			return false;
+		}
+		if ($s[$Sp++] !== ':') {
+			--$Sp;
+			$ov = 'expected colon in Object member';
+			return false;
+		}
 
-	/* parse the member value */
-	$v = NULL;
-	if (!minijson_decode_value($s, $Sp, $Sx, $v, $depth)) {
-		/* pass through error code */
-		$ov = $v;
-		return false;
-	}
-	/* consume, rinse, repeat */
-	$ov[$k] = $v;
+		/* parse the member value */
+		$v = NULL;
+		if (!minijson_decode_value($s, $Sp, $Sx, $v, $depth)) {
+			/* pass through error code */
+			$ov = $v;
+			return false;
+		}
+		/* consume, rinse, repeat */
+		$ov[$k] = $v;
 
-	/* skip optional whitespace between tokens */
-	minijson_skip_wsp($s, $Sp, $Sx);
+		/* skip optional whitespace between tokens */
+		minijson_skip_wsp($s, $Sp, $Sx);
 
-	/* check for end of object or next member */
-	if ($Sp >= $Sx) {
-		$ov = /*{*/'unexpected EOS in Object (want , or })';
-		return false;
+		/* check for end of object or next member */
+		if ($Sp >= $Sx) {
+			$ov = /*{*/'unexpected EOS in Object (want , or })';
+			return false;
+		}
+		switch ($s[$Sp++]) {
+		case /*{*/'}':
+			return true;
+		case ',':
+			break;
+		default:
+			--$Sp;
+			$ov = 'missing comma in Object';
+			return false;
+		}
 	}
-	switch ($s[$Sp++]) {
-	case /*{*/'}':
-		return true;
-	case ',':
-		break;
-	default:
-		--$Sp;
-		$ov = 'missing comma in Object';
-		return false;
-	}
-	goto minijson_decode_object_member;
 }
 
 function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {

@@ -82,105 +82,104 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 	ob_start();	/* in case a restart is needed */
 
 	$Sp = 0;
- minijson_encode_string_utf8:
-	if ($Sp >= $Sx) {
-		ob_end_flush();
-		echo '"';
-		return;
-	}
+	while (true) {
+		if ($Sp >= $Sx) {
+			ob_end_flush();
+			echo '"';
+			return;
+		}
 
-	/* read next octet */
-	$c = ord(($ch = $x[$Sp++]));
+		/* read next octet */
+		$c = ord(($ch = $x[$Sp++]));
 
-	if ($c === 0x5C) {
-		/* just backslash */
-		echo "\\\\";
-		goto minijson_encode_string_utf8;
-	}
+		if ($c === 0x5C) {
+			/* just backslash */
+			echo "\\\\";
+			continue;
+		}
 
-	if ($c > 0x22 && $c < 0x7F) {
-		/* printable ASCII except space, !, " and backslash */
-		echo $ch;
-		goto minijson_encode_string_utf8;
-	}
-
-	if ($c < 0x80) {
-		/* C0 control character, space, !, " or DEL */
-		if (($c & 0x7E) === 0x20)
+		if ($c > 0x22 && $c < 0x7F) {
+			/* printable ASCII except space, !, " and backslash */
 			echo $ch;
-		elseif ($c === 0x22)
-			echo '\"';
-		elseif ($c === 0x08)
-			echo '\b';
-		elseif ($c === 0x09)
-			echo '\t';
-		elseif ($c === 0x0A)
-			echo '\n';
-		elseif ($c === 0x0C)
-			echo '\f';
-		elseif ($c === 0x0D)
-			echo '\r';
-		elseif (!$c)
-			$Sp = $Sx;
-		else
-			printf('\u%04X', $c);
-		goto minijson_encode_string_utf8;
-	}
+			continue;
+		}
 
-	/* UTF-8 lead byte */
-	if ($c < 0xC2 || $c >= 0xF8) {
-		goto minijson_encode_string_latin1;
-	} elseif ($c < 0xE0) {
-		$wc = ($c & 0x1F) << 6;
-		$wmin = 0x80;
-		$Ss = 1;
-	} elseif ($c < 0xF0) {
-		$wc = ($c & 0x0F) << 12;
-		$wmin = 0x800;
-		$Ss = 2;
-	} else {
-		$wc = ($c & 0x07) << 18;
-		$wmin = 0x10000;
-		$Ss = 3;
-	}
-	/* UTF-8 trail bytes */
-	if ($Sp + $Ss > $Sx)
-		goto minijson_encode_string_latin1;
-	while ($Ss--)
-		if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
-			$wc |= $c << (6 * $Ss);
-		else
-			goto minijson_encode_string_latin1;
-	/* complete wide character */
-	if ($wc < $wmin)
-		goto minijson_encode_string_latin1;
+		if ($c < 0x80) {
+			/* C0 control character, space, !, " or DEL */
+			if (($c & 0x7E) === 0x20)
+				echo $ch;
+			elseif ($c === 0x22)
+				echo '\"';
+			elseif ($c === 0x08)
+				echo '\b';
+			elseif ($c === 0x09)
+				echo '\t';
+			elseif ($c === 0x0A)
+				echo '\n';
+			elseif ($c === 0x0C)
+				echo '\f';
+			elseif ($c === 0x0D)
+				echo '\r';
+			elseif (!$c)
+				$Sp = $Sx;
+			else
+				printf('\u%04X', $c);
+			continue;
+		}
 
-	if ($wc < 0x00A0)
-		printf('\u%04X', $wc);
-	elseif ($wc < 0x0800)
-		echo chr(0xC0 | ($wc >> 6)) .
-		    chr(0x80 | ($wc & 0x3F));
-	elseif ($wc > 0xFFFD || ($wc >= 0xD800 && $wc <= 0xDFFF) ||
-	    ($wc >= 0x2028 && $wc <= 0x2029)) {
-		if ($wc > 0xFFFF) {
-			if ($wc > 0x10FFFF)
-				goto minijson_encode_string_latin1;
-			/* UTF-16 */
-			$wc -= 0x10000;
-			printf('\u%04X\u%04X',
-			    0xD800 | ($wc >> 10),
-			    0xDC00 | ($wc & 0x03FF));
-		} else
+		/* UTF-8 lead byte */
+		if ($c < 0xC2 || $c >= 0xF8) {
+			break;
+		} elseif ($c < 0xE0) {
+			$wc = ($c & 0x1F) << 6;
+			$wmin = 0x80;
+			$Ss = 1;
+		} elseif ($c < 0xF0) {
+			$wc = ($c & 0x0F) << 12;
+			$wmin = 0x800;
+			$Ss = 2;
+		} else {
+			$wc = ($c & 0x07) << 18;
+			$wmin = 0x10000;
+			$Ss = 3;
+		}
+		/* UTF-8 trail bytes */
+		if ($Sp + $Ss > $Sx)
+			break;
+		while ($Ss--)
+			if (($c = ord($x[$Sp++]) ^ 0x80) <= 0x3F)
+				$wc |= $c << (6 * $Ss);
+			else
+				break 2;
+		/* complete wide character */
+		if ($wc < $wmin)
+			break;
+
+		if ($wc < 0x00A0)
 			printf('\u%04X', $wc);
-	} else
-		echo chr(0xE0 | ($wc >> 12)) .
-		    chr(0x80 | (($wc >> 6) & 0x3F)) .
-		    chr(0x80 | ($wc & 0x3F));
+		elseif ($wc < 0x0800)
+			echo chr(0xC0 | ($wc >> 6)) .
+			    chr(0x80 | ($wc & 0x3F));
+		elseif ($wc > 0xFFFD || ($wc >= 0xD800 && $wc <= 0xDFFF) ||
+		    ($wc >= 0x2028 && $wc <= 0x2029)) {
+			if ($wc > 0xFFFF) {
+				if ($wc > 0x10FFFF)
+					break;
+				/* UTF-16 */
+				$wc -= 0x10000;
+				printf('\u%04X\u%04X',
+				    0xD800 | ($wc >> 10),
+				    0xDC00 | ($wc & 0x03FF));
+			} else
+				printf('\u%04X', $wc);
+		} else
+			echo chr(0xE0 | ($wc >> 12)) .
+			    chr(0x80 | (($wc >> 6) & 0x3F)) .
+			    chr(0x80 | ($wc & 0x3F));
 
-	/* process next char */
-	goto minijson_encode_string_utf8;
+		/* process next char */
+	}
 
- minijson_encode_string_latin1:
 	/* failed, interpret as sorta latin1 but display only ASCII */
 	ob_end_clean();
 

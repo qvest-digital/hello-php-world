@@ -4,9 +4,9 @@ hello-php-world (30) UNRELEASED; urgency=medium
   * Revert adding debconf note (too fragile)
   * Make minijson.php includable from a stdin script also in PHP 7
   * Improve (debugging) output for resources
-  * Preliminarily reinstate support for older versions
+  * Reinstate support for older versions
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Tue, 09 Jun 2020 02:50:24 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 11 Jun 2020 03:35:26 +0200
 
 hello-php-world (29) wtf; urgency=low
 

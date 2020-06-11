@@ -41,6 +41,8 @@ if (function_exists('hrtime')) {
 	}
 }
 function getmemusage() {
+	if (!function_exists('memory_get_usage'))
+		return array(-1, -1, -1, -1);
 	return array(
 		memory_get_usage(false) / 1024.0,
 		memory_get_usage(true) / 1024.0,

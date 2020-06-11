@@ -468,9 +468,6 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 	if ($c === 0x5D) {
 		++$Sp;
 		return true;
-	} elseif ($c === 0x2C) {
-		$ov = 'unexpected leading comma in Array';
-		return false;
 	} elseif ($c === -1) {
 		$ov = 'unexpected EOS after ['/*]*/;
 		return false;
@@ -512,9 +509,6 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 	if ($c === 0x7D) {
 		++$Sp;
 		return true;
-	} elseif ($c === 0x2C) {
-		$ov = 'unexpected leading comma in Object';
-		return false;
 	} elseif ($c === -1) {
 		$ov = 'unexpected EOS after {'/*}*/;
 		return false;

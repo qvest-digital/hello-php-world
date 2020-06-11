@@ -435,7 +435,7 @@ function minijson_decode($s, &$ov, $depth=32) {
 		minijson_skip_wsp($s, $Sp, $Sx);
 		/* end of string? */
 		if ($Sp < $Sx) {
-			$ov = 'expected EOS';
+			$ov = 'unexpected trailing garbage';
 			$rv = false;
 		}
 	}
@@ -494,7 +494,7 @@ function minijson_decode_array($s, &$Sp, $Sx, &$ov, $depth) {
 			++$Sp;
 			return true;
 		} else {
-			$ov = /*[*/'expected comma or ] in Array';
+			$ov = /*[*/'comma (,) or ] expected';
 			return false;
 		}
 	}
@@ -520,7 +520,7 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 
 		/* look for the member key */
 		if ($c !== 0x22) {
-			$ov = 'expected key string for Object member';
+			$ov = 'key string for Object member expected';
 			return false;
 		}
 		++$Sp;
@@ -537,7 +537,7 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 
 		/* check for separator between key and value */
 		if ($c !== 0x3A) {
-			$ov = 'expected colon in Object member';
+			$ov = 'colon (:) expected';
 			return false;
 		}
 		++$Sp;
@@ -562,7 +562,7 @@ function minijson_decode_object($s, &$Sp, $Sx, &$ov, $depth) {
 			++$Sp;
 			return true;
 		} else {
-			$ov = /*{*/'expected comma or } in Object';
+			$ov = /*{*/'comma (,) or } expected';
 			return false;
 		}
 	}
@@ -602,7 +602,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 			$ov = NULL;
 			return true;
 		}
-		$ov = 'expected “ull” after “n”';
+		$ov = 'after “n”, “ull” expected';
 	} elseif ($c === 0x74) {
 		/* literal true? */
 		if (substr_compare($s, 'true', $Sp, 4) === 0) {
@@ -610,7 +610,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 			$ov = true;
 			return true;
 		}
-		$ov = 'expected “rue” after “t”';
+		$ov = 'after “t”, “rue” expected';
 	} elseif ($c === 0x66) {
 		/* literal false? */
 		if (substr_compare($s, 'false', $Sp, 5) === 0) {
@@ -618,7 +618,7 @@ function minijson_decode_value($s, &$Sp, $Sx, &$ov, $depth) {
 			$ov = false;
 			return true;
 		}
-		$ov = 'expected “alse” after “f”';
+		$ov = 'after “f”, “alse” expected';
 	} elseif ($c <= 0x7E && $c >= 0x20) {
 		$ov = 'unexpected “' . chr($c) . '”, Value expected';
 	} elseif ($c !== -1) {
@@ -816,7 +816,7 @@ function minijson_decode_number($s, &$Sp, $Sx, &$ov) {
 	$matches = array('');
 	if (!preg_match('/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[Ee][+-]?[0-9]+)?/A',
 	    $s, $matches, 0, $Sp) || strlen($matches[0]) < 1) {
-		$ov = 'expected Number';
+		$ov = 'Number expected';
 		return false;
 	}
 	$Sp += strlen($matches[0]);

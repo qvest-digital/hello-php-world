@@ -815,11 +815,15 @@ function minijson_decode_surrogate($s, &$Sp, $Sx, $wc, &$e) {
 function minijson_decode_number($s, &$Sp, $Sx, &$ov) {
 	$matches = array('');
 	if (!preg_match('/-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[Ee][+-]?[0-9]+)?/A',
-	    $s, $matches, 0, $Sp) || strlen($matches[0]) < 1) {
+	    $s, $matches, 0, $Sp) || ($Ss = strlen($matches[0])) < 1) {
 		$ov = 'Number expected';
 		return false;
 	}
-	$Sp += strlen($matches[0]);
+	if ($Sp + $Ss > $Sx) {
+		$ov = 'unexpected EOS in Number';
+		return false;
+	}
+	$Sp += $Ss;
 	if (strpos($matches[0], '.') === false) {
 		/* possible integer */
 		$ov = (int)$matches[0];

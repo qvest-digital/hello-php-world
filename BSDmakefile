@@ -35,7 +35,6 @@ metacheck: generated
 syntaxcheck: generated
 	@echo Running syntax checks, please verify output manually.
 	set +e; rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
-		[[ $$REPLY = common/minijson53.php ]] && continue; \
 		php -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
 		(( PIPESTATUS[0] )) && rv=1; \
 	done; exit $$rv

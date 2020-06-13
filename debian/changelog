@@ -8,8 +8,9 @@ hello-php-world (30) wtf; urgency=medium
   * Reorder dependencies to prefer php 7+ over 5
   * Drop php-mbstring dependency (no longer necessary)
   * Run fakeunit tests in autopkgtests (prepare to kill idiotic phpunit)
+  * Dynamically monkey-add assertions missing in stretch, jessie phpunit
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 18:44:54 +0000
+ -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 21:54:19 +0200
 
 hello-php-world (29) wtf; urgency=low
 

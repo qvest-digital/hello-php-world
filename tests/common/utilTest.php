@@ -25,22 +25,7 @@
 
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
-class Util_Tests extends PHPUnit_Framework_TestCase {
-	private function rplStringContainsString($e, $a) {
-		return $this->assertFalse(strpos($a, $e) === false);
-	}
-	function __construct() {
-		if (is_callable(array('parent', '__construct')))
-			parent::__construct();
-		foreach (array(
-			'StringContainsString',
-		    ) as $suff) {
-			$prop = 'a' . $suff;
-			$this->$prop = method_exists($this, 'assert' . $suff) ?
-			    'assert' . $suff : 'rpl' . $suff;
-		}
-	}
-
+class Util_Tests extends phpFUnit_TestCase {
 	public function testUtil() {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/util.php');

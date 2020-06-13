@@ -2,6 +2,8 @@
 /*-
  * Small test for hello-php-world’s common utilities
  *
+ * Copyright © 2020
+ *	mirabilos <m@mirbsd.org>
  * Copyright © 2019
  *	mirabilos <t.glaser@tarent.de>
  *
@@ -24,6 +26,21 @@
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
 class Util_Tests extends PHPUnit_Framework_TestCase {
+	private function rplStringContainsString($e, $a) {
+		return $this->assertFalse(strpos($a, $e) === false);
+	}
+	function __construct() {
+		if (is_callable(array('parent', '__construct')))
+			parent::__construct();
+		foreach (array(
+			'StringContainsString',
+		    ) as $suff) {
+			$prop = 'a' . $suff;
+			$this->$prop = method_exists($this, 'assert' . $suff) ?
+			    'assert' . $suff : 'rpl' . $suff;
+		}
+	}
+
 	public function testUtil() {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/util.php');
@@ -46,7 +63,7 @@ class Util_Tests extends PHPUnit_Framework_TestCase {
 		$rn = util_randnum(0x0F, 2);
 		$this->assertTrue($rn === 0 || $rn === 1 || $rn === 2);
 
-		$this->assertStringContainsString('"uri": "php://stdout",',
+		$this->{$this->aStringContainsString}('"uri": "php://stdout",',
 		    minijson_encdbg(STDOUT));
 
 		error_reporting($s);

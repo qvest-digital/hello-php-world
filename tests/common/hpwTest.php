@@ -2,6 +2,8 @@
 /*-
  * Small test for hello-php-world’s demonstration class
  *
+ * Copyright © 2020
+ *	mirabilos <m@mirbsd.org>
  * Copyright © 2019
  *	mirabilos <t.glaser@tarent.de>
  *
@@ -24,6 +26,21 @@
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
 class HPW_Tests extends PHPUnit_Framework_TestCase {
+	private function rplIsObject($v) {
+		return $this->assertTrue(is_object($v));
+	}
+	function __construct() {
+		if (is_callable(array('parent', '__construct')))
+			parent::__construct();
+		foreach (array(
+			'IsObject',
+		    ) as $suff) {
+			$prop = 'a' . $suff;
+			$this->$prop = method_exists($this, 'assert' . $suff) ?
+			    'assert' . $suff : 'rpl' . $suff;
+		}
+	}
+
 	private function ob_wrap($instance, $method, $p=array()) {
 		ob_start();
 		call_user_func_array(array($instance, $method), $p);
@@ -38,7 +55,7 @@ class HPW_Tests extends PHPUnit_Framework_TestCase {
 		/* rudimentary tests */
 		$html = new HpwWeb();
 		$this->assertNotNull($html);
-		$this->assertIsObject($html);
+		$this->{$this->aIsObject}($html);
 		$this->assertStringContainsString('<title>untitled page</title>',
 		    $this->ob_wrap($html, 'showHeader'));
 		$html->setTitle('f&amp;o');

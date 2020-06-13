@@ -2,6 +2,10 @@ Tests: src-dev
 Depends: @, mksh, moreutils, pcregrep
 Restrictions: allow-stderr
 
+Tests: fakeunit
+Depends: @
+Restrictions: allow-stderr
+
 Tests: phpunit
 Depends: @, phpunit
 Restrictions: allow-stderr

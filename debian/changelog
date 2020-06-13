@@ -7,8 +7,9 @@ hello-php-world (30) UNRELEASED; urgency=medium
   * Reinstate support for older versions
   * Reorder dependencies to prefer php 7+ over 5
   * Drop php-mbstring dependency (no longer necessary)
+  * Run fakeunit tests in autopkgtests
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 18:07:25 +0000
+ -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 18:19:29 +0000
 
 hello-php-world (29) wtf; urgency=low
 

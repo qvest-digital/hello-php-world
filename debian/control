@@ -6,7 +6,7 @@ Priority: optional
 Maintainer: Thorsten Glaser <t.glaser@tarent.de>
 Standards-Version: 4.5.0
 Build-Depends: debhelper (>= 9), dbconfig-common, mksh, moreutils, pcregrep,
- php5-cli | php-cli, php-mbstring | php5-cli, phpab, phpunit
+ php-cli | php5-cli, php-mbstring | php5-cli, phpab, phpunit
 Homepage: https://www.tarent.de/
 Rules-Requires-Root: no
 VCS-Browser: https://evolvis.org/plugins/scmgit/cgi-bin/gitweb.cgi?p=shellsnippets/hello-php-world.git
@@ -16,9 +16,9 @@ Package: hello-php-world
 Architecture: all
 Depends: ${misc:Depends}, apache2 | httpd,
  dbconfig-common (<< 2) | dbconfig-pgsql | dbconfig-no-thanks,
- libapache2-mod-php5 | libapache2-mod-php | libapache2-mod-php5filter |
- php5-cgi | php-cli | php5-fpm | php-fpm | php5 | php,
- php-mbstring | php5-cli, php5-pgsql | php-pgsql, postgresql
+ libapache2-mod-php | libapache2-mod-php5 | libapache2-mod-php5filter |
+ php-cgi | php-fpm | php-cli | php | php5-cgi | php5-fpm | php5-cli | php5,
+ php-pgsql | php5-pgsql, postgresql
 Description: Hello World example for PHP packaging with PostgreSQL
  This package is an example of how to package a web application
  written in PHP, using a locally set up PostgreSQL database cluster,

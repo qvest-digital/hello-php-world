@@ -156,7 +156,10 @@ all: metacheck syntaxcheck dbc-generated generated
 CLEANFILES+=${GENERATED}
 generated: ${GENERATED}
 
-check: generated
+check: lcheck pcheck
+
+pcheck: generated
+	# run tests with phpunit
 	cd tests && \
 	    if phpunit --do-not-cache-result --help >/dev/null 2>&1; then \
 		exec phpunit --do-not-cache-result .; \
@@ -171,4 +174,4 @@ lcheck: generated
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all generated check lcheck clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated
+.PHONY: all generated check lcheck pcheck clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated

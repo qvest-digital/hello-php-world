@@ -10,26 +10,26 @@ Tests: syntax
 Depends: @
 Restrictions: allow-stderr
 
-#Tests: syntax5
-#Depends: @, mksh, php5-cli
-#Restrictions: allow-stderr
+Tests: syntax5
+Depends: @, mksh, php5-cli
+Restrictions: allow-stderr
 
 Tests: syntax70
-Depends: @, mksh, php7.0-cli, php7.0-mbstring
+Depends: @, mksh, php7.0-cli
 Restrictions: allow-stderr
 
 Tests: syntax71
-Depends: @, mksh, php7.1-cli, php7.1-mbstring
+Depends: @, mksh, php7.1-cli
 Restrictions: allow-stderr
 
 Tests: syntax72
-Depends: @, mksh, php7.2-cli, php7.2-mbstring
+Depends: @, mksh, php7.2-cli
 Restrictions: allow-stderr
 
 Tests: syntax73
-Depends: @, mksh, php7.3-cli, php7.3-mbstring
+Depends: @, mksh, php7.3-cli
 Restrictions: allow-stderr
 
 Tests: syntax74
-Depends: @, mksh, php7.4-cli, php7.4-mbstring
+Depends: @, mksh, php7.4-cli
 Restrictions: allow-stderr

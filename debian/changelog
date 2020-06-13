@@ -1,4 +1,4 @@
-hello-php-world (30) UNRELEASED; urgency=medium
+hello-php-world (30) wtf; urgency=medium
 
   * Make phpunit workaround not break with phpunit from buster 🤮
   * Revert adding debconf note (too fragile)
@@ -7,9 +7,9 @@ hello-php-world (30) UNRELEASED; urgency=medium
   * Reinstate support for older versions
   * Reorder dependencies to prefer php 7+ over 5
   * Drop php-mbstring dependency (no longer necessary)
-  * Run fakeunit tests in autopkgtests
+  * Run fakeunit tests in autopkgtests (prepare to kill idiotic phpunit)
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 18:19:29 +0000
+ -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 18:44:54 +0000
 
 hello-php-world (29) wtf; urgency=low
 

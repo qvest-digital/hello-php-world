@@ -4,6 +4,7 @@ hello-php-world source: debian-source-options-has-custom-compression-settings
 hello-php-world source: package-uses-deprecated-debhelper-compat-version 9
 
 # it uses both but a workaround for sadt only setting ADTTMP is needed (#953811)
+hello-php-world source: uses-deprecated-adttmp debian/tests/fakeunit (line 4)
 hello-php-world source: uses-deprecated-adttmp debian/tests/phpunit (line 4)
 
 # we prefer a human-readable format

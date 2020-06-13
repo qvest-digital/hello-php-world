@@ -150,7 +150,7 @@ var/AUTOLDR.php:
 	php -l $@~
 	mv -f $@~ $@
 
-CLEANFILES+=dbconfig/install/*~ var/*~
+CLEANFILES+=common/*~ dbconfig/install/*~ var/*~
 all: metacheck syntaxcheck dbc-generated generated
 
 CLEANFILES+=${GENERATED}

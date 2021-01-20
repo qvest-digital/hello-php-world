@@ -25,7 +25,7 @@
 
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
-class Util_Tests extends phpFUnit_TestCase {
+class utilTest extends phpFUnit_TestCase {
 	public function testUtil() {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/util.php');

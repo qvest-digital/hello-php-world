@@ -26,7 +26,7 @@
 
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
-class Minijson_Tests extends phpFUnit_TestCase {
+class minijsonTest extends phpFUnit_TestCase {
 	public function testMiniJson() {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/minijson.php');

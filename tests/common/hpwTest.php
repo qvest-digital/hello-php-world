@@ -25,7 +25,7 @@
 
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
-class HPW_Tests extends phpFUnit_TestCase {
+class hpwTest extends phpFUnit_TestCase {
 	private function ob_wrap($instance, $method, $p=array()) {
 		ob_start();
 		call_user_func_array(array($instance, $method), $p);

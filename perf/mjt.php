@@ -60,6 +60,6 @@ showmemusage('total', getmemusage(), NULL, msnice(hrtime(), $tm1load));
 
 printf("hash %s %s\n", $hashval, $hashok ? 'matches' : 'FAILURE');
 
-$h = popen('php mjtenc.php' . (count($argv) > 1 ? (' ' . $argv[1]) : ''), 'w');
+$h = popen('${PHP:-php} mjtenc.php' . (count($argv) > 1 ? (' ' . $argv[1]) : ''), 'w');
 fwrite($h, serialize($out));
 pclose($h);

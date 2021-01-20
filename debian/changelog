@@ -1,12 +1,24 @@
-hello-php-world (30) UNRELEASED; urgency=medium
+hello-php-world (31) wtf; urgency=low
+
+  * Recent PHPUnit explodes if test class name ≠ source file basename
+    (apparently, it r̲e̲a̲l̲l̲y̲ is a case of Java™ devs laughing too hard)
+  * Add PHP 8.0 as listed version
+
+ -- Thorsten Glaser <tg@mirbsd.de>  Wed, 20 Jan 2021 19:53:29 +0100
+
+hello-php-world (30) wtf; urgency=medium
 
   * Make phpunit workaround not break with phpunit from buster 🤮
   * Revert adding debconf note (too fragile)
   * Make minijson.php includable from a stdin script also in PHP 7
   * Improve (debugging) output for resources
-  * Preliminarily reinstate support for older versions
+  * Reinstate support for older versions
+  * Reorder dependencies to prefer php 7+ over 5
+  * Drop php-mbstring dependency (no longer necessary)
+  * Run fakeunit tests in autopkgtests (prepare to kill idiotic phpunit)
+  * Monkey-plug assertions missing in phpunit in stretch/jessie/wheezy
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Tue, 09 Jun 2020 02:50:24 +0200
+ -- Thorsten Glaser <t.glaser@tarent.de>  Sat, 13 Jun 2020 22:27:19 +0200
 
 hello-php-world (29) wtf; urgency=low
 

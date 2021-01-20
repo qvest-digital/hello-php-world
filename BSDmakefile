@@ -59,6 +59,8 @@ var/AUTOLDR.php:
 	php -l $@~
 	mv -f $@~ $@
 
+CLEANFILES+=common/*~ dbconfig/install/*~ var/*~
+
 CLEANFILES+=${GENERATED}
 generated: ${GENERATED}
 

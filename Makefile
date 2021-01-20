@@ -125,6 +125,14 @@ syntaxcheck74: generated
 	done; exit $$rv
 	@echo done.
 
+syntaxcheck80: generated
+	@echo Running syntax checks, please verify output manually.
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+		php8.0 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
+		(( PIPESTATUS[0] )) && rv=1; \
+	done; exit $$rv
+	@echo done.
+
 GENERATED+=common/VERSION.php
 CLEANFILES+=www/artifact-version
 common/VERSION.php: debian/changelog
@@ -150,13 +158,16 @@ var/AUTOLDR.php:
 	php -l $@~
 	mv -f $@~ $@
 
-CLEANFILES+=dbconfig/install/*~ var/*~
+CLEANFILES+=common/*~ dbconfig/install/*~ var/*~
 all: metacheck syntaxcheck dbc-generated generated
 
 CLEANFILES+=${GENERATED}
 generated: ${GENERATED}
 
-check: generated
+check: lcheck pcheck
+
+pcheck: generated
+	# run tests with phpunit
 	cd tests && \
 	    if phpunit --do-not-cache-result --help >/dev/null 2>&1; then \
 		exec phpunit --do-not-cache-result .; \
@@ -171,4 +182,4 @@ lcheck: generated
 clean:
 	rm -f ${CLEANFILES}
 
-.PHONY: all generated check lcheck clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 dbc-generated
+.PHONY: all generated check lcheck pcheck clean metacheck syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 syntaxcheck80 dbc-generated

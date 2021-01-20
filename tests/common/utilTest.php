@@ -2,6 +2,8 @@
 /*-
  * Small test for hello-php-world’s common utilities
  *
+ * Copyright © 2020
+ *	mirabilos <m@mirbsd.org>
  * Copyright © 2019
  *	mirabilos <t.glaser@tarent.de>
  *
@@ -23,7 +25,7 @@
 
 require_once(dirname(__FILE__) . '/../phpFUnit.php');
 
-class Util_Tests extends PHPUnit_Framework_TestCase {
+class utilTest extends phpFUnit_TestCase {
 	public function testUtil() {
 		$s = error_reporting(-1);
 		require_once(dirname(__FILE__) . '/../../common/util.php');
@@ -46,7 +48,7 @@ class Util_Tests extends PHPUnit_Framework_TestCase {
 		$rn = util_randnum(0x0F, 2);
 		$this->assertTrue($rn === 0 || $rn === 1 || $rn === 2);
 
-		$this->assertStringContainsString('"uri": "php://stdout",',
+		$this->{$this->aStringContainsString}('"uri": "php://stdout",',
 		    minijson_encdbg(STDOUT));
 
 		error_reporting($s);

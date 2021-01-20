@@ -108,7 +108,7 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 		$clsr = new ReflectionClass($cls);
 		if (!$clsr->isSubclassOf('PHPUnit_Framework_TestCase'))
 			continue;
-		if ($clsr->name == 'PHPUnit_Framework_TestCase')
+		if ($clsr->isAbstract())
 			continue;
 		echo "I: <<<< $cls\n";
 		$obj = $clsr->newInstance();

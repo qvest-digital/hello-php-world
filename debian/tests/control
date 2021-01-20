@@ -37,3 +37,7 @@ Restrictions: allow-stderr
 Tests: syntax74
 Depends: @, mksh, php7.4-cli
 Restrictions: allow-stderr
+
+Tests: syntax80
+Depends: @, mksh, php8.0-cli
+Restrictions: allow-stderr

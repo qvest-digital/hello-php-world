@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2020
+ * Copyright © 2020, 2021
  *	mirabilos <m@mirbsd.org>
  * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
  *	       2019, 2020
@@ -29,7 +29,6 @@ require_once(dirname(__FILE__) . '/VERSION.php');
 /* replace this with your own custom proper error handling */
 function util_logerr($loglevel, $s) {
 	$s = $loglevel . ': ' . str_replace("\n", "\nN: ", trim($s)) . "\n";
-	echo $s;
 	if (in_array(php_sapi_name(), array(
 		/* all with separate log, NOT stdout/stderr */
 		'apache',
@@ -40,6 +39,8 @@ function util_logerr($loglevel, $s) {
 	    )))
 		foreach (explode("\n", trim($s)) as $msg)
 			error_log($msg, 4);
+	else
+		fwrite(STDERR, $s);
 }
 function util_debugJ() {
 	$argc = func_num_args();

@@ -64,10 +64,14 @@ function db_connect() {
 		$s .= ' host=' . $dbserver;
 	if ($dbport)
 		$s .= ' port=' . $dbport;
+	// connect_timeout=n (default 0=indefinitely; <2 recommended)
+	// client_encoding=…
+	// fallback_application_name=hello-php-world
 	if (!($dbconn = pg_pconnect($s)))
 		db_die('could not connect to database');
 
-	// register_shutdown_function for ROLLBACK
+	// register_shutdown_function for ROLLBACK and reset error states
+	// (some do it after pconnect instead but that’s awful as well)
 }
 
 function db_query_params($sql, $params) {

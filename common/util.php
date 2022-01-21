@@ -469,7 +469,7 @@ function util_emailcase($s) {
 
 /*-
  * The correct way to send eMail from PHP. Do not bug the poor people
- * in #sendmail on Freenode IRC if you’re doing it wrong.
+ * in #sendmail on IRC if you are doing this wrong.
  *
  * Usage example:
  *	$res = util_sendmail('noreply@example.com',
@@ -500,8 +500,12 @@ function util_emailcase($s) {
  * ‣ https://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/
  * ‣ https://gynvael.coldwind.pl/?id=492
  * ‣ https://en.wikiquote.org/wiki/Rasmus_Lerdorf
- * ‣ http://www.rfc-editor.org/rfc/rfc822.txt and its successors
- * ‣ http://jkorpela.fi/rfc/822addr.html
+ * ‣ https://www.rfc-editor.org/rfc/rfc822.txt and its successors
+ * ‣ https://jkorpela.fi/rfc/822addr.html
+ *
+ * Better eMail (and hostname/domain/FQDN and IPv6/IPv4 address
+ * validity checks) are available as:
+ * ‣ https://search.maven.org/artifact/org.evolvis.tartools/rfc822
  */
 
 /**
@@ -568,7 +572,7 @@ function util_sendmail_encode_hdr_int($fname, $ftext) {
 function util_sendmail_valid($adr) {
 	/*
 	 * note for regex reuse: to check a domain, take the part
-	 * after the ‘@’ but prepend: _^(?=.{1,255}\$)
+	 * after the ‘@’ but prepend: _^(?=.{1,253}\$)
 	 */
 	return preg_match(
 	    "_^(?=.{1,254}\$)(?=.{1,64}@)[-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*@[0-9A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?(\.[0-9A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?)*\$_",

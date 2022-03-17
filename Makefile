@@ -149,6 +149,10 @@ common/VERSION.php: debian/changelog
 	    sed -n '/^Version: /s///p') >www/artifact-version
 	mv -f $@~ $@
 
+GENERATED+=var/README
+var/README: var/.README.in
+	sed 's@HPW_package@${HPW_package}g' var/.README.in >$@
+
 GENERATED+=var/AUTOLDR.php
 var/AUTOLDR.php:
 	set -e; set -o pipefail; set -A dirs; ndirs=0; \

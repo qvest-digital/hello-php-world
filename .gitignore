@@ -1,4 +1,5 @@
 common/VERSION.php
 dbconfig/install/pgsql
 var/AUTOLDR.php
+var/README
 www/artifact-version

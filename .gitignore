@@ -1,5 +1,6 @@
 common/VERSION.php
 dbconfig/install/pgsql
+debian/control
 var/AUTOLDR.php
 var/README
 www/artifact-version

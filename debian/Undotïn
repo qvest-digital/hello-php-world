@@ -1,0 +1,44 @@
+#!/bin/mksh
+
+export LC_ALL=C
+unset LANGUAGE
+
+die() {
+	print -ru2 -- "E: $*"
+	exit 1
+}
+
+[[ $(realpath "$0") = "$(realpath debian/Undotïn)" ]] || \
+    die called in wrong directory
+(( USER_ID )) || die called as root
+
+set -e
+set -o pipefail
+set -x
+. ./HPWname.inc
+set +ex
+
+rm -f debian/control
+
+function nuke {
+	local x
+
+	rm -f -- "$@"
+	for x in "$@"; do
+		[[ ! -h $x && ! -e $x ]] || die "could not remove $x"
+	done
+}
+
+function do1 {
+	do2 "$1" "$1.in"
+}
+
+function do2 {
+	nuke "$1~" "$1"
+	sed \
+	    -e "s@HPW_package@${HPW_package}g" \
+	    <"$2" >"$1~" || die "could not substitute from $2"
+	mv "$1~" "$1" || die "could not rename to $1"
+}
+
+do1 debian/control

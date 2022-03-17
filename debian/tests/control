@@ -19,25 +19,25 @@ Depends: @, mksh, php5-cli
 Restrictions: allow-stderr
 
 Tests: syntax70
-Depends: @, mksh, php7.0-cli
+Depends: @, mksh, php7.0-cli, php7.0-mbstring
 Restrictions: allow-stderr
 
 Tests: syntax71
-Depends: @, mksh, php7.1-cli
+Depends: @, mksh, php7.1-cli, php7.1-mbstring
 Restrictions: allow-stderr
 
 Tests: syntax72
-Depends: @, mksh, php7.2-cli
+Depends: @, mksh, php7.2-cli, php7.2-mbstring
 Restrictions: allow-stderr
 
 Tests: syntax73
-Depends: @, mksh, php7.3-cli
+Depends: @, mksh, php7.3-cli, php7.3-mbstring
 Restrictions: allow-stderr
 
 Tests: syntax74
-Depends: @, mksh, php7.4-cli
+Depends: @, mksh, php7.4-cli, php7.4-mbstring
 Restrictions: allow-stderr
 
 Tests: syntax80
-Depends: @, mksh, php8.0-cli
+Depends: @, mksh, php8.0-cli, php8.0-mbstring
 Restrictions: allow-stderr

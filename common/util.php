@@ -533,31 +533,26 @@ function util_emailcase($s) {
 function util_sendmail_encode_hdr($fname, $ftext) {
 	$old_encoding = mb_internal_encoding();
 	mb_internal_encoding('UTF-8');
-	$rv = util_sendmail_encode_hdr_int($fname, $ftext);
+	$rv = is_int($fname) ? util_sendmail_encode_hdr_isz($fname, $ftext) :
+	    util_sendmail_encode_hdr_int($fname, $ftext);
 	mb_internal_encoding($old_encoding);
 	return $rv;
 }
 function util_sendmail_encode_hdr_int($fname, $ftext) {
-	if (is_int($fname)) {
-		$s = $ftext;
-		$i = 2 + $fname;
-	} else {
-		$s = $fname . ': ' . $ftext;
-		$i = 0;
+	$field = $fname . ': ' . $ftext;
+	if (strlen($field) > 78 || preg_match('/[^ -~]/', $field) !== 0) {
+		$field = mb_encode_mimeheader($field, 'UTF-8', 'Q', "\015\012");
 	}
-	if (strlen($s) > (78 - $i) || preg_match('/[^ -~]/', $s) !== 0) {
-		if ($i > 0) {
-			/* ugly workaround for
-			 * https://github.com/php/php-src/issues/8208 */
-			$s = str_pad('', $fname, 'X') . ': ' . $s;
-		}
-		$s = mb_encode_mimeheader($s, 'UTF-8', 'Q', "\015\012");
-		if ($i > 0) {
-			/* trim that workaround again */
-			$s = substr($s, $i);
-		}
+	return $field;
+}
+function util_sendmail_encode_hdr_isz($pfxlen, $fld) {
+	$i = 2 + $pfxlen;
+	/* https://github.com/php/php-src/issues/8208 workaround */
+	if (strlen($fld) > (78 - $i) || preg_match('/[^ -~]/', $fld) !== 0) {
+		$fld = substr(mb_encode_mimeheader(str_pad('', $pfxlen,
+		    'X') . ': ' . $fld, 'UTF-8', 'Q', "\015\012"), $i);
 	}
-	return $s;
+	return $fld;
 }
 
 /**

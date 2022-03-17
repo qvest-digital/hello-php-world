@@ -1,5 +1,6 @@
 common/VERSION.php
 dbconfig/install/pgsql
+debian/apache2/hello-php-world.conf
 debian/control
 var/AUTOLDR.php
 var/README

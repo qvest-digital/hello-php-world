@@ -41,4 +41,6 @@ function do2 {
 	mv "$1~" "$1" || die "could not rename to $1"
 }
 
+do2 debian/apache2/${HPW_package}.conf debian/apache2/conf.in
+# must be last
 do1 debian/control

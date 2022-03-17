@@ -1,6 +1,6 @@
-Alias /hello-php-world /usr/share/hello-php-world/www
+Alias /@HPW_package@ /usr/share/@HPW_package@/www
 
-<Directory /usr/share/hello-php-world/www>
+<Directory /usr/share/@HPW_package@/www>
 	AllowOverride AuthConfig FileInfo Indexes Limit
 	# ExecCGI Indexes
 	Options SymLinksIfOwnerMatch
@@ -10,11 +10,11 @@ Alias /hello-php-world /usr/share/hello-php-world/www
 	<IfModule mod_php5.c>
 		AddType application/x-httpd-php .php
 		# default: .:/usr/share/php:/usr/share/pear
-		php_value include_path .:/usr/share/hello-php-world/common:/usr/share/php:/usr/share/pear
+		php_value include_path .:/usr/share/@HPW_package@/common:/usr/share/php:/usr/share/pear
 	</IfModule>
 	<IfModule mod_php7.c>
 		AddType application/x-httpd-php .php
 		# default: .:/usr/share/php:/usr/share/pear
-		php_value include_path .:/usr/share/hello-php-world/common:/usr/share/php:/usr/share/pear
+		php_value include_path .:/usr/share/@HPW_package@/common:/usr/share/php:/usr/share/pear
 	</IfModule>
 </Directory>

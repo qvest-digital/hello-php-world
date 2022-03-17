@@ -67,11 +67,13 @@ function db_connect() {
 		$s .= ' host=' . $dbserver;
 	if ($dbport)
 		$s .= ' port=' . $dbport;
-	// connect_timeout=n (default 0=indefinitely; <2 recommended)
-	// client_encoding=…
-	// fallback_application_name=hello-php-world
+	$s .= ' connect_timeout=5';
+	$s .= ' client_encoding=UTF-8';
+	$s .= ' fallback_application_name=' . HPW_PACKAGE;
 	if (!($dbconn = pg_pconnect($s)))
 		db_die('could not connect to database');
+	if (!ini_get('pgsql.auto_reset_persistent') && !pg_ping($dbconn))
+		db_die('database connection broken beyond reset');
 }
 
 function db_query_params($sql, $params) {

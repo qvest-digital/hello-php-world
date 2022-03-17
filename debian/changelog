@@ -14,8 +14,11 @@ hello-php-world (32) wtf; urgency=medium
   * Ping PostgreSQL connection unless pgsql.auto_reset_persistent does it
   * Set fallback_application_name to HPW_package on PostgreSQL connection
   * We need php-mbstring after all
+  * Allow passing just the header length to util_sendmail_encode_hdr()
+  * New util_encode_mimeheader workarounds a bug in mb_encode_mimeheader
+  * Mark superficial DEP 8 tests thusly
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 17 Mar 2022 23:54:59 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 00:45:09 +0100
 
 hello-php-world (31) wtf; urgency=low
 

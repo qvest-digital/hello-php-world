@@ -18,6 +18,12 @@ set -x
 . ./HPWname.inc
 set +ex
 
+if [[ $1 = remove ]]; then
+	alias do2=do2_remove
+else
+	alias do2=do2_generate
+fi
+
 rm -f debian/control
 
 function nuke {
@@ -33,12 +39,19 @@ function do1 {
 	do2 "$1" "$1.in"
 }
 
-function do2 {
+function do2_generate {
 	nuke "$1~" "$1"
 	sed \
 	    -e "s@HPW_package@${HPW_package}g" \
 	    <"$2" >"$1~" || die "could not substitute from $2"
 	mv "$1~" "$1" || die "could not rename to $1"
+}
+
+function do2_remove {
+	nuke "$1~" "$1"
+	if [[ $1 = .gitignore ]]; then
+		git checkout -- "$1" || die "could not reset $1"
+	fi
 }
 
 do1 .gitignore

@@ -18,4 +18,7 @@ override_dh_builddeb:
 debian/control:
 	mksh debian/Undotïn
 
-.PHONY: debian/control
+remove/control:
+	mksh debian/Undotïn remove
+
+.PHONY: debian/control remove/control

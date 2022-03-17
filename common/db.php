@@ -72,9 +72,6 @@ function db_connect() {
 	// fallback_application_name=hello-php-world
 	if (!($dbconn = pg_pconnect($s)))
 		db_die('could not connect to database');
-
-	// register_shutdown_function for ROLLBACK and reset error states
-	// (some do it after pconnect instead but that’s awful as well)
 }
 
 function db_query_params($sql, $params) {

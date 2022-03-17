@@ -79,5 +79,6 @@ class utilTest extends phpFUnit_TestCase {
 				$this->assertEquals($vv[0], $r);
 			}
 		}
+		$this->assertTrue($ok);
 	}
 }

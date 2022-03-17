@@ -1,7 +1,5 @@
 common/VERSION.php
 dbconfig/install/pgsql
-debian/apache2/@HPW_package@.conf
-debian/control
 debian/@HPW_package@.config
 debian/@HPW_package@.install
 debian/@HPW_package@.links
@@ -9,6 +7,9 @@ debian/@HPW_package@.lintian-overrides
 debian/@HPW_package@.postinst
 debian/@HPW_package@.postrm
 debian/@HPW_package@.prerm
+debian/apache2/@HPW_package@.conf
+debian/control
+debian/source/lintian-overrides
 var/AUTOLDR.php
 var/README
 www/artifact-version

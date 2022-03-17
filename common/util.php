@@ -467,6 +467,39 @@ function util_emailcase($s) {
 	return is_string($s) && ($r === $s) ? $s : $r;
 }
 
+/**
+ * util_encode_mimeheader - mb_encode_mimeheader bugfix
+ *
+ * This function wraps mb_encode_mimeheader, offering the same
+ * API as documented but with a bugfix for PHP releases before
+ * April 2022. You only need this if $indent is not 0, or when
+ * mb_internal_encoding() may be something other than UTF-8.
+ *
+ * @param	string	$string
+ * @param	?string	$charset = NULL
+ * @param	?string	$transfer_encoding = NULL
+ * @param	string	$newline = "\r\n"
+ * @param	int	$indent = 0
+ * @result	string	The encoded header field, without trailing newline
+ */
+function util_encode_mimeheader($string, $charset=NULL,
+    $transfer_encoding=NULL, $newline="\r\n", $indent=0) {
+	$old_encoding = mb_internal_encoding();
+	if (!mb_internal_encoding('UTF-8'))
+		throw new ErrorException("mb_internal_encoding('UTF-8') fails");
+	if ($indent > 0) {
+		/* work around https://github.com/php/php-src/issues/8208 */
+		$rv = substr(mb_encode_mimeheader(substr(str_pad('', $indent,
+		    'X') . ': ', 2) . $string, $charset,
+		    $transfer_encoding, $newline), $indent);
+	} else {
+		$rv = mb_encode_mimeheader($string, $charset,
+		    $transfer_encoding, $newline);
+	}
+	mb_internal_encoding($old_encoding);
+	return $rv;
+}
+
 /*-
  * The correct way to send eMail from PHP. Do not bug the poor people
  * in #sendmail on IRC if you are doing this wrong.
@@ -524,35 +557,32 @@ function util_emailcase($s) {
  * @param	str|int	$fname
  *		The name of the eMail header to use, which
  *		must not preg_match /[^!-9;-~]/ (not checked)
- *		or its length in octets as integer
+ *		or its length in octets as integer (without
+ *		the colon + space that follows)
  * @param	string	$ftext
  *		The unstructured field text to encode
  * @result	string
  *		The encoded header field, without trailing CRLF
  */
 function util_sendmail_encode_hdr($fname, $ftext) {
-	$old_encoding = mb_internal_encoding();
-	mb_internal_encoding('UTF-8');
-	$rv = is_int($fname) ? util_sendmail_encode_hdr_isz($fname, $ftext) :
-	    util_sendmail_encode_hdr_int($fname, $ftext);
-	mb_internal_encoding($old_encoding);
-	return $rv;
+	if (is_int($fname)) {
+		$s = $ftext;
+		$i = $fname + 2;
+	} else {
+		$s = $fname . ': ' . $ftext;
+		$i = 0;
+	}
+	if (strlen($s) > (78 - $i) || preg_match('/[^ -~]/', $s) !== 0)
+		$s = util_encode_mimeheader($s, 'UTF-8', 'Q', "\015\012", $i);
+	return $s;
 }
+/* same but used internally by util_sendmail() only */
 function util_sendmail_encode_hdr_int($fname, $ftext) {
 	$field = $fname . ': ' . $ftext;
 	if (strlen($field) > 78 || preg_match('/[^ -~]/', $field) !== 0) {
 		$field = mb_encode_mimeheader($field, 'UTF-8', 'Q', "\015\012");
 	}
 	return $field;
-}
-function util_sendmail_encode_hdr_isz($pfxlen, $fld) {
-	$i = 2 + $pfxlen;
-	/* https://github.com/php/php-src/issues/8208 workaround */
-	if (strlen($fld) > (78 - $i) || preg_match('/[^ -~]/', $fld) !== 0) {
-		$fld = substr(mb_encode_mimeheader(str_pad('', $pfxlen,
-		    'X') . ': ' . $fld, 'UTF-8', 'Q', "\015\012"), $i);
-	}
-	return $fld;
 }
 
 /**

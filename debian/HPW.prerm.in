@@ -4,30 +4,24 @@ set -e
 
 # This maintainer script can be called the following ways:
 #
-# * new-postinst "configure" [$most_recently_configured_version]
-# The package is unpacked; all dependencies are unpacked and, when there
-# are no circular dependencies, configured.
-#
-# * old-postinst "abort-upgrade" $new_version
-# * old-postinst "abort-remove"
-# * conflictors-postinst "abort-remove" "in-favour" $new_package
-#	$new_version
-# * deconfigureds-postinst "abort-deconfigure" "in-favour"
-#	$failed_install_package $fip_version		# new-package
+# * prerm "remove"
+# * old-prerm "upgrade" $new_version
+# * conflictors-prerm "remove" "in-favour" $new_package $new_version
+# * deconfigureds-prerm "deconfigure" "in-favour"
+#	$package_being_installed $pbi_version		# new-package
 #	["removing" $conflicting_package $cp_version]	# old-package
-# The package is unpacked; all dependencies are at least Half-Installed,
-# previously been configured, and not removed. In some error situations,
-# dependencies may not be even fully unpacked.
+# The package and dependencies are at least Half-Installed; dependencies
+# have previously been configured and not removed.
 #
-# * postinst "triggered" "${triggers[*]}"
-# For trigger-only calls, i.e. if "configure" is not called.
-#
-# * new-postinst "reconfigure" [$most_recently_configured_version](?)
-# Treat this as just like "configure" for a future extension by debconf.
+# * new-prerm "failed-upgrade" $old_version
+# * new-prerm "failed-upgrade" $old_version $new_version # 1.18.5, stretch
+# Called when 'old-prerm "upgrade"' fails; new package not unpacked, all
+# other constraints the same as above.
 
-HPW_package=hello-php-world
+HPW_package=@HPW_package@
 
-if test -e /usr/share/apache2/apache2-maintscript-helper; then
+test -n "$HPW_PRERM_DIDWEB" || \
+    if test -e /usr/share/apache2/apache2-maintscript-helper; then
 	. /usr/share/apache2/apache2-maintscript-helper
 fi
 detect_webserver() {
@@ -52,19 +46,16 @@ detect_webserver() {
 }
 do_webserver_config() {
 	# set up Apache configuration
-	local nl='
+	local x rv nl='
 '
 
 	case $(detect_webserver) in
 	apache24)
-		apache2_invoke enconf "$HPW_package" || exit $?
+		apache2_invoke disconf "$HPW_package" || exit $?
 		;;
 	apache22)
-		if test -d /etc/apache2/conf.d/ && \
-		    test '!' -L "/etc/apache2/conf.d/$HPW_package.conf"; then
-			ln -s "../conf-available/$HPW_package.conf" \
-			    "/etc/apache2/conf.d/$HPW_package.conf"
-		fi
+		test '!' -L "/etc/apache2/conf.d/$HPW_package.conf" || \
+		    rm "/etc/apache2/conf.d/$HPW_package.conf"
 		;;
 	*)
 		echo >&2 "I: no web server configured for $HPW_package"
@@ -72,7 +63,7 @@ do_webserver_config() {
 		;;
 	esac
 	if invoke-rc.d --disclose-deny apache2 status >/dev/null 2>&1; then
-		echo >&2 "I: restarting Apache to flush the code cache"
+		echo >&2 "I: restarting Apache to get rid of hanging connections"
 		(invoke-rc.d apache2 stop || :)
 		set +e # necessary to catch errorlevel
 		x=$(LC_ALL=C apache2ctl configtest 2>&1)
@@ -93,6 +84,17 @@ EOF
 	fi
 }
 
+# Handle webserver part first, to ensure it’s gone before
+# dbconfig-common attempts to purge the database; this is
+# tricky due to bad interaction with debconf
+test -n "$HPW_PRERM_DIDWEB" || case $1 in
+remove)
+	do_webserver_config >&2
+	HPW_PRERM_DIDWEB=1
+	export HPW_PRERM_DIDWEB
+	;;
+esac
+
 # Initialise debconf
 . /usr/share/debconf/confmodule
 # Initialise dbconfig-common
@@ -112,28 +114,21 @@ dbc_pgsql_createdb_encoding="UTF8' lc_ctype='C.UTF-8' lc_collate='C"
 # https://www.postgresql.org/message-id/BA6132ED-1F6B-4A0B-AC22-81278F5AB81E@tripadvisor.com
 #dbc_pgsql_createdb_encoding=UTF8
 dbc_authmethod_user=password
-if test -f /usr/share/dbconfig-common/dpkg/postinst.pgsql; then
-	. /usr/share/dbconfig-common/dpkg/postinst.pgsql
+if test -f /usr/share/dbconfig-common/dpkg/prerm.pgsql; then
+	. /usr/share/dbconfig-common/dpkg/prerm.pgsql
 	dbc_go "$HPW_package" "$@"
 fi
 
 # custom actions
 case $1 in
-(configure|reconfigure)
-	# end debconf connection so we can start services
-	db_stop
-	# set up webserver
-	do_webserver_config
+(remove|deconfigure)
 	;;
 
-(abort-upgrade|abort-remove|abort-deconfigure)
-	;;
-
-(triggered)
+(upgrade|failed-upgrade)
 	;;
 
 (*)
-	echo >&2 "E: postinst called with unknown subcommand '$1'"
+	echo >&2 "E: prerm called with unknown subcommand '$1'"
 	exit 1
 	;;
 esac

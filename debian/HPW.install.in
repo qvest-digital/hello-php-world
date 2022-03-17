@@ -1,0 +1,7 @@
+HPWname.inc usr/share/@HPW_package@/
+common/* usr/share/@HPW_package@/common/
+dbconfig/* usr/share/dbconfig-common/data/@HPW_package@/
+debian/Makefile usr/share/@HPW_package@/
+debian/apache2/*.conf etc/apache2/conf-available/
+var/* var/lib/@HPW_package@/
+www/* usr/share/@HPW_package@/www/

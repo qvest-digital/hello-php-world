@@ -5,3 +5,10 @@ debian/control
 var/AUTOLDR.php
 var/README
 www/artifact-version
+debian/hello-php-world.config
+debian/hello-php-world.install
+debian/hello-php-world.links
+debian/hello-php-world.postinst
+debian/hello-php-world.postrm
+debian/hello-php-world.prerm
+debian/hello-php-world.lintian-overrides

@@ -42,5 +42,13 @@ function do2 {
 }
 
 do2 debian/apache2/${HPW_package}.conf debian/apache2/conf.in
+do1 debian/source/lintian-overrides
+do2 debian/${HPW_package}.config debian/HPW.config.in
+do2 debian/${HPW_package}.install debian/HPW.install.in
+do2 debian/${HPW_package}.links debian/HPW.links.in
+do2 debian/${HPW_package}.lintian-overrides debian/HPW.lintian-overrides.in
+do2 debian/${HPW_package}.postinst debian/HPW.postinst.in
+do2 debian/${HPW_package}.postrm debian/HPW.postrm.in
+do2 debian/${HPW_package}.prerm debian/HPW.prerm.in
 # must be last
 do1 debian/control

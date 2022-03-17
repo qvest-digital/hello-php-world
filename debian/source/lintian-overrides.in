@@ -1,0 +1,14 @@
+# we wish to facilitate backports
+@HPW_package@ source: custom-compression-in-debian-rules
+@HPW_package@ source: custom-compression-in-debian-source-options
+@HPW_package@ source: package-uses-deprecated-debhelper-compat-version 9
+
+# it uses both but a workaround for sadt only setting ADTTMP is needed (#953811)
+@HPW_package@ source: uses-deprecated-adttmp debian/tests/fakeunit (line 4)
+@HPW_package@ source: uses-deprecated-adttmp debian/tests/phpunit (line 4)
+
+# what the…
+@HPW_package@ source: cute-field
+
+# we prefer a human-readable format
+@HPW_package@ source: no-dep5-copyright

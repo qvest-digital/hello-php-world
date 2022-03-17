@@ -1,15 +1,15 @@
 # we cannot use reload, we must ensure that all children use the new code
-hello-php-world: apache2-reverse-dependency-calls-invoke-rc.d postinst
+@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d postinst
 
 # we cannot use reload, we must ensure that all children are gone
-hello-php-world: apache2-reverse-dependency-calls-invoke-rc.d prerm
+@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d prerm
 
 # this package is not currently uploaded to Debian proper, although a
 # suggestion to do that was posted to and ignored by the PHP maintainers
-hello-php-world: bugs-field-does-not-refer-to-debian-infrastructure mailto:t.glaser@tarent.de
+@HPW_package@: bugs-field-does-not-refer-to-debian-infrastructure mailto:t.glaser@tarent.de
 
 # this is correct, debconf is used only indirectly via dbconfig-common
-hello-php-world: no-debconf-templates
+@HPW_package@: no-debconf-templates
 
 # deliberate, not a “documentation” file
-hello-php-world: package-contains-documentation-outside-usr-share-doc var/lib/hello-php-world/README
+@HPW_package@: package-contains-documentation-outside-usr-share-doc var/lib/@HPW_package@/README

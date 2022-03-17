@@ -24,7 +24,7 @@ set -e
 # Called when preinst fails; package is not unpacked. Essential packages
 # and (unpacked or Half-Configured) Pre-Depends are available.
 
-HPW_package=hello-php-world
+HPW_package=@HPW_package@
 
 # Initialise debconf
 . /usr/share/debconf/confmodule

@@ -1,7 +1,0 @@
-HPWname.inc usr/share/hello-php-world/
-common/* usr/share/hello-php-world/common/
-dbconfig/* usr/share/dbconfig-common/data/hello-php-world/
-debian/Makefile usr/share/hello-php-world/
-debian/apache2/*.conf etc/apache2/conf-available/
-var/* var/lib/hello-php-world/
-www/* usr/share/hello-php-world/www/

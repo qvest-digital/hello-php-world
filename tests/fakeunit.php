@@ -45,7 +45,7 @@ abstract class PHPUnit_Framework_TestCase {
 		if ($t) {
 			$x = new FakeUnitException($msg);
 			$x->go(array(
-				'expected' => $e,
+				'expect' => $e,
 				'actual' => $a,
 			    ));
 		}

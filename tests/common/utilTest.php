@@ -66,10 +66,12 @@ class utilTest extends phpFUnit_TestCase {
 			),
 		);
 		foreach ($tests as $k => $vv) {
-			$r = util_sendmail_encode_hdr('Subject', $k);
+			$r = util_sendmail_encode_hdr(strlen('Subject'), $k);
+			$s = util_sendmail_encode_hdr('Subject', $k);
+			$this->assertEquals($s, 'Subject: ' . $r);
 			$ok = false;
 			foreach ($vv as $v) {
-				if ($r === ('Subject: ' . $v)) {
+				if ($r === $v) {
 					$ok = true;
 					break;
 				}
@@ -79,6 +81,5 @@ class utilTest extends phpFUnit_TestCase {
 				$this->assertEquals($vv[0], $r);
 			}
 		}
-		$this->assertTrue($ok);
 	}
 }

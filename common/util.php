@@ -521,9 +521,10 @@ function util_emailcase($s) {
  * as we currently have no way to line-fold non-MIME headers.
  * This should eventually be improved.
  *
- * @param	string	$fname
+ * @param	str|int	$fname
  *		The name of the eMail header to use, which
  *		must not preg_match /[^!-9;-~]/ (not checked)
+ *		or its length in octets as integer
  * @param	string	$ftext
  *		The unstructured field text to encode
  * @result	string
@@ -537,11 +538,17 @@ function util_sendmail_encode_hdr($fname, $ftext) {
 	return $rv;
 }
 function util_sendmail_encode_hdr_int($fname, $ftext) {
-	$field = $fname . ': ' . $ftext;
-	if (strlen($field) > 78 || preg_match('/[^ -~]/', $field) !== 0) {
-		$field = mb_encode_mimeheader($field, 'UTF-8', 'Q', "\015\012");
+	if (is_int($fname)) {
+		$s = $ftext;
+		$i = 2 + $fname;
+	} else {
+		$s = $fname . ': ' . $ftext;
+		$i = 0;
 	}
-	return $field;
+	if (strlen($s) > (78 - $i) || preg_match('/[^ -~]/', $s) !== 0) {
+		$s = mb_encode_mimeheader($s, 'UTF-8', 'Q', "\015\012", $i);
+	}
+	return $s;
 }
 
 /**

@@ -1,3 +1,22 @@
+hello-php-world (32) wtf; urgency=medium
+
+  * Do not write errors to stdout e̲v̲e̲r̲ (may contain XHTML or graphics);
+    rather, write to either stderr or server log
+  * Update mail utility from MirBSD CVS and add workaround for a PHP bug
+    that will be fixed in future releases only plus add unit test
+  * Update outlinks from code comments
+  * Generate files depending on HPW_package variable for flexibility;
+    this makes downstream packages keep-up much easier
+  * Improve comments and documentation
+    - drop note about shutdown hook, even PHP 5.0.0 ext/pgsql had that
+      automatically already for persistent connections (i.e. pconnect)
+  * Set connect_timeout=5, client_encoding=UTF-8 on PostgreSQL connection
+  * Ping PostgreSQL connection unless pgsql.auto_reset_persistent does it
+  * Set fallback_application_name to HPW_package on PostgreSQL connection
+  * We need php-mbstring after all
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Thu, 17 Mar 2022 23:54:59 +0100
+
 hello-php-world (31) wtf; urgency=low
 
   * Recent PHPUnit explodes if test class name ≠ source file basename

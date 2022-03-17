@@ -1,3 +1,4 @@
 #!/bin/sh
 set -e
-exec make -f /usr/share/hello-php-world/Makefile syntaxcheck72
+. ./HPWname.inc
+exec make -f /usr/share/$HPW_package/Makefile syntaxcheck72

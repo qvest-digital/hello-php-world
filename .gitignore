@@ -1,0 +1,4 @@
+common/VERSION.php
+dbconfig/install/pgsql
+var/AUTOLDR.php
+www/artifact-version

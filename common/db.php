@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2014, 2015, 2017
+ * Copyright © 2014, 2015, 2017, 2022
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -18,6 +18,9 @@
  * damage or existence of a defect, except proven that it results out
  * of said person’s immediate fault when using the work as intended.
  */
+
+/* (just in case) */
+require_once(dirname(__FILE__) . '/util.php');
 
 function db_error() {
 	global $dbconn;
@@ -49,7 +52,7 @@ function db_connect() {
 	if (!function_exists('pg_pconnect'))
 		db_die('missing PostgreSQL interface for PHP: function pg_pconnect does not exist!', false);
 
-	include('/var/lib/hello-php-world/dbconfig.inc');
+	include('/var/lib/' . HPW_PACKAGE . '/dbconfig.inc');
 	if ($dbpass && !$dbserver) {
 		/* by default, peer auth for IPC, password auth for localhost */
 		$dbserver = 'localhost';

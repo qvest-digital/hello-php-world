@@ -3,7 +3,7 @@
  * Copyright © 2020, 2021
  *	mirabilos <m@mirbsd.org>
  * Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
- *	       2019, 2020
+ *	       2019, 2020, 2022
  * 	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -749,7 +749,8 @@ function util_hpw_autoloader($cls) {
 		require_once(dirname(__FILE__) . '/AUTOLDR.php');
 	}
 	if (isset($classlist[$cls])) {
-		require_once('/usr/share/hello-php-world/' . $classlist[$cls]);
+		require_once('/usr/share/' . HPW_PACKAGE . '/' .
+		    $classlist[$cls]);
 	} else {
 		util_debugJ('ERR', NULL, NULL, 'cannot autoload class', $cls);
 		util_logerr('T', debug_string_backtrace());

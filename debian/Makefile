@@ -3,7 +3,9 @@ SHELL:=/bin/mksh
 all: syntaxcheck
 clean:
 
-DIRS:=/usr/share/hello-php-world /var/lib/hello-php-world
+include HPWname.inc
+
+DIRS:=/usr/share/${HPW_package} /var/lib/${HPW_package}
 
 syntaxcheck:
 	@echo Running syntax checks, please verify output manually.

@@ -7,13 +7,15 @@ set -e
 # just to be safe
 test -n "$AUTOPKGTEST_TMP"
 
+. ./HPWname.inc
+
 # copy tests and link code to test as-installed
 cp -r tests "$AUTOPKGTEST_TMP/"
 cd "$AUTOPKGTEST_TMP"
-ln -s /usr/share/hello-php-world/common common
-ln -s /usr/share/hello-php-world/www www
-ln -s /usr/share/dbconfig-common/data/hello-php-world dbconfig
-ln -s /var/lib/hello-php-world var
+ln -s /usr/share/$HPW_package/common common
+ln -s /usr/share/$HPW_package/www www
+ln -s /usr/share/dbconfig-common/data/$HPW_package dbconfig
+ln -s /var/lib/$HPW_package var
 
 # php ecosystem what the actual fuck²…
 if phpunit --do-not-cache-result --help >/dev/null 2>&1; then

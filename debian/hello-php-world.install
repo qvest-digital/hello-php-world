@@ -1,3 +1,4 @@
+HPWname.inc usr/share/hello-php-world/
 common/* usr/share/hello-php-world/common/
 dbconfig/* usr/share/dbconfig-common/data/hello-php-world/
 debian/Makefile usr/share/hello-php-world/

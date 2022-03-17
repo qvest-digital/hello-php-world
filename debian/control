@@ -18,6 +18,7 @@ Depends: ${misc:Depends}, apache2 | httpd,
  dbconfig-common (<< 2) | dbconfig-pgsql | dbconfig-no-thanks,
  libapache2-mod-php | libapache2-mod-php5 | libapache2-mod-php5filter |
  php-cgi | php-fpm | php-cli | php | php5-cgi | php5-fpm | php5-cli | php5,
+ php-mbstring | php5-cgi | php5-fpm | php5-cli | php5,
  php-pgsql | php5-pgsql, postgresql
 Description: Hello World example for PHP packaging with PostgreSQL
  This package is an example of how to package a web application

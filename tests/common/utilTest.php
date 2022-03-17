@@ -4,7 +4,7 @@
  *
  * Copyright © 2020
  *	mirabilos <m@mirbsd.org>
- * Copyright © 2019
+ * Copyright © 2019, 2022
  *	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -52,5 +52,32 @@ class utilTest extends phpFUnit_TestCase {
 		    minijson_encdbg(STDOUT));
 
 		error_reporting($s);
+	}
+
+	public function testMailHeaderEncoding() {
+		/* array of teststring to array of allowed result strings */
+		/* in theory, the result can have many forms but PHP emits just one */
+		$tests = array(
+			"p\xC3\xB6stal ohfuu bar baz foo bar baz foo bar baz foo bar baz" => array(
+				"=?UTF-8?Q?p=C3=B6stal=20ohfuu=20bar=20baz=20foo=20bar=20baz=20fo?=\r\n =?UTF-8?Q?o=20bar=20baz=20foo=20bar=20baz?=",
+			),
+			"[service-Aufgaben S&W-Team][#19415] VM''s aufsetzen mit unterschiedlichen" => array(
+				"[service-Aufgaben S&W-Team][#19415] VM''s aufsetzen mit\r\n unterschiedlichen",
+			),
+		);
+		foreach ($tests as $k => $vv) {
+			$r = util_sendmail_encode_hdr('Subject', $k);
+			$ok = false;
+			foreach ($vv as $v) {
+				if ($r === ('Subject: ' . $v)) {
+					$ok = true;
+					break;
+				}
+			}
+			if (!$ok) {
+				/* force failure but say where */
+				$this->assertEquals($vv[0], $r);
+			}
+		}
 	}
 }

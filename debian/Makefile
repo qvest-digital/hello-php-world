@@ -71,4 +71,14 @@ syntaxcheck80:
 	done; exit $$rv
 	@echo done.
 
-.PHONY: all clean syntaxcheck syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73 syntaxcheck74 syntaxcheck80
+syntaxcheck81:
+	@echo Running syntax checks, please verify output manually.
+	rv=0; find ${DIRS} -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+		php8.1 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
+		(( PIPESTATUS[0] )) && rv=1; \
+	done; exit $$rv
+	@echo done.
+
+.PHONY: all clean syntaxcheck
+.PHONY: syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73
+.PHONY: syntaxcheck74 syntaxcheck80 syntaxcheck81

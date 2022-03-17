@@ -17,8 +17,9 @@ hello-php-world (32) wtf; urgency=medium
   * Allow passing just the header length to util_sendmail_encode_hdr()
   * New util_encode_mimeheader workarounds a bug in mb_encode_mimeheader
   * Mark superficial DEP 8 tests thusly
+  * Add PHP 8.1 as listed version
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 00:45:09 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 00:49:05 +0100
 
 hello-php-world (31) wtf; urgency=low
 

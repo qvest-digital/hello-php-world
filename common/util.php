@@ -546,7 +546,16 @@ function util_sendmail_encode_hdr_int($fname, $ftext) {
 		$i = 0;
 	}
 	if (strlen($s) > (78 - $i) || preg_match('/[^ -~]/', $s) !== 0) {
-		$s = mb_encode_mimeheader($s, 'UTF-8', 'Q', "\015\012", $i);
+		if ($i > 0) {
+			/* ugly workaround for
+			 * https://github.com/php/php-src/issues/8208 */
+			$s = str_pad('', $fname, 'X') . ': ' . $s;
+		}
+		$s = mb_encode_mimeheader($s, 'UTF-8', 'Q', "\015\012");
+		if ($i > 0) {
+			/* trim that workaround again */
+			$s = substr($s, $i);
+		}
 	}
 	return $s;
 }

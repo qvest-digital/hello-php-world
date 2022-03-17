@@ -195,10 +195,35 @@ lcheck: generated
 	# run tests without phpunit
 	php tests/fakeunit.php
 
+lcheck5: generated
+	php5 tests/fakeunit.php
+
+lcheck70: generated
+	php7.0 tests/fakeunit.php
+
+lcheck71: generated
+	php7.1 tests/fakeunit.php
+
+lcheck72: generated
+	php7.2 tests/fakeunit.php
+
+lcheck73: generated
+	php7.3 tests/fakeunit.php
+
+lcheck74: generated
+	php7.4 tests/fakeunit.php
+
+lcheck80: generated
+	php8.0 tests/fakeunit.php
+
+lcheck81: generated
+	php8.1 tests/fakeunit.php
+
 clean:
 	rm -f ${CLEANFILES}
 
 .PHONY: all generated check lcheck pcheck clean metacheck syntaxcheck
+.PHONY: lcheck5 lcheck70 lcheck71 lcheck72 lcheck73 lcheck74 lcheck80 lcheck81
 .PHONY: syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73
 .PHONY: syntaxcheck74 syntaxcheck80 syntaxcheck81
 .PHONY: dbc-generated

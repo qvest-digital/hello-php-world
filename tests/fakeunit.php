@@ -59,6 +59,9 @@ abstract class PHPUnit_Framework_TestCase {
 	protected function assertTrue($v) {
 		$this->chk($v, "not true", !$v);
 	}
+	protected function assertFalse($v) {
+		$this->chk($v, "not false", !!$v);
+	}
 	protected function assertNotNull($v) {
 		$this->chk($v, "null", is_null($v));
 	}

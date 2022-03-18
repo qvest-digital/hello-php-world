@@ -55,12 +55,62 @@ class utilTest extends phpFUnit_TestCase {
 		$e = "?????????\x09\x0A??\x0D?????????????????? �??\xF0\x90\x80\x80";
 		$this->assertEquals($e, util_xmlutf8($q));
 		$this->assertEquals($e, util_xmlutf8($q, true));
+		$this->assertEquals("ô?€€", util_fixutf8("\xF4\x90\x80\x80"));
 
 		$rn = util_randnum(0x0F, 2);
 		$this->assertTrue($rn === 0 || $rn === 1 || $rn === 2);
 
 		$this->{$this->aStringContainsString}('"uri": "php://stdout",',
 		    minijson_encdbg(STDOUT));
+
+		unset($v);
+		$this->assertFalse(util_nat0($v));
+		$v = array();
+		$this->assertFalse(util_nat0($v));
+		$v = array(1, 1);
+		$this->assertFalse(util_nat0($v));
+
+		$k = '1a';
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
+		$k = '1';
+		$this->assertEquals(1, util_nat0($k));
+		$a = array($k);
+		$this->assertEquals(1, util_nat0($a));
+		$k = '1 ';
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
+		$k = ' 1';
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
+		$k = '0123';
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
+		$k = '1.2';
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
+		$k = 'a1';
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
+
+		$k = 1;
+		$this->assertEquals(1, util_nat0($k));
+		$a = array($k);
+		$this->assertEquals(1, util_nat0($a));
+		$k = 0;
+		$this->assertEquals(0, util_nat0($k));
+		$a = array($k);
+		$this->assertEquals(0, util_nat0($a));
+		$k = -1;
+		$this->assertFalse(util_nat0($k));
+		$a = array($k);
+		$this->assertFalse(util_nat0($a));
 
 		error_reporting($s);
 	}

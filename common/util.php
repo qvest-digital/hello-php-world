@@ -393,6 +393,10 @@ function util_nat0(&$s) {
 		/* unset variable */
 		return false;
 	}
+	if (is_int($s)) {
+		/* already integral */
+		return $s >= 0 ? $s : false;
+	}
 	if (is_array($s)) {
 		if (count($s) == 1) {
 			/* one-element array */
@@ -409,7 +413,7 @@ function util_nat0(&$s) {
 	if ($num >= 0) {
 		/* number element of ℕ₀ */
 		$text = strval($num);
-		if ($text == $s) {
+		if ($text === $s) {
 			/* number matches its textual representation */
 			return ($num);
 		}

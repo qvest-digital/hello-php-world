@@ -27,8 +27,9 @@ hello-php-world (32) wtf; urgency=medium
   * Provide an HPW_autoload toggle
   * Fix util_nat0 final string value comparison to match comment docs
   * Better testsuite output legibility
+  * Streamline handling errors and exit codes (errorlevels)
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 05:21:37 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 06:03:14 +0100
 
 hello-php-world (31) wtf; urgency=low
 

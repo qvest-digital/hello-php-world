@@ -28,19 +28,11 @@ require_once(dirname(__FILE__) . '/VERSION.php');
 
 /* replace this with your own custom proper error handling */
 function util_logerr($loglevel, $s) {
-	$s = $loglevel . ': ' . str_replace("\n", "\nN: ", trim($s)) . "\n";
-	if (in_array(php_sapi_name(), array(
-		/* all with separate log, NOT stdout/stderr */
-		'apache',
-		'apache2filter',
-		'apache2handler',
-		'litespeed',
-		/* possibly more */
-	    )))
-		foreach (explode("\n", trim($s)) as $msg)
-			error_log($msg, 4);
-	else
-		fwrite(STDERR, $s);
+	$level = $loglevel;
+	foreach (explode("\n", trim($s)) as $ls) {
+		error_log($level . ': ' . $ls, 4);
+		$level = 'N';
+	}
 }
 function util_debugJ() {
 	$argc = func_num_args();

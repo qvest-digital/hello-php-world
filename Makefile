@@ -168,7 +168,8 @@ var/AUTOLDR.php:
 		dirs[ndirs++]=$$PWD/$$dir; \
 	    done; \
 	    printf '%s\n' '}BEGIN' $$'\t___CLASSLIST___' '}END' | \
-	    phpab -n --indent $$'\t' -b "$$PWD" -t php://stdin "$${dirs[@]}" | \
+	    phpab -n --indent $$'\t' -b "$$PWD" -t php://stdin \
+	    --blacklist ErrorException "$${dirs[@]}" | \
 	    sed --posix -e '1,/^}BEGIN/d' -e '/^}END/,$$d' | \
 	    printf '%s\n' '<''?php' '$$classlist = array(' "$$(cat)" ');' >$@~
 	php -l $@~

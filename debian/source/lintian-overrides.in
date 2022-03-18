@@ -1,3 +1,6 @@
+# file substitution
+@HPW_package@ source: unknown-file-in-debian-source lintian-overrides.in
+
 # we wish to facilitate backports
 @HPW_package@ source: custom-compression-in-debian-rules
 @HPW_package@ source: custom-compression-in-debian-source-options

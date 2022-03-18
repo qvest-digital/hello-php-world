@@ -1,8 +1,10 @@
 # we cannot use reload, we must ensure that all children use the new code
-@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d postinst
+@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d postinst:76
+@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d postinst:83
 
 # we cannot use reload, we must ensure that all children are gone
-@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d prerm
+@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d prerm:67
+@HPW_package@: apache2-reverse-dependency-calls-invoke-rc.d prerm:74
 
 # this package is not currently uploaded to Debian proper, although a
 # suggestion to do that was posted to and ignored by the PHP maintainers

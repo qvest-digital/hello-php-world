@@ -222,7 +222,17 @@ function util_html_secure($s) {
 
 /* split text by newlines: ASCII CR-LF / Unix LF; if not found, Macintosh CR */
 function util_split_newlines($text, &$trailing=false, $mop=true) {
-	if (is_array($text))
+	$i = "\\IteratorAggregate";
+	if (!function_exists("interface_exists") || !interface_exists($i))
+		$i = 'IteratorAggregate';
+	if ($text instanceof $i) {
+		$a = array();
+		foreach ($text as $v)
+			$a[] = $v;
+		unset($v);
+		$text = implode("\n", $a);
+		unset($a);
+	} elseif (is_array($text))
 		$text = implode("\n", $text);
 	/*
 	 * First, convert all ASCII CR-LF pairs into ASCII LF, so we
@@ -369,17 +379,6 @@ function util_xmlutf8($s, $didfix=false) {
 
 /* prefix every line of a string */
 function util_linequote($s, $pfx, $firstline=false) {
-	$i = "\\IteratorAggregate";
-	if (!function_exists("interface_exists") || !interface_exists($i))
-		$i = 'IteratorAggregate';
-	if ($s instanceof $i) {
-		$a = array();
-		foreach ($s as $v)
-			$a[] = $v;
-		unset($v);
-		$s = $a;
-		unset($a);
-	}
 	$s = util_split_newlines($s);
 	if (!$s)
 		return '';

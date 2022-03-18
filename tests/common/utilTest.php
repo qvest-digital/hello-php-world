@@ -48,6 +48,13 @@ class utilTest extends phpFUnit_TestCase {
 		$pcre_utfcheck = preg_replace('/u/u', 'x', "\xFF") === NULL;
 		$this->assertEquals($pcre_utfcheck ? NULL : "\x80\x0Ca",
 		    util_xmlutf8("\x80\x0Ca", true));
+		/* test efficacy */
+		$q = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F" .
+		    "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F" .
+		    " \xEF\xBF\xBD\xEF\xBF\xBE\xEF\xBF\xBF\xF0\x90\x80\x80";
+		$e = "?????????\x09\x0A??\x0D?????????????????? �??\xF0\x90\x80\x80";
+		$this->assertEquals($e, util_xmlutf8($q));
+		$this->assertEquals($e, util_xmlutf8($q, true));
 
 		$rn = util_randnum(0x0F, 2);
 		$this->assertTrue($rn === 0 || $rn === 1 || $rn === 2);

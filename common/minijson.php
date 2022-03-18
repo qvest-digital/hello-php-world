@@ -141,7 +141,7 @@ function minijson_encode_ob_string($x, $truncsz=0, $leader='"') {
 			$wc = ($c & 0x0F) << 12;
 			$wmin = 0x800;
 			$Ss = 2;
-		} elseif ($c < 0xF8) {
+		} elseif ($c < 0xF4) {
 			$wc = ($c & 0x07) << 18;
 			$wmin = 0x10000;
 			$Ss = 3;

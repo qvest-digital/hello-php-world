@@ -285,7 +285,7 @@ function util_fixutf8($s) {
 		if ($c < 0x80)
 			continue;
 		/* UTF-8 lead byte */
-		if ($c < 0xC2 || $c >= 0xF8) {
+		if ($c < 0xC2 || $c >= 0xF4) {
 			break;
 		} elseif ($c < 0xE0) {
 			$wc = ($c & 0x1F) << 6;

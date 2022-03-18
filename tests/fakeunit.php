@@ -96,7 +96,7 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 		exec('find . -type f -a -name \*Test.php', $lns, $rc);
 		if ($rc) {
 			echo "E: find\n";
-			exit($rc);
+			exit(2);
 		}
 		$fls = array();
 		foreach ($lns as $f) {
@@ -113,7 +113,7 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 			require_once($f);
 		else {
 			echo "E: not found: $f\n";
-			exit(1);
+			exit(2);
 		}
 	}
 	$npass = 0;

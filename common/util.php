@@ -433,7 +433,7 @@ function util_randbytes($num=6) {
 	if ($b === false || strlen(strval($b)) != $num) {
 		util_debugJ('ERR', true, 'Could not read from random device',
 		    array('b' => $b, 'num' => $num));
-		exit(1);
+		exit(255);
 	}
 
 	return strval($b);
@@ -446,7 +446,7 @@ function util_randnum($mask=0xFFFFFF, $lim=false) {
 	if ($mask > 0xFFFFFF || $lim > $mask) {
 		util_debugJ('ERR', true, NULL, "util_randnum($mask, $lim): " .
 		    'arguments out of bounds');
-		exit(1);
+		exit(255);
 	}
 	while (true) {
 		$rnum = hexdec(bin2hex(util_randbytes(3))) & $mask;

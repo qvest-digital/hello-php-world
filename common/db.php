@@ -36,7 +36,7 @@ function db_die($reason, $dberr=true) {
 		util_debugJ('ERR', true, NULL, $reason, db_error());
 	else
 		util_debugJ('ERR', true, NULL, $reason);
-	exit(1);
+	exit(255);
 }
 
 function db_connect_if_needed() {

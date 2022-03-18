@@ -21,8 +21,12 @@ hello-php-world (32) wtf; urgency=medium
   * Introduce versioned lcheck targets (for the top-level GNU Makefile)
   * Bump Policy
   * Update lintian overrides for sid
+  * util_split_newlines now handle IteratorAggregate as well (not just
+    util_linequote)
+  * Emit SplFixedArray as JSONArray
+  * Provide an HPW_autoload toggle
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 01:18:51 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 04:56:01 +0100
 
 hello-php-world (31) wtf; urgency=low
 

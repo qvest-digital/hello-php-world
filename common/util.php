@@ -502,6 +502,10 @@ function util_encode_mimeheader($string, $charset=NULL,
 	return $rv;
 }
 
+if (!class_exists('ErrorException')) {
+	/* PHP 5.0 */
+	class ErrorException extends Exception { }
+}
 class mbstringEncodingError extends ErrorException {
 	function __construct() {
 		parent::__construct("mb_internal_encoding('UTF-8') failed");

@@ -285,7 +285,7 @@ function minijson_encode_ob($x, $ri, $depth, $truncsz, $dumprsrc) {
 	$Si = ',' . $xi;
 
 	/* arrays, may be empty or non-associative */
-	if (is_array($x) || $x instanceof SplFixedArray) {
+	if (is_array($x) || is_a($x, 'SplFixedArray')) {
 		if (!($n = count($x))) {
 			echo '[]';
 			return;

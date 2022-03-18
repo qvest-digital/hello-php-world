@@ -4,7 +4,7 @@ Bugs: mailto:t.glaser@tarent.de
 Section: web
 Priority: optional
 Maintainer: Thorsten Glaser <t.glaser@tarent.de>
-Standards-Version: 4.5.1
+Standards-Version: 4.6.0
 Build-Depends: debhelper (>= 9), dbconfig-common, mksh (>= 50), moreutils,
  pcregrep, php-cli | php5-cli, php-mbstring | php5-cli, phpab, phpunit
 Homepage: https://www.tarent.de/

@@ -19,8 +19,9 @@ hello-php-world (32) wtf; urgency=medium
   * Mark superficial DEP 8 tests thusly
   * Add PHP 8.1 as listed version
   * Introduce versioned lcheck targets (for the top-level GNU Makefile)
+  * Bump Policy
 
- -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 00:53:48 +0100
+ -- Thorsten Glaser <t.glaser@tarent.de>  Fri, 18 Mar 2022 01:14:43 +0100
 
 hello-php-world (31) wtf; urgency=low
 

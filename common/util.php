@@ -488,7 +488,7 @@ function util_encode_mimeheader($string, $charset=NULL,
     $transfer_encoding=NULL, $newline="\r\n", $indent=0) {
 	$old_encoding = mb_internal_encoding();
 	if (!mb_internal_encoding('UTF-8'))
-		throw new ErrorException("mb_internal_encoding('UTF-8') fails");
+		throw new mbstringEncodingError();
 	if ($indent > 0) {
 		/* work around https://github.com/php/php-src/issues/8208 */
 		$rv = substr(mb_encode_mimeheader(substr(str_pad('', $indent,
@@ -500,6 +500,12 @@ function util_encode_mimeheader($string, $charset=NULL,
 	}
 	mb_internal_encoding($old_encoding);
 	return $rv;
+}
+
+class mbstringEncodingError extends ErrorException {
+	function __construct() {
+		parent::__construct("mb_internal_encoding('UTF-8') failed");
+	}
 }
 
 /*-

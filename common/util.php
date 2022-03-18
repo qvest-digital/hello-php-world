@@ -810,6 +810,7 @@ function util_hpw_autoloader($cls) {
 	} else {
 		util_debugJ('ERR', NULL, NULL, 'cannot autoload class', $cls);
 		util_logerr('T', debug_string_backtrace());
+		exit(255);
 	}
 }
 if (HPW_AUTOLDR && function_exists('spl_autoload_register'))

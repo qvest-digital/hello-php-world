@@ -6,7 +6,7 @@ Priority: optional
 Maintainer: Thorsten Glaser <t.glaser@tarent.de>
 Standards-Version: 4.6.0
 Build-Depends: debhelper (>= 9), dbconfig-common, mksh (>= 50), moreutils,
- pcregrep, php-cli | php5-cli, php-mbstring | php5-cli, phpab, phpunit
+ pcregrep, php-cli | php5-cli, php-mbstring | php5-cli, @phpab,@ phpunit
 Homepage: https://www.tarent.de/
 Rules-Requires-Root: no
 VCS-Browser: https://evolvis.org/plugins/scmgit/cgi-bin/gitweb.cgi?p=shellsnippets/@HPW_package@.git

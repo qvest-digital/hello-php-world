@@ -808,7 +808,7 @@ function util_hpw_autoloader($cls) {
 		util_logerr('T', debug_string_backtrace());
 	}
 }
-if (function_exists('spl_autoload_register'))
+if (HPW_AUTOLDR && function_exists('spl_autoload_register'))
 	spl_autoload_register('util_hpw_autoloader');
 
 /* anything else? */

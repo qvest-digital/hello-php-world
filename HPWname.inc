@@ -6,3 +6,6 @@ HPW_package=hello-php-world
 # (periods and colons in Maven, for example)
 # no quotes, nothing interpolating for PHP or shell
 HPW_nameword=Hello-PHP-World
+
+# true or false
+HPW_autoload=true

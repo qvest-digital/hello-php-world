@@ -24,6 +24,18 @@ else
 	alias do2=do2_generate
 fi
 
+if [[ $HPW_autoload = true ]]; then
+	phpabcomma=phpab,
+elif [[ $HPW_autoload = false ]]; then
+	phpabcomma=
+else
+	die "invalid HPW_autoload: $HPW_autoload"
+fi
+
+set -A substs -- \
+    -e "s@phpab,@${phpabcomma}g" \
+    -e "s@HPW_package@${HPW_package}g"
+
 rm -f debian/control
 
 function nuke {
@@ -41,9 +53,7 @@ function do1 {
 
 function do2_generate {
 	nuke "$1~" "$1"
-	sed \
-	    -e "s@HPW_package@${HPW_package}g" \
-	    <"$2" >"$1~" || die "could not substitute from $2"
+	sed "${substs[@]}" <"$2" >"$1~" || die "could not substitute from $2"
 	mv "$1~" "$1" || die "could not rename to $1"
 }
 

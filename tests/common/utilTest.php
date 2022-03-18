@@ -44,6 +44,9 @@ class utilTest extends phpFUnit_TestCase {
 		    util_fixutf8("\x80\x0Ca"));
 		$this->assertEquals("€?a",
 		    util_xmlutf8("\x80\x0Ca"));
+		/* silent death for didfix wrongly given */
+		$this->assertEquals(NULL,
+		    util_xmlutf8("\x80\x0Ca", true));
 
 		$rn = util_randnum(0x0F, 2);
 		$this->assertTrue($rn === 0 || $rn === 1 || $rn === 2);

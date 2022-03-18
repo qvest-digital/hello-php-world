@@ -6,6 +6,8 @@ if (!defined('__main__') && count(get_included_files()) <= 1 && count(debug_back
  *
  * Copyright © 2020
  *	mirabilos <m@mirbsd.org>
+ * Copyright © 2022
+ *	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
  * are retained or reproduced in an accompanying document, permission
@@ -32,7 +34,7 @@ class FakeUnitException extends Exception {
 		$wd = getcwd() . '/';
 		if (strncmp($f, $wd, strlen($wd)) === 0)
 			$f = substr($f, strlen($wd));
-		printf("E: %s:%d:%s%s%s(): %s: %s\n",
+		printf("\nE: %s:%d:%s%s%s(): %s: %s\n",
 		    $f, $t[1]['line'],
 		    $t[2]['class'], $t[2]['type'], $t[2]['function'],
 		    $this->getMessage(), var_export($v, true));
@@ -41,7 +43,15 @@ class FakeUnitException extends Exception {
 }
 
 abstract class PHPUnit_Framework_TestCase {
-	private static function c2($e, $a, $msg, $t) {
+	private $__unit_cnt;
+	public function __unit_count() {
+		return $this->__unit_cnt;
+	}
+	public function __unit_reset() {
+		$this->__unit_cnt = 0;
+	}
+	private function c2($e, $a, $msg, $t) {
+		++$this->__unit_cnt;
 		if ($t) {
 			$x = new FakeUnitException($msg);
 			$x->go(array(
@@ -50,7 +60,8 @@ abstract class PHPUnit_Framework_TestCase {
 			    ));
 		}
 	}
-	private static function chk($v, $msg, $t) {
+	private function chk($v, $msg, $t) {
+		++$this->__unit_cnt;
 		if ($t) {
 			$x = new FakeUnitException($msg);
 			$x->go($v);
@@ -107,7 +118,9 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 	}
 	$npass = 0;
 	$nfail = 0;
-	foreach (get_declared_classes() as $cls) {
+	$classnames = get_declared_classes();
+	sort($classnames, SORT_STRING);
+	foreach ($classnames as $cls) {
 		$clsr = new ReflectionClass($cls);
 		if (!$clsr->isSubclassOf('PHPUnit_Framework_TestCase'))
 			continue;
@@ -115,18 +128,25 @@ if (defined('__main__') && constant('__main__') === __FILE__) {
 			continue;
 		echo "I: <<<< $cls\n";
 		$obj = $clsr->newInstance();
-		foreach ($clsr->getMethods() as $m) {
+		$methodlist = array();
+		foreach ($clsr->getMethods() as $m)
+			$methodlist[$m->name] = $m;
+		ksort($methodlist, SORT_STRING);
+		foreach ($methodlist as $m) {
 			if (!$m->isPublic())
 				continue;
 			if (strncmp($m->name, "test", 4) !== 0)
 				continue;
-			echo "I: test $cls::{$m->name}\n";
+			echo "I: test $cls::{$m->name} ";
+			$obj->__unit_reset();
 			try {
 				call_user_func(array($obj, $m->name));
-				echo "\rI: pass $cls::{$m->name}\n";
+				echo "\rI: pass $cls::{$m->name} " .
+				    $obj->__unit_count() . " assertions\n";
 				++$npass;
 			} catch (FakeUnitException $e) {
-				echo "\rI: FAIL $cls::{$m->name}\n";
+				echo "\rI: FAIL $cls::{$m->name} " .
+				    "assertion #" . $obj->__unit_count() . "\n";
 				++$nfail;
 			}
 		}

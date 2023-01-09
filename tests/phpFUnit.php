@@ -4,7 +4,7 @@
  *
  * Copyright © 2020
  *	mirabilos <m@mirbsd.org>
- * Copyright © 2018
+ * Copyright © 2018, 2023
  *	mirabilos <t.glaser@tarent.de>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -41,6 +41,8 @@ abstract class phpFUnit_TestCase extends PHPUnit_Framework_TestCase {
 		return $this->assertFalse(strpos($a, $e) === false);
 	}
 
+	protected $aIsObject;
+	protected $aStringContainsString;
 	function __construct() {
 		if (is_callable(array(get_parent_class(), '__construct')))
 			parent::__construct();

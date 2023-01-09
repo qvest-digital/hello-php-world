@@ -42,7 +42,7 @@ abstract class phpFUnit_TestCase extends PHPUnit_Framework_TestCase {
 	}
 
 	function __construct() {
-		if (is_callable(array('parent', '__construct')))
+		if (is_callable(array(get_parent_class(), '__construct')))
 			parent::__construct();
 		foreach (array(
 			'IsObject',

@@ -45,3 +45,7 @@ Restrictions: allow-stderr, superficial
 Tests: syntax81
 Depends: @, mksh, php8.1-cli, php8.1-mbstring
 Restrictions: allow-stderr, superficial
+
+Tests: syntax82
+Depends: @, mksh, php8.2-cli, php8.2-mbstring
+Restrictions: allow-stderr, superficial

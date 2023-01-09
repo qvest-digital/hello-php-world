@@ -1,3 +1,9 @@
+hello-php-world (33) UNRELEASED; urgency=medium
+
+  * Add PHP 8.2 as listed version
+
+ -- Thorsten Glaser <t.glaser@tarent.de>  Mon, 09 Jan 2023 18:11:13 +0100
+
 hello-php-world (32) wtf; urgency=medium
 
   * Do not write errors to stdout e̲v̲e̲r̲ (may contain XHTML or graphics);

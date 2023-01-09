@@ -143,6 +143,14 @@ syntaxcheck81: generated
 	done; exit $$rv
 	@echo done.
 
+syntaxcheck82: generated
+	@echo Running syntax checks, please verify output manually.
+	rv=0; find * -name '*.php' -print0 |& while IFS= read -p -d '' -r; do \
+		php8.2 -l "$$REPLY" | grep -v '^No syntax errors detected in '; \
+		(( PIPESTATUS[0] )) && rv=1; \
+	done; exit $$rv
+	@echo done.
+
 GENERATED+=common/VERSION.php
 CLEANFILES+=www/artifact-version
 common/VERSION.php: debian/changelog
@@ -225,11 +233,15 @@ lcheck80: generated
 lcheck81: generated
 	php8.1 tests/fakeunit.php
 
+lcheck82: generated
+	php8.2 tests/fakeunit.php
+
 clean:
 	rm -f ${CLEANFILES}
 
 .PHONY: all generated check lcheck pcheck clean metacheck syntaxcheck
-.PHONY: lcheck5 lcheck70 lcheck71 lcheck72 lcheck73 lcheck74 lcheck80 lcheck81
+.PHONY: lcheck5 lcheck70 lcheck71 lcheck72 lcheck73 lcheck74 lcheck80
+.PHONY: lcheck81 lcheck82
 .PHONY: syntaxcheck5 syntaxcheck70 syntaxcheck71 syntaxcheck72 syntaxcheck73
-.PHONY: syntaxcheck74 syntaxcheck80 syntaxcheck81
+.PHONY: syntaxcheck74 syntaxcheck80 syntaxcheck81 syntaxcheck82
 .PHONY: dbc-generated
